@@ -2046,9 +2046,11 @@ bool Main::iteration() {
 		}
 	}
 
-	idle_process_ticks = OS::get_singleton()->get_ticks_usec() - idle_begin;
+	uint64_t now_time = OS::get_singleton()->get_ticks_usec();
+
+	idle_process_ticks = now_time - idle_begin;
 	idle_process_max = MAX(idle_process_ticks, idle_process_max);
-	uint64_t frame_time = OS::get_singleton()->get_ticks_usec() - ticks;
+	uint64_t frame_time = now_time - ticks;
 
 	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
 		ScriptServer::get_language(i)->frame();
@@ -2099,14 +2101,19 @@ bool Main::iteration() {
 			OS::get_singleton()->delay_usec(Engine::get_singleton()->get_frame_delay() * 1000);
 	}
 
+	// Implement a maximum framerate if it is desired
 	int target_fps = Engine::get_singleton()->get_target_fps();
 	if (target_fps > 0 && !Engine::get_singleton()->is_editor_hint()) {
-		uint64_t time_step = 1000000L / target_fps;
-		target_ticks += time_step;
+		uint64_t target_time_step_usec = 1000000L / target_fps;
+		target_ticks += target_time_step_usec;
+
+		// Sleep if the current framerate is too high
 		uint64_t current_ticks = OS::get_singleton()->get_ticks_usec();
-		if (current_ticks < target_ticks) OS::get_singleton()->delay_usec(target_ticks - current_ticks);
+		if (current_ticks < target_ticks)
+			OS::get_singleton()->delay_usec(target_ticks - current_ticks);
+
 		current_ticks = OS::get_singleton()->get_ticks_usec();
-		target_ticks = MIN(MAX(target_ticks, current_ticks - time_step), current_ticks + time_step);
+		target_ticks = MIN(MAX(target_ticks, current_ticks - target_time_step_usec), current_ticks + target_time_step_usec);
 	}
 
 #ifdef TOOLS_ENABLED
