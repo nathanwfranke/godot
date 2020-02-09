@@ -44,14 +44,6 @@
 class ProjectSettingsEditor : public AcceptDialog {
 	GDCLASS(ProjectSettingsEditor, AcceptDialog);
 
-	enum InputType {
-		INPUT_KEY,
-		INPUT_KEY_PHYSICAL,
-		INPUT_JOY_BUTTON,
-		INPUT_JOY_MOTION,
-		INPUT_MOUSE_BUTTON
-	};
-
 	static ProjectSettingsEditor *singleton;
 	ProjectSettings *ps;
 	Timer *timer;
@@ -107,6 +99,7 @@ class ProjectSettingsEditor : public AcceptDialog {
 
 protected:
 	void _notification(int p_what);
+	void _unhandled_input(const Ref<InputEvent> &p_event);
 	static void _bind_methods();
 
 public:
