@@ -86,6 +86,8 @@ private:
 	Button *create_dir;
 	Container *name_container;
 	Container *path_container;
+	Container *install_project_container;
+	CheckButton *install_project_button;
 	Container *install_path_container;
 	Container *rasterizer_container;
 	Ref<ButtonGroup> rasterizer_button_group;
@@ -144,7 +146,11 @@ private:
 		set_size(Size2(500, 0) * EDSCALE);
 	}
 
+	bool import_zip = false;
+
 	String _test_path() {
+
+		import_zip = false;
 
 		DirAccess *d = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 		String valid_path, valid_install_path;
@@ -154,6 +160,7 @@ private:
 			valid_path = project_path->get_text().strip_edges();
 		} else if (project_path->get_text().ends_with(".zip")) {
 			if (d->file_exists(project_path->get_text())) {
+				import_zip = true;
 				valid_path = project_path->get_text();
 			}
 		} else if (project_path->get_text().strip_edges().ends_with(".zip")) {
@@ -161,6 +168,8 @@ private:
 				valid_path = project_path->get_text().strip_edges();
 			}
 		}
+
+		update_install_project_system();
 
 		if (valid_path == "") {
 			set_message(TTR("The path specified doesn't exist."), MESSAGE_ERROR);
@@ -186,7 +195,7 @@ private:
 
 		if (mode == MODE_IMPORT || mode == MODE_RENAME) {
 
-			if (valid_path != "" && !d->file_exists("project.godot")) {
+			if (!import_install_zip || (valid_path != "" && !d->file_exists("project.godot"))) {
 
 				if (valid_path.ends_with(".zip")) {
 					FileAccess *src_f = NULL;
@@ -242,7 +251,7 @@ private:
 					}
 					d->list_dir_end();
 
-					if (!is_empty) {
+					if (import_install_zip && !is_empty) {
 
 						set_message(TTR("Please choose an empty folder."), MESSAGE_WARNING, INSTALL_PATH);
 						memdelete(d);
@@ -342,8 +351,10 @@ private:
 			} else {
 				set_message(TTR("Please choose a \"project.godot\" or \".zip\" file."), MESSAGE_ERROR);
 				get_ok()->set_disabled(true);
+				update_install_project_system();
 				return;
 			}
+			_test_path();
 		}
 		String sp = p.simplify_path();
 		project_path->set_text(sp);
@@ -516,6 +527,26 @@ private:
 				} else if (mode == MODE_INSTALL) {
 
 					if (project_path->get_text().ends_with(".zip")) {
+						if (import_install_zip) {
+							dir = install_path->get_text();
+						} else {
+							DirAccess *d = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+							
+							String import_path = String("/tmp/gdzip") + Variant(OS::get_singleton()->get_unix_time());
+							uint64_t i = 0;
+							do {
+								dir = import_path + "_" + itos(i++);
+							} while (d->dir_exists(dir));
+							
+							print_line("Temp path is " + dir);
+							dir = String("/tmp/TEST_") + Variant(OS::get_singleton()->get_unix_time());
+							d->make_dir_recursive(dir);
+							
+							_install_path_selected(dir);
+							dir = install_path->get_text();
+							
+							memdelete(d);
+						}
 						dir = install_path->get_text();
 						zip_path = project_path->get_text();
 					}
@@ -579,6 +610,8 @@ private:
 
 							FileAccess *f = FileAccess::open(dir.plus_file(path), FileAccess::WRITE);
 
+							print_line("Copy to " + String(path));
+
 							if (f) {
 								f->store_buffer(data.ptr(), data.size());
 								memdelete(f);
@@ -614,10 +647,14 @@ private:
 				}
 			}
 
+			print_line(String("..."));
+			print_line(dir);
+
 			dir = dir.replace("\\", "/");
 			if (dir.ends_with("/"))
 				dir = dir.substr(0, dir.length() - 1);
 			String proj = get_project_key_from_path(dir);
+			print_line(proj);
 			EditorSettings::get_singleton()->set("projects/" + proj, dir);
 			EditorSettings::get_singleton()->save();
 
@@ -690,6 +727,19 @@ public:
 
 	void set_project_path(const String &p_path) {
 		project_path->set_text(p_path);
+	}
+
+	bool import_install_zip = false;
+	void update_install_project_system() {
+		install_project_container->hide();
+		if(mode == Mode::MODE_IMPORT) {
+			if(import_zip) {
+				install_project_container->show();
+				import_install_zip = install_project_button->is_pressed();
+				install_path_container->set_visible(import_install_zip);
+				set_size(get_minimum_size());
+			}
+		}
 	}
 
 	void show_dialog() {
@@ -827,8 +877,20 @@ public:
 		project_path->set_h_size_flags(SIZE_EXPAND_FILL);
 		pphb->add_child(project_path);
 
+		install_project_container = memnew(HBoxContainer);
+		vb->add_child(install_project_container);
+
+		l = memnew(Label);
+		l->set_text(TTR("Install Project to System:"));
+		install_project_container->add_child(l);
+
+		install_project_button = memnew(CheckButton);
+		install_project_container->add_child(install_project_button);
+
 		install_path_container = memnew(VBoxContainer);
 		vb->add_child(install_path_container);
+
+		install_project_button->connect("pressed", callable_mp(this, &ProjectDialog::_test_path));
 
 		l = memnew(Label);
 		l->set_text(TTR("Project Installation Path:"));
@@ -1265,6 +1327,13 @@ void ProjectList::load_projects() {
 
 		Item item;
 		load_project_data(property_key, item, favorite);
+
+		/*if (((String)EditorSettings::get_singleton()->get(property_key)).begins_with(EditorSettings::get_singleton()->get_cache_dir() + String("/"))) {
+			EditorSettings::get_singleton()->erase(property_key);
+			EditorSettings::get_singleton()->save();
+			print_line("TEMPORARY!!!");
+			continue;
+		}*/
 
 		_projects.push_back(item);
 	}
@@ -2316,6 +2385,7 @@ void ProjectManager::_exit_dialog() {
 
 void ProjectManager::_install_project(const String &p_zip_path, const String &p_title) {
 
+	print_line("INSTALL PROJECT...");
 	npdialog->set_mode(ProjectDialog::MODE_INSTALL);
 	npdialog->set_zip_path(p_zip_path);
 	npdialog->set_zip_title(p_title);
