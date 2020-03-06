@@ -3279,6 +3279,14 @@ String OS_Windows::get_user_data_dir() const {
 	return ProjectSettings::get_singleton()->get_resource_path();
 }
 
+String OS::get_temp_dir() const {
+	const size_t MAX_PATH = 32767;
+	wchar_t path_buffer[MAX_PATH];
+	ERR_FAIL_COND_MSG(GetTempPath(MAX_PATH, path_buffer));
+	wstring path = path_buffer;
+	return String(path);
+}
+
 String OS_Windows::get_unique_id() const {
 
 	HW_PROFILE_INFO HwProfInfo;

@@ -405,6 +405,8 @@ public:
 	virtual String get_user_data_dir() const;
 	virtual String get_resource_dir() const;
 
+	virtual String get_temp_dir() const;
+
 	enum SystemDir {
 		SYSTEM_DIR_DESKTOP,
 		SYSTEM_DIR_DCIM,

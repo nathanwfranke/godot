@@ -791,6 +791,8 @@ public:
 
 	ProjectDialog() {
 
+		print_line("... " + OS::get_singleton()->get_temp_dir());
+
 		VBoxContainer *vb = memnew(VBoxContainer);
 		add_child(vb);
 

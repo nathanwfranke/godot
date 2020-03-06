@@ -1134,6 +1134,10 @@ String _OS::get_system_dir(SystemDir p_dir) const {
 	return OS::get_singleton()->get_system_dir(OS::SystemDir(p_dir));
 }
 
+String _OS::get_temp_dir() const {
+	return OS::get_singleton()->get_temp_dir();
+}
+
 String _OS::get_keycode_string(uint32_t p_code) const {
 
 	return keycode_get_string(p_code);
@@ -1323,6 +1327,8 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_user_data_dir"), &_OS::get_user_data_dir);
 	ClassDB::bind_method(D_METHOD("get_system_dir", "dir"), &_OS::get_system_dir);
 	ClassDB::bind_method(D_METHOD("get_unique_id"), &_OS::get_unique_id);
+
+	//ClassDB::bind_method(D_METHOD("get_temp_dir", "dir"), &_OS::get_temp_dir);
 
 	ClassDB::bind_method(D_METHOD("is_ok_left_and_cancel_right"), &_OS::is_ok_left_and_cancel_right);
 

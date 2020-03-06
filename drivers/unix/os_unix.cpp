@@ -464,6 +464,10 @@ int OS_Unix::get_processor_count() const {
 	return sysconf(_SC_NPROCESSORS_CONF);
 }
 
+String OS::get_temp_dir() const {
+	return String("/tmp/");
+}
+
 String OS_Unix::get_user_data_dir() const {
 
 	String appname = get_safe_dir_name(ProjectSettings::get_singleton()->get("application/config/name"));
