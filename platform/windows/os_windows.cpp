@@ -3280,11 +3280,11 @@ String OS_Windows::get_user_data_dir() const {
 }
 
 String OS::get_temp_dir() const {
-	const size_t MAX_PATH = 32767;
-	wchar_t path_buffer[MAX_PATH];
-	ERR_FAIL_COND_MSG(GetTempPath(MAX_PATH, path_buffer));
-	wstring path = path_buffer;
-	return String(path);
+	const size_t TEMP_MAX_PATH = 32767;
+	LPSTR path_buffer;
+	DWORD result = GetTempPathA(TEMP_MAX_PATH, path_buffer);
+	ERR_FAIL_COND_V_MSG(!result, "Could not get Windows temporary path", String());
+	return String(path_buffer);
 }
 
 String OS_Windows::get_unique_id() const {
