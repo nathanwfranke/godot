@@ -350,6 +350,7 @@ public:
 
 class EditorPropertyVector2 : public EditorProperty {
 	GDCLASS(EditorPropertyVector2, EditorProperty);
+	bool linked = true;
 	EditorSpinSlider *spin[2];
 	bool setting;
 	void _value_changed(double p_val, const String &p_name);

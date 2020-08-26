@@ -1132,6 +1132,12 @@ void EditorPropertyVector2::_value_changed(double val, const String &p_name) {
 		return;
 	}
 
+	if (linked) {
+		for(int i = 0; i < 2; ++i) {
+			spin[i]->set_value(val);
+		}
+	}
+
 	Vector2 v2;
 	v2.x = spin[0]->get_value();
 	v2.y = spin[1]->get_value();
@@ -1174,7 +1180,12 @@ void EditorPropertyVector2::setup(double p_min, double p_max, double p_step, boo
 EditorPropertyVector2::EditorPropertyVector2(bool p_force_wide) {
 	bool horizontal = EDITOR_GET("interface/inspector/horizontal_vector2_editing");
 
-	BoxContainer *bc;
+	HBoxContainer *property_editor = memnew(HBoxContainer);
+	Button *linked_toggle = memnew(Button);
+
+	property_editor->add_child(linked_toggle);
+
+	BoxContainer *data_container;
 
 	if (p_force_wide) {
 		bc = memnew(HBoxContainer);
