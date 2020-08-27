@@ -1144,6 +1144,11 @@ void EditorPropertyVector2::_value_changed(double val, const String &p_name) {
 	emit_changed(get_edited_property(), v2, p_name);
 }
 
+
+void EditorPropertyVector2::set_linked(bool p_linked) {
+	linked = p_linked;
+}
+
 void EditorPropertyVector2::update_property() {
 	Vector2 val = get_edited_object()->get(get_edited_property());
 	setting = true;
@@ -1177,26 +1182,32 @@ void EditorPropertyVector2::setup(double p_min, double p_max, double p_step, boo
 	}
 }
 
-EditorPropertyVector2::EditorPropertyVector2(bool p_force_wide) {
+EditorPropertyVector2::EditorPropertyVector2(bool p_allow_linking, bool p_force_wide) {
 	bool horizontal = EDITOR_GET("interface/inspector/horizontal_vector2_editing");
 
 	HBoxContainer *property_editor = memnew(HBoxContainer);
-	Button *linked_toggle = memnew(Button);
 
-	property_editor->add_child(linked_toggle);
+	if (p_allow_linking) {
+		Button *linked_toggle = memnew(Button);
+		linked_toggle->set_toggle_mode(true);
+		linked_toggle->connect("toggled", callable_mp(this, &EditorPropertyVector2::set_linked));
+		linked_toggle->set_pressed(linked);
+
+		property_editor->add_child(linked_toggle);
+	}
 
 	BoxContainer *data_container;
 
 	if (p_force_wide) {
-		bc = memnew(HBoxContainer);
-		add_child(bc);
+		data_container = memnew(HBoxContainer);
+		property_editor->add_child(data_container);
 	} else if (horizontal) {
-		bc = memnew(HBoxContainer);
-		add_child(bc);
-		set_bottom_editor(bc);
+		data_container = memnew(HBoxContainer);
+		property_editor->add_child(data_container);
+		set_bottom_editor(data_container);
 	} else {
-		bc = memnew(VBoxContainer);
-		add_child(bc);
+		data_container = memnew(VBoxContainer);
+		property_editor->add_child(data_container);
 	}
 
 	static const char *desc[2] = { "x", "y" };
@@ -1204,7 +1215,7 @@ EditorPropertyVector2::EditorPropertyVector2(bool p_force_wide) {
 		spin[i] = memnew(EditorSpinSlider);
 		spin[i]->set_flat(true);
 		spin[i]->set_label(desc[i]);
-		bc->add_child(spin[i]);
+		data_container->add_child(spin[i]);
 		add_focusable(spin[i]);
 		spin[i]->connect("value_changed", callable_mp(this, &EditorPropertyVector2::_value_changed), varray(desc[i]));
 		if (horizontal) {
@@ -1215,7 +1226,7 @@ EditorPropertyVector2::EditorPropertyVector2(bool p_force_wide) {
 	if (!horizontal) {
 		set_label_reference(spin[0]); //show text and buttons around this
 	}
-	setting = false;
+	add_child(property_editor);
 }
 
 ///////////////////// RECT2 /////////////////////////

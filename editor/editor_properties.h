@@ -350,19 +350,21 @@ public:
 
 class EditorPropertyVector2 : public EditorProperty {
 	GDCLASS(EditorPropertyVector2, EditorProperty);
-	bool linked = true;
 	EditorSpinSlider *spin[2];
-	bool setting;
+	bool setting = false;
 	void _value_changed(double p_val, const String &p_name);
 
 protected:
+	bool linked = true;
+	void set_linked(bool p_linked);
+
 	void _notification(int p_what);
 	static void _bind_methods();
 
 public:
 	virtual void update_property() override;
 	void setup(double p_min, double p_max, double p_step, bool p_no_slider);
-	EditorPropertyVector2(bool p_force_wide = false);
+	EditorPropertyVector2(bool p_allow_linking = true, bool p_force_wide = false);
 };
 
 class EditorPropertyRect2 : public EditorProperty {
