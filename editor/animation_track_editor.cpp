@@ -5700,11 +5700,11 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	edit->set_flat(false);
 	edit->set_disabled(true);
 	edit->set_tooltip(TTR("Animation properties."));
-	edit->get_popup()->add_item(TTR("Copy Tracks"), EDIT_COPY_TRACKS);
-	edit->get_popup()->add_item(TTR("Paste Tracks"), EDIT_PASTE_TRACKS);
+	edit->get_popup()->add_button(TTR("Copy Tracks"));
+	edit->get_popup()->add_button(TTR("Paste Tracks"));
 	edit->get_popup()->add_separator();
-	edit->get_popup()->add_item(TTR("Scale Selection"), EDIT_SCALE_SELECTION);
-	edit->get_popup()->add_item(TTR("Scale From Cursor"), EDIT_SCALE_FROM_CURSOR);
+	edit->get_popup()->add_button(TTR("Scale Selection"));
+	edit->get_popup()->add_button(TTR("Scale From Cursor"));
 	edit->get_popup()->add_separator();
 	edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/duplicate_selection", TTR("Duplicate Selection"), KEY_MASK_CMD | KEY_D), EDIT_DUPLICATE_SELECTION);
 	edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/duplicate_selection_transposed", TTR("Duplicate Transposed"), KEY_MASK_SHIFT | KEY_MASK_CMD | KEY_D), EDIT_DUPLICATE_TRANSPOSED);

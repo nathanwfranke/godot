@@ -274,7 +274,7 @@ public:
 class AnimationTrackEditor : public VBoxContainer {
 	GDCLASS(AnimationTrackEditor, VBoxContainer);
 
-	enum {
+	/*enum {
 		EDIT_COPY_TRACKS,
 		EDIT_COPY_TRACKS_CONFIRM,
 		EDIT_PASTE_TRACKS,
@@ -290,7 +290,7 @@ class AnimationTrackEditor : public VBoxContainer {
 		EDIT_OPTIMIZE_ANIMATION_CONFIRM,
 		EDIT_CLEAN_UP_ANIMATION,
 		EDIT_CLEAN_UP_ANIMATION_CONFIRM
-	};
+	};*/
 
 	Ref<Animation> animation;
 	Node *root;
