@@ -87,7 +87,7 @@ void GridMapEditor::_menu_cursor_rotate(int p_rotation_type) {
 		} break;
 	}
 
-	float rotate_delta = Math_PI / 2.0 * ((p_rotation_type / 3) ? 1 : -1);
+	float rotate_delta = Math_PI / 2.0 * (p_rotation_type < 3 ? -1 : 1);
 
 	Basis r;
 	if (input_action == INPUT_PASTE) {
@@ -484,8 +484,7 @@ void GridMapEditor::_update_paste_indicator() {
 }
 
 void GridMapEditor::_do_paste() {
-	int idx = options->get_popup()->get_item_index(MENU_OPTION_PASTE_SELECTS);
-	bool reselect = options->get_popup()->is_item_checked(idx);
+	bool reselect = selection_paste_selects->is_pressed();
 
 	Basis rot;
 	rot.set_orthogonal_index(paste_indicator.orientation);
@@ -641,7 +640,8 @@ bool GridMapEditor::forward_spatial_input_event(Camera3D *p_camera, const Ref<In
 				}
 			}
 
-			if (k->get_shift() && selection.active && input_action != INPUT_PASTE) {
+			// TODO: How is this supposed to work? Not sure if it is needed.
+			/*if (k->get_shift() && selection.active && input_action != INPUT_PASTE) {
 				if (k->get_keycode() == options->get_popup()->get_item_accelerator(options->get_popup()->get_item_index(MENU_OPTION_PREV_LEVEL))) {
 					selection.click[edit_axis]--;
 					_validate_selection();
@@ -652,7 +652,7 @@ bool GridMapEditor::forward_spatial_input_event(Camera3D *p_camera, const Ref<In
 					_validate_selection();
 					return true;
 				}
-			}
+			}*/
 		}
 	}
 
@@ -1118,6 +1118,8 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 		clip_buttons.get(i)->connect("pressed", callable_mp(this, &GridMapEditor::_menu_change_clip), varray(i));
 	}
 	clip_buttons.get(0)->set_pressed(true);
+	// Should be automatic because of above line
+	//clip_mode = CLIP_DISABLED;
 	
 	options->get_popup()->add_separator();
 	
@@ -1147,27 +1149,42 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	// TODO: Shortcut W
 	options->get_popup()->add_button(TTR("Cursor Clear Rotation"));
 	
-	options->get_popup()->add_item(TTR("Cursor Rotate X"), MENU_OPTION_CURSOR_ROTATE_X, KEY_A);
-	options->get_popup()->add_item(TTR("Cursor Rotate Y"), MENU_OPTION_CURSOR_ROTATE_Y, KEY_S);
-	options->get_popup()->add_item(TTR("Cursor Rotate Z"), MENU_OPTION_CURSOR_ROTATE_Z, KEY_D);
-	options->get_popup()->add_item(TTR("Cursor Back Rotate X"), MENU_OPTION_CURSOR_BACK_ROTATE_X, KEY_MASK_SHIFT + KEY_A);
-	options->get_popup()->add_item(TTR("Cursor Back Rotate Y"), MENU_OPTION_CURSOR_BACK_ROTATE_Y, KEY_MASK_SHIFT + KEY_S);
-	options->get_popup()->add_item(TTR("Cursor Back Rotate Z"), MENU_OPTION_CURSOR_BACK_ROTATE_Z, KEY_MASK_SHIFT + KEY_D);
-	options->get_popup()->add_item(TTR("Cursor Clear Rotation"), MENU_OPTION_CURSOR_CLEAR_ROTATION, KEY_W);
+	// TODO: Shortcuts A, S, D, SHIFT+A, SHIFT+S, SHIFT+D
+	Vector<Ref<Button>> cursor_rotate_buttons;
+	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Rotate X")));
+	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Rotate Y")));
+	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Rotate Z")));
+	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Back Rotate X")));
+	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Back Rotate Y")));
+	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Back Rotate Z")));
+	for (int i = 0; i < 6; ++i) {
+		Ref<Button> button = cursor_rotate_buttons.get(i);
+		button->connect("pressed", callable_mp(this, &GridMapEditor::_menu_cursor_rotate), varray(i));
+	}
+	
+	// TODO: Shortcut W
+	Ref<Button> cursor_clear_rotation = options->get_popup()->add_button(TTR("Cursor Clear Rotation"));
+	cursor_clear_rotation->connect("pressed", callable_mp(this, &GridMapEditor::_menu_clear_rotation));
+	
 	options->get_popup()->add_separator();
-
+	
 	selection_paste_selects = options->get_popup()->add_check_button(TTR("Paste Selects"));
+	
 	// TODO: Shortcuts CTRL+C, CTRL+X, DELETE, CTRL+F
 	// TODO: CTRL+F -> CTRL+V?
 	selection_duplicate = options->get_popup()->add_button(TTR("Duplicate Selection"));
 	selection_duplicate->connect("pressed", callable_mp(this, &GridMapEditor::_menu_selection_duplicate));
 	selection_cut = options->get_popup()->add_button(TTR("Cut Selection"));
-	selection_cut->connect("pressed", callable_mp(this, &GridMapEditor::_menu_selection_duplicate));
+	selection_cut->connect("pressed", callable_mp(this, &GridMapEditor::_menu_selection_cut));
 	selection_clear = options->get_popup()->add_button(TTR("Clear Selection"));
+	selection_clear->connect("pressed", callable_mp(this, &GridMapEditor::_menu_selection_clear));
 	selection_fill = options->get_popup()->add_button(TTR("Fill Selection"));
+	selection_fill->connect("pressed", callable_mp(this, &GridMapEditor::_menu_selection_fill));
 
 	options->get_popup()->add_separator();
-	options->get_popup()->add_item(TTR("Settings..."), MENU_OPTION_GRIDMAP_SETTINGS);
+
+	Ref<Button> settings_button = options->get_popup()->add_button(TTR("Settings..."));
+	settings_button->connect("pressed", callable_mp(this, &GridMapEditor::_menu_open_settings));
 
 	settings_dialog = memnew(ConfirmationDialog);
 	settings_dialog->set_title(TTR("GridMap Settings"));
@@ -1182,9 +1199,6 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	settings_pick_distance->set_step(1.0f);
 	settings_pick_distance->set_value(EDITOR_DEF("editors/grid_map/pick_distance", 5000.0));
 	settings_vbc->add_margin_child(TTR("Pick Distance:"), settings_pick_distance);
-
-	clip_mode = CLIP_DISABLED;
-	options->get_popup()->connect("id_pressed", callable_mp(this, &GridMapEditor::_menu_option));
 
 	HBoxContainer *hb = memnew(HBoxContainer);
 	add_child(hb);
