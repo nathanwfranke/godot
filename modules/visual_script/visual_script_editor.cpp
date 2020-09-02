@@ -1892,10 +1892,10 @@ void VisualScriptEditor::_members_gui_input(const Ref<InputEvent> &p_event) {
 				member_name = ti->get_text(0);
 			}
 			if (ED_IS_SHORTCUT("visual_script_editor/delete_selected", p_event)) {
-				_member_option(MEMBER_REMOVE);
+				_member_delete();
 			}
 			if (ED_IS_SHORTCUT("visual_script_editor/edit_member", p_event)) {
-				_member_option(MEMBER_EDIT);
+				_member_edit();
 			}
 		}
 	}
@@ -4115,425 +4115,425 @@ void VisualScriptEditor::_comment_node_resized(const Vector2 &p_new_size, int p_
 	updating_graph = false;
 }
 
-void VisualScriptEditor::_menu_option(int p_what) {
-	switch (p_what) {
-		case EDIT_DELETE_NODES: {
-			_on_nodes_delete();
-		} break;
-		case EDIT_TOGGLE_BREAKPOINT: {
-			List<String> reselect;
-			for (int i = 0; i < graph->get_child_count(); i++) {
-				GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
-				if (gn) {
-					if (gn->is_selected()) {
-						int id = String(gn->get_name()).to_int();
-						StringName func = _get_function_of_node(id);
-						Ref<VisualScriptNode> vsn = script->get_node(func, id);
-						if (vsn.is_valid()) {
-							vsn->set_breakpoint(!vsn->is_breakpoint());
-							reselect.push_back(gn->get_name());
-						}
-					}
+void VisualScriptEditor::_menu_delete_selected() {
+	_on_nodes_delete();
+}
+
+void VisualScriptEditor::_menu_toggle_breakpoint() {
+	List<String> reselect;
+	for (int i = 0; i < graph->get_child_count(); i++) {
+		GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
+		if (gn) {
+			if (gn->is_selected()) {
+				int id = String(gn->get_name()).to_int();
+				StringName func = _get_function_of_node(id);
+				Ref<VisualScriptNode> vsn = script->get_node(func, id);
+				if (vsn.is_valid()) {
+					vsn->set_breakpoint(!vsn->is_breakpoint());
+					reselect.push_back(gn->get_name());
 				}
 			}
+		}
+	}
 
-			_update_graph();
+	_update_graph();
 
-			for (List<String>::Element *E = reselect.front(); E; E = E->next()) {
-				GraphNode *gn = Object::cast_to<GraphNode>(graph->get_node(E->get()));
-				gn->set_selected(true);
-			}
+	for (List<String>::Element *E = reselect.front(); E; E = E->next()) {
+		GraphNode *gn = Object::cast_to<GraphNode>(graph->get_node(E->get()));
+		gn->set_selected(true);
+	}
+}
 
-		} break;
-		case EDIT_FIND_NODE_TYPE: {
-			_generic_search(script->get_instance_base_type());
-		} break;
-		case EDIT_COPY_NODES:
-		case EDIT_CUT_NODES: {
-			if (!script->has_function(default_func)) {
-				break;
-			}
+void VisualScriptEditor::_menu_find_node_type() {
+	_generic_search(script->get_instance_base_type());
+}
 
-			clipboard->nodes.clear();
-			clipboard->data_connections.clear();
-			clipboard->sequence_connections.clear();
+void VisualScriptEditor::_menu_copy_nodes() {
+	if (!script->has_function(default_func)) {
+		return;
+	}
 
-			Set<String> funcs;
-			for (int i = 0; i < graph->get_child_count(); i++) {
-				GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
-				if (gn) {
-					if (gn->is_selected()) {
-						int id = String(gn->get_name()).to_int();
-						StringName func = _get_function_of_node(id);
-						Ref<VisualScriptNode> node = script->get_node(func, id);
-						if (Object::cast_to<VisualScriptFunction>(*node)) {
-							EditorNode::get_singleton()->show_warning(TTR("Can't copy the function node."));
-							return;
-						}
-						if (node.is_valid()) {
-							clipboard->nodes[id] = node->duplicate(true);
-							clipboard->nodes_positions[id] = script->get_node_position(func, id);
-							funcs.insert(String(func));
-						}
-					}
-				}
-			}
+	clipboard->nodes.clear();
+	clipboard->data_connections.clear();
+	clipboard->sequence_connections.clear();
 
-			if (clipboard->nodes.empty()) {
-				break;
-			}
-
-			for (Set<String>::Element *F = funcs.front(); F; F = F->next()) {
-				List<VisualScript::SequenceConnection> sequence_connections;
-
-				script->get_sequence_connection_list(F->get(), &sequence_connections);
-
-				for (List<VisualScript::SequenceConnection>::Element *E = sequence_connections.front(); E; E = E->next()) {
-					if (clipboard->nodes.has(E->get().from_node) && clipboard->nodes.has(E->get().to_node)) {
-						clipboard->sequence_connections.insert(E->get());
-					}
-				}
-
-				List<VisualScript::DataConnection> data_connections;
-
-				script->get_data_connection_list(F->get(), &data_connections);
-
-				for (List<VisualScript::DataConnection>::Element *E = data_connections.front(); E; E = E->next()) {
-					if (clipboard->nodes.has(E->get().from_node) && clipboard->nodes.has(E->get().to_node)) {
-						clipboard->data_connections.insert(E->get());
-					}
-				}
-			}
-			if (p_what == EDIT_CUT_NODES) {
-				_on_nodes_delete(); // oh yeah, also delete on cut
-			}
-
-		} break;
-		case EDIT_PASTE_NODES: {
-			if (!script->has_function(default_func)) {
-				break;
-			}
-
-			if (clipboard->nodes.empty()) {
-				EditorNode::get_singleton()->show_warning(TTR("Clipboard is empty!"));
-				break;
-			}
-
-			Map<int, int> remap;
-
-			undo_redo->create_action(TTR("Paste VisualScript Nodes"));
-			int idc = script->get_available_id() + 1;
-
-			Set<int> to_select;
-
-			Set<Vector2> existing_positions;
-
-			{
-				List<StringName> functions;
-				script->get_function_list(&functions);
-				for (List<StringName>::Element *F = functions.front(); F; F = F->next()) {
-					List<int> nodes;
-					script->get_node_list(F->get(), &nodes);
-					for (List<int>::Element *E = nodes.front(); E; E = E->next()) {
-						Vector2 pos = script->get_node_position(F->get(), E->get()).snapped(Vector2(2, 2));
-						existing_positions.insert(pos);
-					}
-				}
-			}
-
-			for (Map<int, Ref<VisualScriptNode>>::Element *E = clipboard->nodes.front(); E; E = E->next()) {
-				Ref<VisualScriptNode> node = E->get()->duplicate();
-
-				int new_id = idc++;
-				to_select.insert(new_id);
-
-				remap[E->key()] = new_id;
-
-				Vector2 paste_pos = clipboard->nodes_positions[E->key()];
-
-				while (existing_positions.has(paste_pos.snapped(Vector2(2, 2)))) {
-					paste_pos += Vector2(20, 20) * EDSCALE;
-				}
-
-				undo_redo->add_do_method(script.ptr(), "add_node", default_func, new_id, node, paste_pos);
-				undo_redo->add_undo_method(script.ptr(), "remove_node", default_func, new_id);
-			}
-
-			for (Set<VisualScript::SequenceConnection>::Element *E = clipboard->sequence_connections.front(); E; E = E->next()) {
-				undo_redo->add_do_method(script.ptr(), "sequence_connect", default_func, remap[E->get().from_node], E->get().from_output, remap[E->get().to_node]);
-				undo_redo->add_undo_method(script.ptr(), "sequence_disconnect", default_func, remap[E->get().from_node], E->get().from_output, remap[E->get().to_node]);
-			}
-
-			for (Set<VisualScript::DataConnection>::Element *E = clipboard->data_connections.front(); E; E = E->next()) {
-				undo_redo->add_do_method(script.ptr(), "data_connect", default_func, remap[E->get().from_node], E->get().from_port, remap[E->get().to_node], E->get().to_port);
-				undo_redo->add_undo_method(script.ptr(), "data_disconnect", default_func, remap[E->get().from_node], E->get().from_port, remap[E->get().to_node], E->get().to_port);
-			}
-
-			undo_redo->add_do_method(this, "_update_graph");
-			undo_redo->add_undo_method(this, "_update_graph");
-
-			undo_redo->commit_action();
-
-			for (int i = 0; i < graph->get_child_count(); i++) {
-				GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
-				if (gn) {
-					int id = gn->get_name().operator String().to_int();
-					gn->set_selected(to_select.has(id));
-				}
-			}
-		} break;
-		case EDIT_CREATE_FUNCTION: {
-			StringName function = "";
-			Map<int, Ref<VisualScriptNode>> nodes;
-			Set<int> selections;
-			for (int i = 0; i < graph->get_child_count(); i++) {
-				GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
-				if (gn) {
-					if (gn->is_selected()) {
-						int id = String(gn->get_name()).to_int();
-						StringName func = _get_function_of_node(id);
-						Ref<VisualScriptNode> node = script->get_node(func, id);
-						if (Object::cast_to<VisualScriptFunction>(*node)) {
-							EditorNode::get_singleton()->show_warning(TTR("Can't create function with a function node."));
-							return;
-						}
-						if (node.is_valid()) {
-							if (func != function && function != StringName("")) {
-								EditorNode::get_singleton()->show_warning(TTR("Can't create function of nodes from nodes of multiple functions."));
-								return;
-							}
-							nodes.insert(id, node);
-							selections.insert(id);
-							function = func;
-						}
-					}
-				}
-			}
-
-			if (nodes.size() == 0) {
-				return; // nothing to be done if there are no valid nodes selected
-			}
-
-			Set<VisualScript::SequenceConnection> seqmove;
-			Set<VisualScript::DataConnection> datamove;
-
-			Set<VisualScript::SequenceConnection> seqext;
-			Set<VisualScript::DataConnection> dataext;
-
-			int start_node = -1;
-			Set<int> end_nodes;
-			if (nodes.size() == 1) {
-				Ref<VisualScriptNode> nd = script->get_node(function, nodes.front()->key());
-				if (nd.is_valid() && nd->has_input_sequence_port()) {
-					start_node = nodes.front()->key();
-				} else {
-					EditorNode::get_singleton()->show_warning(TTR("Select at least one node with sequence port."));
+	Set<String> funcs;
+	for (int i = 0; i < graph->get_child_count(); i++) {
+		GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
+		if (gn) {
+			if (gn->is_selected()) {
+				int id = String(gn->get_name()).to_int();
+				StringName func = _get_function_of_node(id);
+				Ref<VisualScriptNode> node = script->get_node(func, id);
+				if (Object::cast_to<VisualScriptFunction>(*node)) {
+					EditorNode::get_singleton()->show_warning(TTR("Can't copy the function node."));
 					return;
 				}
-			} else {
-				List<VisualScript::SequenceConnection> seqs;
-				script->get_sequence_connection_list(function, &seqs);
+				if (node.is_valid()) {
+					clipboard->nodes[id] = node->duplicate(true);
+					clipboard->nodes_positions[id] = script->get_node_position(func, id);
+					funcs.insert(String(func));
+				}
+			}
+		}
+	}
 
-				if (seqs.size() == 0) {
-					// in case there are no sequence connections
-					// select the top most node cause that's probably how
-					// the user wants to connect the nodes
-					int top_nd = -1;
-					Vector2 top;
-					for (Map<int, Ref<VisualScriptNode>>::Element *E = nodes.front(); E; E = E->next()) {
-						Ref<VisualScriptNode> nd = script->get_node(function, E->key());
-						if (nd.is_valid() && nd->has_input_sequence_port()) {
-							if (top_nd < 0) {
-								top_nd = E->key();
-								top = script->get_node_position(function, top_nd);
-							}
-							Vector2 pos = script->get_node_position(function, E->key());
-							if (top.y > pos.y) {
-								top_nd = E->key();
-								top = pos;
-							}
-						}
-					}
-					Ref<VisualScriptNode> nd = script->get_node(function, top_nd);
-					if (nd.is_valid() && nd->has_input_sequence_port()) {
-						start_node = top_nd;
-					} else {
-						EditorNode::get_singleton()->show_warning(TTR("Select at least one node with sequence port."));
+	if (clipboard->nodes.empty()) {
+		return;
+	}
+
+	for (Set<String>::Element *F = funcs.front(); F; F = F->next()) {
+		List<VisualScript::SequenceConnection> sequence_connections;
+
+		script->get_sequence_connection_list(F->get(), &sequence_connections);
+
+		for (List<VisualScript::SequenceConnection>::Element *E = sequence_connections.front(); E; E = E->next()) {
+			if (clipboard->nodes.has(E->get().from_node) && clipboard->nodes.has(E->get().to_node)) {
+				clipboard->sequence_connections.insert(E->get());
+			}
+		}
+
+		List<VisualScript::DataConnection> data_connections;
+
+		script->get_data_connection_list(F->get(), &data_connections);
+
+		for (List<VisualScript::DataConnection>::Element *E = data_connections.front(); E; E = E->next()) {
+			if (clipboard->nodes.has(E->get().from_node) && clipboard->nodes.has(E->get().to_node)) {
+				clipboard->data_connections.insert(E->get());
+			}
+		}
+	}
+}
+
+void VisualScriptEditor::_menu_cut_nodes() {
+	_menu_copy_nodes();
+	_on_nodes_delete(); // oh yeah, also delete on cut
+}
+
+void VisualScriptEditor::_menu_paste_nodes() {
+	if (!script->has_function(default_func)) {
+		return;
+	}
+
+	if (clipboard->nodes.empty()) {
+		EditorNode::get_singleton()->show_warning(TTR("Clipboard is empty!"));
+		return;
+	}
+
+	Map<int, int> remap;
+
+	undo_redo->create_action(TTR("Paste VisualScript Nodes"));
+	int idc = script->get_available_id() + 1;
+
+	Set<int> to_select;
+
+	Set<Vector2> existing_positions;
+
+	{
+		List<StringName> functions;
+		script->get_function_list(&functions);
+		for (List<StringName>::Element *F = functions.front(); F; F = F->next()) {
+			List<int> nodes;
+			script->get_node_list(F->get(), &nodes);
+			for (List<int>::Element *E = nodes.front(); E; E = E->next()) {
+				Vector2 pos = script->get_node_position(F->get(), E->get()).snapped(Vector2(2, 2));
+				existing_positions.insert(pos);
+			}
+		}
+	}
+
+	for (Map<int, Ref<VisualScriptNode>>::Element *E = clipboard->nodes.front(); E; E = E->next()) {
+		Ref<VisualScriptNode> node = E->get()->duplicate();
+
+		int new_id = idc++;
+		to_select.insert(new_id);
+
+		remap[E->key()] = new_id;
+
+		Vector2 paste_pos = clipboard->nodes_positions[E->key()];
+
+		while (existing_positions.has(paste_pos.snapped(Vector2(2, 2)))) {
+			paste_pos += Vector2(20, 20) * EDSCALE;
+		}
+
+		undo_redo->add_do_method(script.ptr(), "add_node", default_func, new_id, node, paste_pos);
+		undo_redo->add_undo_method(script.ptr(), "remove_node", default_func, new_id);
+	}
+
+	for (Set<VisualScript::SequenceConnection>::Element *E = clipboard->sequence_connections.front(); E; E = E->next()) {
+		undo_redo->add_do_method(script.ptr(), "sequence_connect", default_func, remap[E->get().from_node], E->get().from_output, remap[E->get().to_node]);
+		undo_redo->add_undo_method(script.ptr(), "sequence_disconnect", default_func, remap[E->get().from_node], E->get().from_output, remap[E->get().to_node]);
+	}
+
+	for (Set<VisualScript::DataConnection>::Element *E = clipboard->data_connections.front(); E; E = E->next()) {
+		undo_redo->add_do_method(script.ptr(), "data_connect", default_func, remap[E->get().from_node], E->get().from_port, remap[E->get().to_node], E->get().to_port);
+		undo_redo->add_undo_method(script.ptr(), "data_disconnect", default_func, remap[E->get().from_node], E->get().from_port, remap[E->get().to_node], E->get().to_port);
+	}
+
+	undo_redo->add_do_method(this, "_update_graph");
+	undo_redo->add_undo_method(this, "_update_graph");
+
+	undo_redo->commit_action();
+
+	for (int i = 0; i < graph->get_child_count(); i++) {
+		GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
+		if (gn) {
+			int id = gn->get_name().operator String().to_int();
+			gn->set_selected(to_select.has(id));
+		}
+	}
+}
+
+void VisualScriptEditor::_menu_create_function() {
+	StringName function = "";
+	Map<int, Ref<VisualScriptNode>> nodes;
+	Set<int> selections;
+	for (int i = 0; i < graph->get_child_count(); i++) {
+		GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(i));
+		if (gn) {
+			if (gn->is_selected()) {
+				int id = String(gn->get_name()).to_int();
+				StringName func = _get_function_of_node(id);
+				Ref<VisualScriptNode> node = script->get_node(func, id);
+				if (Object::cast_to<VisualScriptFunction>(*node)) {
+					EditorNode::get_singleton()->show_warning(TTR("Can't create function with a function node."));
+					return;
+				}
+				if (node.is_valid()) {
+					if (func != function && function != StringName("")) {
+						EditorNode::get_singleton()->show_warning(TTR("Can't create function of nodes from nodes of multiple functions."));
 						return;
 					}
-				} else {
-					// pick the node with input sequence
-					Set<int> nodes_from;
-					Set<int> nodes_to;
-					for (List<VisualScript::SequenceConnection>::Element *E = seqs.front(); E; E = E->next()) {
-						if (nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
-							seqmove.insert(E->get());
-							nodes_from.insert(E->get().from_node);
-						} else if (nodes.has(E->get().from_node) && !nodes.has(E->get().to_node)) {
-							seqext.insert(E->get());
-						} else if (!nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
-							if (start_node == -1) {
-								seqext.insert(E->get());
-								start_node = E->get().to_node;
-							} else {
-								EditorNode::get_singleton()->show_warning(TTR("Try to only have one sequence input in selection."));
-								return;
-							}
-						}
-						nodes_to.insert(E->get().to_node);
+					nodes.insert(id, node);
+					selections.insert(id);
+					function = func;
+				}
+			}
+		}
+	}
+
+	if (nodes.size() == 0) {
+		return; // nothing to be done if there are no valid nodes selected
+	}
+
+	Set<VisualScript::SequenceConnection> seqmove;
+	Set<VisualScript::DataConnection> datamove;
+
+	Set<VisualScript::SequenceConnection> seqext;
+	Set<VisualScript::DataConnection> dataext;
+
+	int start_node = -1;
+	Set<int> end_nodes;
+	if (nodes.size() == 1) {
+		Ref<VisualScriptNode> nd = script->get_node(function, nodes.front()->key());
+		if (nd.is_valid() && nd->has_input_sequence_port()) {
+			start_node = nodes.front()->key();
+		} else {
+			EditorNode::get_singleton()->show_warning(TTR("Select at least one node with sequence port."));
+			return;
+		}
+	} else {
+		List<VisualScript::SequenceConnection> seqs;
+		script->get_sequence_connection_list(function, &seqs);
+
+		if (seqs.size() == 0) {
+			// in case there are no sequence connections
+			// select the top most node cause that's probably how
+			// the user wants to connect the nodes
+			int top_nd = -1;
+			Vector2 top;
+			for (Map<int, Ref<VisualScriptNode>>::Element *E = nodes.front(); E; E = E->next()) {
+				Ref<VisualScriptNode> nd = script->get_node(function, E->key());
+				if (nd.is_valid() && nd->has_input_sequence_port()) {
+					if (top_nd < 0) {
+						top_nd = E->key();
+						top = script->get_node_position(function, top_nd);
 					}
-
-					// to use to add return nodes
-					_get_ends(start_node, seqs, selections, end_nodes);
-
-					if (start_node == -1) {
-						// if we still don't have a start node then
-						// run through the nodes and select the first tree node
-						// ie node without any input sequence but output sequence
-						for (Set<int>::Element *E = nodes_from.front(); E; E = E->next()) {
-							if (!nodes_to.has(E->get())) {
-								start_node = E->get();
-							}
-						}
+					Vector2 pos = script->get_node_position(function, E->key());
+					if (top.y > pos.y) {
+						top_nd = E->key();
+						top = pos;
 					}
 				}
 			}
+			Ref<VisualScriptNode> nd = script->get_node(function, top_nd);
+			if (nd.is_valid() && nd->has_input_sequence_port()) {
+				start_node = top_nd;
+			} else {
+				EditorNode::get_singleton()->show_warning(TTR("Select at least one node with sequence port."));
+				return;
+			}
+		} else {
+			// pick the node with input sequence
+			Set<int> nodes_from;
+			Set<int> nodes_to;
+			for (List<VisualScript::SequenceConnection>::Element *E = seqs.front(); E; E = E->next()) {
+				if (nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
+					seqmove.insert(E->get());
+					nodes_from.insert(E->get().from_node);
+				} else if (nodes.has(E->get().from_node) && !nodes.has(E->get().to_node)) {
+					seqext.insert(E->get());
+				} else if (!nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
+					if (start_node == -1) {
+						seqext.insert(E->get());
+						start_node = E->get().to_node;
+					} else {
+						EditorNode::get_singleton()->show_warning(TTR("Try to only have one sequence input in selection."));
+						return;
+					}
+				}
+				nodes_to.insert(E->get().to_node);
+			}
+
+			// to use to add return nodes
+			_get_ends(start_node, seqs, selections, end_nodes);
 
 			if (start_node == -1) {
-				return; // this should not happen, but just in case something goes wrong
-			}
-
-			List<Variant::Type> inputs; // input types
-			List<Pair<int, int>> input_connections;
-			{
-				List<VisualScript::DataConnection> dats;
-				script->get_data_connection_list(function, &dats);
-				for (List<VisualScript::DataConnection>::Element *E = dats.front(); E; E = E->next()) {
-					if (nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
-						datamove.insert(E->get());
-					} else if (!nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
-						// add all these as inputs for the Function
-						Ref<VisualScriptNode> node = script->get_node(function, E->get().to_node);
-						if (node.is_valid()) {
-							dataext.insert(E->get());
-							PropertyInfo pi = node->get_input_value_port_info(E->get().to_port);
-							inputs.push_back(pi.type);
-							input_connections.push_back(Pair<int, int>(E->get().to_node, E->get().to_port));
-						}
-					} else if (nodes.has(E->get().from_node) && !nodes.has(E->get().to_node)) {
-						dataext.insert(E->get());
+				// if we still don't have a start node then
+				// run through the nodes and select the first tree node
+				// ie node without any input sequence but output sequence
+				for (Set<int>::Element *E = nodes_from.front(); E; E = E->next()) {
+					if (!nodes_to.has(E->get())) {
+						start_node = E->get();
 					}
 				}
 			}
-
-			String new_fn = _validate_name("new_function");
-
-			Vector2 ofs = _get_available_pos(false, script->get_node_position(function, start_node) - Vector2(80, 150));
-
-			Ref<VisualScriptFunction> func_node;
-			func_node.instance();
-			func_node->set_name(new_fn);
-
-			undo_redo->create_action(TTR("Create Function"));
-
-			undo_redo->add_do_method(script.ptr(), "add_function", new_fn);
-			int fn_id = script->get_available_id();
-			undo_redo->add_do_method(script.ptr(), "add_node", new_fn, fn_id, func_node, ofs);
-			undo_redo->add_undo_method(script.ptr(), "remove_function", new_fn);
-			undo_redo->add_do_method(this, "_update_members");
-			undo_redo->add_undo_method(this, "_update_members");
-			undo_redo->add_do_method(this, "emit_signal", "edited_script_changed");
-			undo_redo->add_undo_method(this, "emit_signal", "edited_script_changed");
-
-			// Move the nodes
-
-			for (Map<int, Ref<VisualScriptNode>>::Element *E = nodes.front(); E; E = E->next()) {
-				undo_redo->add_do_method(script.ptr(), "remove_node", function, E->key());
-				undo_redo->add_do_method(script.ptr(), "add_node", new_fn, E->key(), E->get(), script->get_node_position(function, E->key()));
-
-				// undo_redo->add_undo_method(script.ptr(), "remove_node", new_fn, E->key()); not needed cause we already remove the function :P
-				undo_redo->add_undo_method(script.ptr(), "add_node", function, E->key(), E->get(), script->get_node_position(function, E->key()));
-			}
-
-			for (Set<VisualScript::SequenceConnection>::Element *E = seqmove.front(); E; E = E->next()) {
-				undo_redo->add_do_method(script.ptr(), "sequence_connect", new_fn, E->get().from_node, E->get().from_output, E->get().to_node);
-				undo_redo->add_undo_method(script.ptr(), "sequence_connect", function, E->get().from_node, E->get().from_output, E->get().to_node);
-			}
-
-			for (Set<VisualScript::DataConnection>::Element *E = datamove.front(); E; E = E->next()) {
-				undo_redo->add_do_method(script.ptr(), "data_connect", new_fn, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
-				undo_redo->add_undo_method(script.ptr(), "data_connect", function, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
-			}
-
-			// Add undo for external connections as well so that it's easier to revert back and forth
-			// these didn't require do methods as it's already handled internally by other do calls
-			for (Set<VisualScript::SequenceConnection>::Element *E = seqext.front(); E; E = E->next()) {
-				undo_redo->add_undo_method(script.ptr(), "sequence_connect", function, E->get().from_node, E->get().from_output, E->get().to_node);
-			}
-			for (Set<VisualScript::DataConnection>::Element *E = dataext.front(); E; E = E->next()) {
-				undo_redo->add_undo_method(script.ptr(), "data_connect", function, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
-			}
-
-			// I don't really think we need support for non sequenced functions at this moment
-			undo_redo->add_do_method(script.ptr(), "sequence_connect", new_fn, fn_id, 0, start_node);
-
-			// end nodes are mapped to the return nodes with data connections if possible
-			int m = 1;
-			for (Set<int>::Element *G = end_nodes.front(); G; G = G->next()) {
-				Ref<VisualScriptReturn> ret_node;
-				ret_node.instance();
-
-				int ret_id = fn_id + (m++);
-				selections.insert(ret_id);
-				Vector2 ofsi = _get_available_pos(false, script->get_node_position(function, G->get()) + Vector2(80, -100));
-				undo_redo->add_do_method(script.ptr(), "add_node", new_fn, ret_id, ret_node, ofsi);
-				undo_redo->add_undo_method(script.ptr(), "remove_node", new_fn, ret_id);
-
-				undo_redo->add_do_method(script.ptr(), "sequence_connect", new_fn, G->get(), 0, ret_id);
-				// add data outputs from each of the end_nodes
-				Ref<VisualScriptNode> vsn = script->get_node(function, G->get());
-				if (vsn.is_valid() && vsn->get_output_value_port_count() > 0) {
-					ret_node->set_enable_return_value(true);
-					// use the zeroth data port cause that's the likely one that is planned to be used
-					ret_node->set_return_type(vsn->get_output_value_port_info(0).type);
-					undo_redo->add_do_method(script.ptr(), "data_connect", new_fn, G->get(), 0, ret_id, 0);
-				}
-			}
-
-			// * might make the system more intelligent by checking port from info.
-			int i = 0;
-			List<Pair<int, int>>::Element *F = input_connections.front();
-			for (List<Variant::Type>::Element *E = inputs.front(); E && F; E = E->next(), F = F->next()) {
-				func_node->add_argument(E->get(), "arg_" + String::num_int64(i), i);
-				undo_redo->add_do_method(script.ptr(), "data_connect", new_fn, fn_id, i, F->get().first, F->get().second);
-				i++; // increment i
-			}
-
-			undo_redo->add_do_method(this, "_update_graph");
-			undo_redo->add_undo_method(this, "_update_graph");
-
-			undo_redo->commit_action();
-
-			// make sure all Nodes get marked for selection so that they can be moved together
-			selections.insert(fn_id);
-			for (int k = 0; k < graph->get_child_count(); k++) {
-				GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(k));
-				if (gn) {
-					int id = gn->get_name().operator String().to_int();
-					gn->set_selected(selections.has(id));
-				}
-			}
-
-			// Ensure Preview Selection is of newly created function node
-			if (selections.size()) {
-				EditorNode::get_singleton()->push_item(func_node.ptr());
-			}
-
-		} break;
-		case REFRESH_GRAPH: {
-			_update_graph();
-		} break;
+		}
 	}
+
+	if (start_node == -1) {
+		return; // this should not happen, but just in case something goes wrong
+	}
+
+	List<Variant::Type> inputs; // input types
+	List<Pair<int, int>> input_connections;
+	{
+		List<VisualScript::DataConnection> dats;
+		script->get_data_connection_list(function, &dats);
+		for (List<VisualScript::DataConnection>::Element *E = dats.front(); E; E = E->next()) {
+			if (nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
+				datamove.insert(E->get());
+			} else if (!nodes.has(E->get().from_node) && nodes.has(E->get().to_node)) {
+				// add all these as inputs for the Function
+				Ref<VisualScriptNode> node = script->get_node(function, E->get().to_node);
+				if (node.is_valid()) {
+					dataext.insert(E->get());
+					PropertyInfo pi = node->get_input_value_port_info(E->get().to_port);
+					inputs.push_back(pi.type);
+					input_connections.push_back(Pair<int, int>(E->get().to_node, E->get().to_port));
+				}
+			} else if (nodes.has(E->get().from_node) && !nodes.has(E->get().to_node)) {
+				dataext.insert(E->get());
+			}
+		}
+	}
+
+	String new_fn = _validate_name("new_function");
+
+	Vector2 ofs = _get_available_pos(false, script->get_node_position(function, start_node) - Vector2(80, 150));
+
+	Ref<VisualScriptFunction> func_node;
+	func_node.instance();
+	func_node->set_name(new_fn);
+
+	undo_redo->create_action(TTR("Create Function"));
+
+	undo_redo->add_do_method(script.ptr(), "add_function", new_fn);
+	int fn_id = script->get_available_id();
+	undo_redo->add_do_method(script.ptr(), "add_node", new_fn, fn_id, func_node, ofs);
+	undo_redo->add_undo_method(script.ptr(), "remove_function", new_fn);
+	undo_redo->add_do_method(this, "_update_members");
+	undo_redo->add_undo_method(this, "_update_members");
+	undo_redo->add_do_method(this, "emit_signal", "edited_script_changed");
+	undo_redo->add_undo_method(this, "emit_signal", "edited_script_changed");
+
+	// Move the nodes
+
+	for (Map<int, Ref<VisualScriptNode>>::Element *E = nodes.front(); E; E = E->next()) {
+		undo_redo->add_do_method(script.ptr(), "remove_node", function, E->key());
+		undo_redo->add_do_method(script.ptr(), "add_node", new_fn, E->key(), E->get(), script->get_node_position(function, E->key()));
+
+		// undo_redo->add_undo_method(script.ptr(), "remove_node", new_fn, E->key()); not needed cause we already remove the function :P
+		undo_redo->add_undo_method(script.ptr(), "add_node", function, E->key(), E->get(), script->get_node_position(function, E->key()));
+	}
+
+	for (Set<VisualScript::SequenceConnection>::Element *E = seqmove.front(); E; E = E->next()) {
+		undo_redo->add_do_method(script.ptr(), "sequence_connect", new_fn, E->get().from_node, E->get().from_output, E->get().to_node);
+		undo_redo->add_undo_method(script.ptr(), "sequence_connect", function, E->get().from_node, E->get().from_output, E->get().to_node);
+	}
+
+	for (Set<VisualScript::DataConnection>::Element *E = datamove.front(); E; E = E->next()) {
+		undo_redo->add_do_method(script.ptr(), "data_connect", new_fn, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
+		undo_redo->add_undo_method(script.ptr(), "data_connect", function, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
+	}
+
+	// Add undo for external connections as well so that it's easier to revert back and forth
+	// these didn't require do methods as it's already handled internally by other do calls
+	for (Set<VisualScript::SequenceConnection>::Element *E = seqext.front(); E; E = E->next()) {
+		undo_redo->add_undo_method(script.ptr(), "sequence_connect", function, E->get().from_node, E->get().from_output, E->get().to_node);
+	}
+	for (Set<VisualScript::DataConnection>::Element *E = dataext.front(); E; E = E->next()) {
+		undo_redo->add_undo_method(script.ptr(), "data_connect", function, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
+	}
+
+	// I don't really think we need support for non sequenced functions at this moment
+	undo_redo->add_do_method(script.ptr(), "sequence_connect", new_fn, fn_id, 0, start_node);
+
+	// end nodes are mapped to the return nodes with data connections if possible
+	int m = 1;
+	for (Set<int>::Element *G = end_nodes.front(); G; G = G->next()) {
+		Ref<VisualScriptReturn> ret_node;
+		ret_node.instance();
+
+		int ret_id = fn_id + (m++);
+		selections.insert(ret_id);
+		Vector2 ofsi = _get_available_pos(false, script->get_node_position(function, G->get()) + Vector2(80, -100));
+		undo_redo->add_do_method(script.ptr(), "add_node", new_fn, ret_id, ret_node, ofsi);
+		undo_redo->add_undo_method(script.ptr(), "remove_node", new_fn, ret_id);
+
+		undo_redo->add_do_method(script.ptr(), "sequence_connect", new_fn, G->get(), 0, ret_id);
+		// add data outputs from each of the end_nodes
+		Ref<VisualScriptNode> vsn = script->get_node(function, G->get());
+		if (vsn.is_valid() && vsn->get_output_value_port_count() > 0) {
+			ret_node->set_enable_return_value(true);
+			// use the zeroth data port cause that's the likely one that is planned to be used
+			ret_node->set_return_type(vsn->get_output_value_port_info(0).type);
+			undo_redo->add_do_method(script.ptr(), "data_connect", new_fn, G->get(), 0, ret_id, 0);
+		}
+	}
+
+	// * might make the system more intelligent by checking port from info.
+	int i = 0;
+	List<Pair<int, int>>::Element *F = input_connections.front();
+	for (List<Variant::Type>::Element *E = inputs.front(); E && F; E = E->next(), F = F->next()) {
+		func_node->add_argument(E->get(), "arg_" + String::num_int64(i), i);
+		undo_redo->add_do_method(script.ptr(), "data_connect", new_fn, fn_id, i, F->get().first, F->get().second);
+		i++; // increment i
+	}
+
+	undo_redo->add_do_method(this, "_update_graph");
+	undo_redo->add_undo_method(this, "_update_graph");
+
+	undo_redo->commit_action();
+
+	// make sure all Nodes get marked for selection so that they can be moved together
+	selections.insert(fn_id);
+	for (int k = 0; k < graph->get_child_count(); k++) {
+		GraphNode *gn = Object::cast_to<GraphNode>(graph->get_child(k));
+		if (gn) {
+			int id = gn->get_name().operator String().to_int();
+			gn->set_selected(selections.has(id));
+		}
+	}
+
+	// Ensure Preview Selection is of newly created function node
+	if (selections.size()) {
+		EditorNode::get_singleton()->push_item(func_node.ptr());
+	}
+}
+
+void VisualScriptEditor::_menu_refresh_nodes() {
+	_update_graph();
 }
 
 // this is likely going to be very slow and I am not sure if I should keep it
@@ -4570,118 +4570,104 @@ void VisualScriptEditor::_member_rmb_selected(const Vector2 &p_pos) {
 
 	Ref<Texture2D> edit_icon = Control::get_theme_icon("Edit", "EditorIcons");
 
+	// TODO: Use indexes
 	if (ti->get_parent() == root->get_children()) {
 		member_type = MEMBER_FUNCTION;
-		member_name = ti->get_text(0);
-		member_popup->add_icon_shortcut(edit_icon, ED_GET_SHORTCUT("visual_script_editor/edit_member"), MEMBER_EDIT);
-		member_popup->add_separator();
-		member_popup->add_icon_shortcut(del_icon, ED_GET_SHORTCUT("visual_script_editor/delete_selected"), MEMBER_REMOVE);
-		member_popup->popup();
-		return;
-	}
-
-	if (ti->get_parent() == root->get_children()->get_next()) {
+	} else if (ti->get_parent() == root->get_children()->get_next()) {
 		member_type = MEMBER_VARIABLE;
-		member_name = ti->get_text(0);
-		member_popup->add_icon_shortcut(edit_icon, ED_GET_SHORTCUT("visual_script_editor/edit_member"), MEMBER_EDIT);
-		member_popup->add_separator();
-		member_popup->add_icon_shortcut(del_icon, ED_GET_SHORTCUT("visual_script_editor/delete_selected"), MEMBER_REMOVE);
-		member_popup->popup();
-		return;
-	}
-
-	if (ti->get_parent() == root->get_children()->get_next()->get_next()) {
+	} else if (ti->get_parent() == root->get_children()->get_next()->get_next()) {
 		member_type = MEMBER_SIGNAL;
-		member_name = ti->get_text(0);
-		member_popup->add_icon_shortcut(edit_icon, ED_GET_SHORTCUT("visual_script_editor/edit_member"), MEMBER_EDIT);
-		member_popup->add_separator();
-		member_popup->add_icon_shortcut(del_icon, ED_GET_SHORTCUT("visual_script_editor/delete_selected"), MEMBER_REMOVE);
-		member_popup->popup();
-		return;
+	}
+	
+	member_name = ti->get_text(0);
+
+	Button *edit = member_popup->add_button(TTR("Edit"), edit_icon, ED_GET_SHORTCUT("visual_script_editor/edit_member"));
+	edit->connect("pressed", callable_mp(this, &VisualScriptEditor::_member_edit));
+
+	Button *del = member_popup->add_button(TTR("Delete"), del_icon, ED_GET_SHORTCUT("visual_script_editor/delete_selected"));
+	del->connect("pressed", callable_mp(this, &VisualScriptEditor::_member_delete));
+
+	member_popup->popup();
+}
+
+void VisualScriptEditor::_member_edit() {
+	String name = member_name;
+	switch (member_type) {
+		case MEMBER_FUNCTION: {
+			selected = members->get_selected()->get_text(0);
+			function_name_edit->popup();
+			function_name_box->set_text(selected);
+			function_name_box->select_all();
+		} break;
+		case MEMBER_VARIABLE: {
+			variable_editor->edit(name);
+			edit_variable_dialog->set_title(TTR("Editing Variable:") + " " + name);
+			edit_variable_dialog->popup_centered(Size2(400, 200) * EDSCALE);
+		} break;
+		case MEMBER_SIGNAL: {
+			signal_editor->edit(name);
+			edit_signal_dialog->set_title(TTR("Editing Signal:") + " " + name);
+			edit_signal_dialog->popup_centered(Size2(400, 300) * EDSCALE);
+		} break;
 	}
 }
 
-void VisualScriptEditor::_member_option(int p_option) {
+void VisualScriptEditor::_member_delete() {
+	String name = member_name;
 	switch (member_type) {
 		case MEMBER_FUNCTION: {
-			if (p_option == MEMBER_REMOVE) {
-				//delete the function
-				String name = member_name;
-
-				undo_redo->create_action(TTR("Remove Function"));
-				undo_redo->add_do_method(script.ptr(), "remove_function", name);
-				undo_redo->add_undo_method(script.ptr(), "add_function", name);
-				List<int> nodes;
-				script->get_node_list(name, &nodes);
-				for (List<int>::Element *E = nodes.front(); E; E = E->next()) {
-					undo_redo->add_undo_method(script.ptr(), "add_node", name, E->get(), script->get_node(name, E->get()), script->get_node_position(name, E->get()));
-				}
-
-				List<VisualScript::SequenceConnection> seq_connections;
-
-				script->get_sequence_connection_list(name, &seq_connections);
-
-				for (List<VisualScript::SequenceConnection>::Element *E = seq_connections.front(); E; E = E->next()) {
-					undo_redo->add_undo_method(script.ptr(), "sequence_connect", name, E->get().from_node, E->get().from_output, E->get().to_node);
-				}
-
-				List<VisualScript::DataConnection> data_connections;
-
-				script->get_data_connection_list(name, &data_connections);
-
-				for (List<VisualScript::DataConnection>::Element *E = data_connections.front(); E; E = E->next()) {
-					undo_redo->add_undo_method(script.ptr(), "data_connect", name, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
-				}
-
-				undo_redo->add_do_method(this, "_update_members");
-				undo_redo->add_undo_method(this, "_update_members");
-				undo_redo->add_do_method(this, "_update_graph");
-				undo_redo->add_undo_method(this, "_update_graph");
-				undo_redo->commit_action();
-			} else if (p_option == MEMBER_EDIT) {
-				selected = members->get_selected()->get_text(0);
-				function_name_edit->popup();
-				function_name_box->set_text(selected);
-				function_name_box->select_all();
+			undo_redo->create_action(TTR("Remove Function"));
+			undo_redo->add_do_method(script.ptr(), "remove_function", name);
+			undo_redo->add_undo_method(script.ptr(), "add_function", name);
+			List<int> nodes;
+			script->get_node_list(name, &nodes);
+			for (List<int>::Element *E = nodes.front(); E; E = E->next()) {
+				undo_redo->add_undo_method(script.ptr(), "add_node", name, E->get(), script->get_node(name, E->get()), script->get_node_position(name, E->get()));
 			}
+
+			List<VisualScript::SequenceConnection> seq_connections;
+
+			script->get_sequence_connection_list(name, &seq_connections);
+
+			for (List<VisualScript::SequenceConnection>::Element *E = seq_connections.front(); E; E = E->next()) {
+				undo_redo->add_undo_method(script.ptr(), "sequence_connect", name, E->get().from_node, E->get().from_output, E->get().to_node);
+			}
+
+			List<VisualScript::DataConnection> data_connections;
+
+			script->get_data_connection_list(name, &data_connections);
+
+			for (List<VisualScript::DataConnection>::Element *E = data_connections.front(); E; E = E->next()) {
+				undo_redo->add_undo_method(script.ptr(), "data_connect", name, E->get().from_node, E->get().from_port, E->get().to_node, E->get().to_port);
+			}
+
+			undo_redo->add_do_method(this, "_update_members");
+			undo_redo->add_undo_method(this, "_update_members");
+			undo_redo->add_do_method(this, "_update_graph");
+			undo_redo->add_undo_method(this, "_update_graph");
+			undo_redo->commit_action();
 		} break;
 		case MEMBER_VARIABLE: {
-			String name = member_name;
-
-			if (p_option == MEMBER_REMOVE) {
-				undo_redo->create_action(TTR("Remove Variable"));
-				undo_redo->add_do_method(script.ptr(), "remove_variable", name);
-				undo_redo->add_undo_method(script.ptr(), "add_variable", name, script->get_variable_default_value(name));
-				undo_redo->add_undo_method(script.ptr(), "set_variable_info", name, script->call("get_variable_info", name)); //return as dict
-				undo_redo->add_do_method(this, "_update_members");
-				undo_redo->add_undo_method(this, "_update_members");
-				undo_redo->commit_action();
-			} else if (p_option == MEMBER_EDIT) {
-				variable_editor->edit(name);
-				edit_variable_dialog->set_title(TTR("Editing Variable:") + " " + name);
-				edit_variable_dialog->popup_centered(Size2(400, 200) * EDSCALE);
-			}
+			undo_redo->create_action(TTR("Remove Variable"));
+			undo_redo->add_do_method(script.ptr(), "remove_variable", name);
+			undo_redo->add_undo_method(script.ptr(), "add_variable", name, script->get_variable_default_value(name));
+			undo_redo->add_undo_method(script.ptr(), "set_variable_info", name, script->call("get_variable_info", name)); //return as dict
+			undo_redo->add_do_method(this, "_update_members");
+			undo_redo->add_undo_method(this, "_update_members");
+			undo_redo->commit_action();
 		} break;
 		case MEMBER_SIGNAL: {
-			String name = member_name;
+			undo_redo->create_action(TTR("Remove Signal"));
+			undo_redo->add_do_method(script.ptr(), "remove_custom_signal", name);
+			undo_redo->add_undo_method(script.ptr(), "add_custom_signal", name);
 
-			if (p_option == MEMBER_REMOVE) {
-				undo_redo->create_action(TTR("Remove Signal"));
-				undo_redo->add_do_method(script.ptr(), "remove_custom_signal", name);
-				undo_redo->add_undo_method(script.ptr(), "add_custom_signal", name);
-
-				for (int i = 0; i < script->custom_signal_get_argument_count(name); i++) {
-					undo_redo->add_undo_method(script.ptr(), "custom_signal_add_argument", name, script->custom_signal_get_argument_name(name, i), script->custom_signal_get_argument_type(name, i));
-				}
-
-				undo_redo->add_do_method(this, "_update_members");
-				undo_redo->add_undo_method(this, "_update_members");
-				undo_redo->commit_action();
-			} else if (p_option == MEMBER_EDIT) {
-				signal_editor->edit(name);
-				edit_signal_dialog->set_title(TTR("Editing Signal:") + " " + name);
-				edit_signal_dialog->popup_centered(Size2(400, 300) * EDSCALE);
+			for (int i = 0; i < script->custom_signal_get_argument_count(name); i++) {
+				undo_redo->add_undo_method(script.ptr(), "custom_signal_add_argument", name, script->custom_signal_get_argument_name(name, i), script->custom_signal_get_argument_type(name, i));
 			}
+
+			undo_redo->add_do_method(this, "_update_members");
+			undo_redo->add_undo_method(this, "_update_members");
+			undo_redo->commit_action();
 		} break;
 	}
 }
@@ -4727,17 +4713,34 @@ VisualScriptEditor::VisualScriptEditor() {
 	edit_menu = memnew(MenuButton);
 	edit_menu->set_text(TTR("Edit"));
 	edit_menu->set_switch_on_hover(true);
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/delete_selected"), EDIT_DELETE_NODES);
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/toggle_breakpoint"), EDIT_TOGGLE_BREAKPOINT);
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/find_node_type"), EDIT_FIND_NODE_TYPE);
+
+	Button *delete_selected = edit_menu->get_popup()->add_button(TTR("Delete Selected"), ED_GET_SHORTCUT("visual_script_editor/delete_selected"));
+	delete_selected->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_delete_selected));
+
+	Button *toggle_breakpoint = edit_menu->get_popup()->add_button(TTR("Toggle Breakpoint"), ED_GET_SHORTCUT("visual_script_editor/toggle_breakpoint"));
+	toggle_breakpoint->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_toggle_breakpoint));
+
+	Button *find_node_type = edit_menu->get_popup()->add_button(TTR("Find Node Type"), ED_GET_SHORTCUT("visual_script_editor/find_node_type"));
+	find_node_type->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_find_node_type));
+
 	edit_menu->get_popup()->add_separator();
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/copy_nodes"), EDIT_COPY_NODES);
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/cut_nodes"), EDIT_CUT_NODES);
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/paste_nodes"), EDIT_PASTE_NODES);
+
+	Button *copy_nodes = edit_menu->get_popup()->add_button(TTR("Copy Nodes"), ED_GET_SHORTCUT("visual_script_editor/copy_nodes"));
+	copy_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_copy_nodes));
+
+	Button *cut_nodes = edit_menu->get_popup()->add_button(TTR("Cut Nodes"), ED_GET_SHORTCUT("visual_script_editor/cut_nodes"));
+	cut_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_cut_nodes));
+
+	Button *paste_nodes = edit_menu->get_popup()->add_button(TTR("Paste Nodes"), ED_GET_SHORTCUT("visual_script_editor/paste_nodes"));
+	paste_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_paste_nodes));
+
 	edit_menu->get_popup()->add_separator();
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/create_function"), EDIT_CREATE_FUNCTION);
-	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("visual_script_editor/refresh_nodes"), REFRESH_GRAPH);
-	edit_menu->get_popup()->connect("id_pressed", callable_mp(this, &VisualScriptEditor::_menu_option));
+
+	Button *create_function = edit_menu->get_popup()->add_button(TTR("Make Function"), ED_GET_SHORTCUT("visual_script_editor/create_function"));
+	create_function->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_cut_nodes));
+
+	Button *refresh_nodes = edit_menu->get_popup()->add_button(TTR("Refresh Graph"), ED_GET_SHORTCUT("visual_script_editor/refresh_nodes"));
+	refresh_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_paste_nodes));
 
 	members_section = memnew(VBoxContainer);
 	// Add but wait until done setting up this.

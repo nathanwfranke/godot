@@ -46,7 +46,6 @@ class GridMapEditor : public VBoxContainer {
 	};
 
 	enum InputAction {
-
 		INPUT_NONE,
 		INPUT_PAINT,
 		INPUT_ERASE,
@@ -56,7 +55,6 @@ class GridMapEditor : public VBoxContainer {
 	};
 
 	enum ClipMode {
-
 		CLIP_DISABLED,
 		CLIP_ABOVE,
 		CLIP_BELOW
@@ -180,12 +178,12 @@ class GridMapEditor : public VBoxContainer {
 	void _menu_cursor_rotate(int p_rotation_type);
 	void _menu_clear_rotation();
 	
-	Ref<CheckBox> selection_paste_selects;
+	CheckBox *selection_paste_selects;
 	
-	Ref<Button> selection_duplicate;
-	Ref<Button> selection_cut;
-	Ref<Button> selection_clear;
-	Ref<Button> selection_fill;
+	Button *selection_duplicate;
+	Button *selection_cut;
+	Button *selection_clear;
+	Button *selection_fill;
 	
 	void _menu_selection_paste();
 	void _menu_selection_duplicate();

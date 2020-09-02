@@ -94,7 +94,7 @@ class PopupMenu : public Popup {
 
 	Timer *submenu_timer;
 	List<Rect2> autohide_areas;
-	Vector<Ref<Control>> items;
+	Vector<Control *> items;
 	int initial_button_mask;
 	bool during_grabbed_click;
 	int mouse_over;
@@ -143,13 +143,13 @@ protected:
 
 public:
 	void add_item(Control *p_item);
-	Ref<Control> get_item(int p_id);
+	Control *get_item(int p_id);
 	
-	Ref<Button> get_button(int p_id);
+	Button *get_button(int p_id);
 	
-	Ref<Button> add_button(const String &p_label, Ref<Texture2D> p_icon = Ref<Texture2D>());
-	Ref<CheckBox> add_check_button(const String &p_label, Ref<Texture2D> p_icon = Ref<Texture2D>());
-	Ref<CheckBox> add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<Texture2D> p_icon = Ref<Texture2D>());
+	Button *add_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
+	CheckBox *add_check_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
+	CheckBox *add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
 	/*void add_check_item(const String &p_label, int p_id = -1, uint32_t p_accel = 0);
 	void add_icon_check_item(const Ref<Texture2D> &p_icon, const String &p_label, int p_id = -1, uint32_t p_accel = 0);
 	void add_radio_check_item(const String &p_label, int p_id = -1, uint32_t p_accel = 0);
@@ -165,7 +165,7 @@ public:
 	void add_icon_radio_check_shortcut(const Ref<Texture2D> &p_icon, const Ref<Shortcut> &p_shortcut, int p_id = -1, bool p_global = false);
 
 	void add_submenu_item(const String &p_label, const String &p_submenu, int p_id = -1);*/
-	Ref<SplitContainer> add_separator();
+	SplitContainer *add_separator();
 
 	/*void set_item_text(int p_idx, const String &p_text);
 	void set_item_icon(int p_idx, const Ref<Texture2D> &p_icon);

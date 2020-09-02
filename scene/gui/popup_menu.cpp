@@ -195,12 +195,12 @@ void PopupMenu::add_item(Control *p_item) {
 	item_container->add_child(p_item);
 }
 
-Ref<Control> PopupMenu::get_item(int p_id) {
+Control *PopupMenu::get_item(int p_id) {
 	return items.get(p_id);
 }
 
-Ref<Button> PopupMenu::get_button(int p_id) {
-	Ref<Button> button = get_item(p_id);
+Button *PopupMenu::get_button(int p_id) {
+	Button *button = get_item(p_id);
 	ERR_FAIL_COND_V_MSG(!button.is_valid(), button, String("Item at ") + Variant(p_id) + String(" is not a button"));
 	if (button.is_valid()) {
 		return button;
@@ -213,35 +213,38 @@ void PopupMenu::remove_item(int p_id) {
 	item_container->remove_child(item_container->get_child(p_id));
 }
 
-Ref<Button> PopupMenu::add_button(const String &p_label, const Ref<Texture2D> p_icon) {
+Button *PopupMenu::add_button(const String &p_label, Ref<ShortCut> p_shortcut, const Ref<Texture2D> p_icon) {
 	Button *button = memnew(Button);
 	button->set_text(p_label);
+	button->set_shortcut(p_shortcut);
 	button->set_icon(p_icon);
 	add_item(button);
-	return Ref<Button>(button);
+	return button;
 }
 
-Ref<CheckBox> PopupMenu::add_check_button(const String &p_label, const Ref<Texture2D> p_icon) {
+CheckBox *PopupMenu::add_check_button(const String &p_label, Ref<ShortCut> p_shortcut, const Ref<Texture2D> p_icon) {
 	CheckBox *button = memnew(CheckBox);
 	button->set_text(p_label);
+	button->set_shortcut(p_shortcut);
 	button->set_icon(p_icon);
 	add_item(button);
-	return Ref<CheckBox>(button);
+	return button;
 }
 
-Ref<CheckBox> PopupMenu::add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<Texture2D> p_icon) {
+CheckBox *PopupMenu::add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<ShortCut> p_shortcut, Ref<Texture2D> p_icon) {
 	CheckBox *button = memnew(CheckBox);
 	button->set_text(p_label);
 	button->set_button_group(p_group);
+	button->set_shortcut(p_shortcut);
 	button->set_icon(p_icon);
 	add_item(button);
-	return Ref<CheckBox>(button);
+	return button;
 }
 
-Ref<SplitContainer> PopupMenu::add_separator() {
+SplitContainer *PopupMenu::add_separator() {
 	SplitContainer *sep = memnew(VSplitContainer);
 	add_item(sep);
-	return Ref<SplitContainer>(sep);
+	return sep;
 }
 
 void PopupMenu::clear() {

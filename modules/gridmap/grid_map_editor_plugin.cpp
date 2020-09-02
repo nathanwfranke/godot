@@ -1094,23 +1094,23 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 
 	options->set_text(TTR("Grid Map"));
 	
-	Ref<CheckBox> snap_view = options->get_popup()->add_check_button(TTR("Snap View"));
+	CheckBox *snap_view = options->get_popup()->add_check_button(TTR("Snap View"));
 	snap_view->connect("toggled", callable_mp(this, &GridMapEditor::_menu_snap_view));
 	
 	options->get_popup()->add_separator();
 	
 	// TODO: Shortcut Q
-	Ref<Button> previous_level = options->get_popup()->add_button(TTR("Previous Plane"));
+	Button *previous_level = options->get_popup()->add_button(TTR("Previous Plane"));
 	previous_level->connect("pressed", callable_mp(this, &GridMapEditor::_menu_change_level), varray(-1));
 	
 	// TODO: Shortcut E
-	Ref<Button> next_level = options->get_popup()->add_button(TTR("Next Plane"));
+	Button *next_level = options->get_popup()->add_button(TTR("Next Plane"));
 	next_level->connect("pressed", callable_mp(this, &GridMapEditor::_menu_change_level), varray(1));
 	
 	options->get_popup()->add_separator();
 	
 	Ref<ButtonGroup> clip_group = Ref<ButtonGroup>(memnew(ButtonGroup));
-	Vector<Ref<Button>> clip_buttons;
+	Vector<Button *> clip_buttons;
 	clip_buttons.push_back(options->get_popup()->add_radio_button(TTR("Clip Disabled"), clip_group));
 	clip_buttons.push_back(options->get_popup()->add_radio_button(TTR("Clip Above"), clip_group));
 	clip_buttons.push_back(options->get_popup()->add_radio_button(TTR("Clip Below"), clip_group));
@@ -1125,7 +1125,7 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	
 	// TODO: Shortcuts Z, X, C
 	Ref<ButtonGroup> axis_group = Ref<ButtonGroup>(memnew(ButtonGroup));
-	Vector<Ref<Button>> axis_buttons;
+	Vector<Button *> axis_buttons;
 	axis_buttons.push_back(options->get_popup()->add_radio_button(TTR("Edit X Axis"), axis_group));
 	axis_buttons.push_back(options->get_popup()->add_radio_button(TTR("Edit Y Axis"), axis_group));
 	axis_buttons.push_back(options->get_popup()->add_radio_button(TTR("Edit Z Axis"), axis_group));
@@ -1150,7 +1150,7 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	options->get_popup()->add_button(TTR("Cursor Clear Rotation"));
 	
 	// TODO: Shortcuts A, S, D, SHIFT+A, SHIFT+S, SHIFT+D
-	Vector<Ref<Button>> cursor_rotate_buttons;
+	Vector<Button *> cursor_rotate_buttons;
 	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Rotate X")));
 	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Rotate Y")));
 	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Rotate Z")));
@@ -1158,12 +1158,12 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Back Rotate Y")));
 	cursor_rotate_buttons.push_back(options->get_popup()->add_button(TTR("Cursor Back Rotate Z")));
 	for (int i = 0; i < 6; ++i) {
-		Ref<Button> button = cursor_rotate_buttons.get(i);
+		Button *button = cursor_rotate_buttons.get(i);
 		button->connect("pressed", callable_mp(this, &GridMapEditor::_menu_cursor_rotate), varray(i));
 	}
 	
 	// TODO: Shortcut W
-	Ref<Button> cursor_clear_rotation = options->get_popup()->add_button(TTR("Cursor Clear Rotation"));
+	Button *cursor_clear_rotation = options->get_popup()->add_button(TTR("Cursor Clear Rotation"));
 	cursor_clear_rotation->connect("pressed", callable_mp(this, &GridMapEditor::_menu_clear_rotation));
 	
 	options->get_popup()->add_separator();
@@ -1183,7 +1183,7 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 
 	options->get_popup()->add_separator();
 
-	Ref<Button> settings_button = options->get_popup()->add_button(TTR("Settings..."));
+	Button *settings_button = options->get_popup()->add_button(TTR("Settings..."));
 	settings_button->connect("pressed", callable_mp(this, &GridMapEditor::_menu_open_settings));
 
 	settings_dialog = memnew(ConfirmationDialog);

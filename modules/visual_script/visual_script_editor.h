@@ -41,6 +41,7 @@
 class VisualScriptEditorSignalEdit;
 class VisualScriptEditorVariableEdit;
 
+#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 
 class VisualScriptEditor : public ScriptEditorBase {
@@ -268,7 +269,16 @@ class VisualScriptEditor : public ScriptEditorBase {
 	void _default_value_changed();
 	void _default_value_edited(Node *p_button, int p_id, int p_input_port);
 
-	void _menu_option(int p_what);
+	void _menu_delete_selected();
+	void _menu_toggle_breakpoint();
+	void _menu_find_node_type();
+	
+	void _menu_copy_nodes();
+	void _menu_cut_nodes();
+	void _menu_paste_nodes();
+	
+	void _menu_create_function();
+	void _menu_refresh_nodes();
 
 	void _graph_ofs_changed(const Vector2 &p_ofs);
 	void _comment_node_resized(const Vector2 &p_new_size, int p_node);
@@ -280,6 +290,9 @@ class VisualScriptEditor : public ScriptEditorBase {
 	void _button_resource_previewed(const String &p_path, const Ref<Texture2D> &p_preview, const Ref<Texture2D> &p_small_preview, Variant p_ud);
 
 	VisualScriptNode::TypeGuess _guess_output_type(int p_port_action_node, int p_port_action_output, Set<int> &p_visited_nodes);
+
+	void _member_edit();
+	void _member_delete();
 
 	void _member_rmb_selected(const Vector2 &p_pos);
 	void _member_option(int p_option);
