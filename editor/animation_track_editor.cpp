@@ -5063,74 +5063,77 @@ void AnimationTrackEditor::_anim_duplicate_keys(bool transpose) {
 	}
 }
 
+void AnimationTrackEditor::_edit_copy_tracks() {
+	track_copy_select->clear();
+	TreeItem *troot = track_copy_select->create_item();
+
+	for (int i = 0; i < animation->get_track_count(); i++) {
+		NodePath path = animation->track_get_path(i);
+		Node *node = nullptr;
+
+		if (root && root->has_node(path)) {
+			node = root->get_node(path);
+		}
+
+		String text;
+		Ref<Texture2D> icon = get_theme_icon("Node", "EditorIcons");
+		if (node) {
+			if (has_theme_icon(node->get_class(), "EditorIcons")) {
+				icon = get_theme_icon(node->get_class(), "EditorIcons");
+			}
+
+			text = node->get_name();
+			Vector<StringName> sn = path.get_subnames();
+			for (int j = 0; j < sn.size(); j++) {
+				text += ".";
+				text += sn[j];
+			}
+
+			path = NodePath(node->get_path().get_names(), path.get_subnames(), true); //store full path instead for copying
+		} else {
+			text = path;
+			int sep = text.find(":");
+			if (sep != -1) {
+				text = text.substr(sep + 1, text.length());
+			}
+		}
+
+		switch (animation->track_get_type(i)) {
+			case Animation::TYPE_TRANSFORM:
+				text += " (Transform)";
+				break;
+			case Animation::TYPE_METHOD:
+				text += " (Methods)";
+				break;
+			case Animation::TYPE_BEZIER:
+				text += " (Bezier)";
+				break;
+			case Animation::TYPE_AUDIO:
+				text += " (Audio)";
+				break;
+			default: {
+			};
+		}
+
+		TreeItem *it = track_copy_select->create_item(troot);
+		it->set_editable(0, true);
+		it->set_selectable(0, true);
+		it->set_cell_mode(0, TreeItem::CELL_MODE_CHECK);
+		it->set_icon(0, icon);
+		it->set_text(0, text);
+		Dictionary md;
+		md["track_idx"] = i;
+		md["path"] = path;
+		it->set_metadata(0, md);
+	}
+
+	track_copy_dialog->popup_centered(Size2(350, 500) * EDSCALE);
+}
+
 void AnimationTrackEditor::_edit_menu_pressed(int p_option) {
 	last_menu_track_opt = p_option;
 	switch (p_option) {
 		case EDIT_COPY_TRACKS: {
-			track_copy_select->clear();
-			TreeItem *troot = track_copy_select->create_item();
-
-			for (int i = 0; i < animation->get_track_count(); i++) {
-				NodePath path = animation->track_get_path(i);
-				Node *node = nullptr;
-
-				if (root && root->has_node(path)) {
-					node = root->get_node(path);
-				}
-
-				String text;
-				Ref<Texture2D> icon = get_theme_icon("Node", "EditorIcons");
-				if (node) {
-					if (has_theme_icon(node->get_class(), "EditorIcons")) {
-						icon = get_theme_icon(node->get_class(), "EditorIcons");
-					}
-
-					text = node->get_name();
-					Vector<StringName> sn = path.get_subnames();
-					for (int j = 0; j < sn.size(); j++) {
-						text += ".";
-						text += sn[j];
-					}
-
-					path = NodePath(node->get_path().get_names(), path.get_subnames(), true); //store full path instead for copying
-				} else {
-					text = path;
-					int sep = text.find(":");
-					if (sep != -1) {
-						text = text.substr(sep + 1, text.length());
-					}
-				}
-
-				switch (animation->track_get_type(i)) {
-					case Animation::TYPE_TRANSFORM:
-						text += " (Transform)";
-						break;
-					case Animation::TYPE_METHOD:
-						text += " (Methods)";
-						break;
-					case Animation::TYPE_BEZIER:
-						text += " (Bezier)";
-						break;
-					case Animation::TYPE_AUDIO:
-						text += " (Audio)";
-						break;
-					default: {
-					};
-				}
-
-				TreeItem *it = track_copy_select->create_item(troot);
-				it->set_editable(0, true);
-				it->set_selectable(0, true);
-				it->set_cell_mode(0, TreeItem::CELL_MODE_CHECK);
-				it->set_icon(0, icon);
-				it->set_text(0, text);
-				Dictionary md;
-				md["track_idx"] = i;
-				md["path"] = path;
-				it->set_metadata(0, md);
-			}
-
-			track_copy_dialog->popup_centered(Size2(350, 500) * EDSCALE);
 		} break;
 		case EDIT_COPY_TRACKS_CONFIRM: {
 			track_clipboard.clear();
@@ -5700,11 +5703,11 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	edit->set_flat(false);
 	edit->set_disabled(true);
 	edit->set_tooltip(TTR("Animation properties."));
-	edit->get_popup()->add_button(TTR("Copy Tracks"));
-	edit->get_popup()->add_button(TTR("Paste Tracks"));
+	edit->get_popup()->add_button(TTR("Copy Tracks"))->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_copy_tracks));
+	edit->get_popup()->add_button(TTR("Paste Tracks"), EDIT_PASTE_TRACKS);
 	edit->get_popup()->add_separator();
-	edit->get_popup()->add_button(TTR("Scale Selection"));
-	edit->get_popup()->add_button(TTR("Scale From Cursor"));
+	edit->get_popup()->add_button(TTR("Scale Selection"), EDIT_SCALE_SELECTION);
+	edit->get_popup()->add_button(TTR("Scale From Cursor"), EDIT_SCALE_FROM_CURSOR);
 	edit->get_popup()->add_separator();
 	edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/duplicate_selection", TTR("Duplicate Selection"), KEY_MASK_CMD | KEY_D), EDIT_DUPLICATE_SELECTION);
 	edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/duplicate_selection_transposed", TTR("Duplicate Transposed"), KEY_MASK_SHIFT | KEY_MASK_CMD | KEY_D), EDIT_DUPLICATE_TRANSPOSED);

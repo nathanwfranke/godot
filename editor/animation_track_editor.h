@@ -274,7 +274,7 @@ public:
 class AnimationTrackEditor : public VBoxContainer {
 	GDCLASS(AnimationTrackEditor, VBoxContainer);
 
-	/*enum {
+	enum {
 		EDIT_COPY_TRACKS,
 		EDIT_COPY_TRACKS_CONFIRM,
 		EDIT_PASTE_TRACKS,
@@ -290,7 +290,7 @@ class AnimationTrackEditor : public VBoxContainer {
 		EDIT_OPTIMIZE_ANIMATION_CONFIRM,
 		EDIT_CLEAN_UP_ANIMATION,
 		EDIT_CLEAN_UP_ANIMATION_CONFIRM
-	};*/
+	};
 
 	Ref<Animation> animation;
 	Node *root;
@@ -448,6 +448,7 @@ class AnimationTrackEditor : public VBoxContainer {
 
 	void _select_all_tracks_for_copy();
 
+	void _edit_copy_tracks();
 	void _edit_menu_pressed(int p_option);
 	int last_menu_track_opt;
 

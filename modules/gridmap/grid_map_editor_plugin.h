@@ -81,7 +81,6 @@ class GridMapEditor : public VBoxContainer {
 	ConfirmationDialog *settings_dialog;
 	VBoxContainer *settings_vbc;
 	SpinBox *settings_pick_distance;
-	Label *spin_box_label;
 
 	struct SetItem {
 		Vector3i position;
@@ -199,7 +198,30 @@ class GridMapEditor : public VBoxContainer {
 	void update_grid(); // Change which and where the grid is displayed
 	void _draw_grids(const Vector3 &cell_size);
 	void _configure();
-	void _menu_option(int);
+	
+	void _menu_change_level(int p_delta);
+	void _menu_snap_view(bool p_pressed);
+	void _menu_change_clip(ClipMode p_clip_mode);
+	void _menu_change_axis(Vector3::Axis p_axis);
+	
+	void _menu_cursor_rotate(int p_rotation_type);
+	void _menu_clear_rotation();
+	
+	Ref<CheckBox> selection_paste_selects;
+	
+	Ref<Button> selection_duplicate;
+	Ref<Button> selection_cut;
+	Ref<Button> selection_clear;
+	Ref<Button> selection_fill;
+	
+	void _menu_selection_paste();
+	void _menu_selection_duplicate();
+	void _menu_selection_cut();
+	void _menu_selection_clear();
+	void _menu_selection_fill();
+	
+	void _menu_open_settings();
+	
 	void update_palette();
 	void _set_display_mode(int p_mode);
 	void _item_selected_cbk(int idx);

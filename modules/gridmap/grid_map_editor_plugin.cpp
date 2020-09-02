@@ -52,206 +52,116 @@ void GridMapEditor::_configure() {
 	update_grid();
 }
 
-void GridMapEditor::_menu_option(int p_option) {
-	switch (p_option) {
-		case MENU_OPTION_PREV_LEVEL: {
-			floor->set_value(floor->get_value() - 1);
+void GridMapEditor::_menu_change_level(int p_delta) {
+	floor->set_value(floor->get_value() + p_delta);
+}
+
+void GridMapEditor::_menu_snap_view(bool p_checked) {
+	lock_view = p_checked;
+}
+
+void GridMapEditor::_menu_change_clip(ClipMode p_clip_mode) {
+	clip_mode = p_clip_mode;
+	_update_clip();
+}
+
+void GridMapEditor::_menu_change_axis(Vector3::Axis p_axis) {
+	edit_axis = p_axis;
+	update_grid();
+	_update_clip();
+}
+
+// p_rotation_type = [ X, Y, Z, BACK_X, BACK_Y, BACK_Z ]
+void GridMapEditor::_menu_cursor_rotate(int p_rotation_type) {
+	Vector3 rotate_axis;
+
+	switch (p_rotation_type % 3) {
+		case 0: {
+			rotate_axis = Vector3(1, 0, 0);
 		} break;
-
-		case MENU_OPTION_NEXT_LEVEL: {
-			floor->set_value(floor->get_value() + 1);
+		case 1: {
+			rotate_axis = Vector3(0, 1, 0);
 		} break;
-
-		case MENU_OPTION_LOCK_VIEW: {
-			int index = options->get_popup()->get_item_index(MENU_OPTION_LOCK_VIEW);
-			lock_view = !options->get_popup()->is_item_checked(index);
-
-			options->get_popup()->set_item_checked(index, lock_view);
-		} break;
-		case MENU_OPTION_CLIP_DISABLED:
-		case MENU_OPTION_CLIP_ABOVE:
-		case MENU_OPTION_CLIP_BELOW: {
-			clip_mode = ClipMode(p_option - MENU_OPTION_CLIP_DISABLED);
-			for (int i = 0; i < 3; i++) {
-				int index = options->get_popup()->get_item_index(MENU_OPTION_CLIP_DISABLED + i);
-				options->get_popup()->set_item_checked(index, i == clip_mode);
-			}
-
-			_update_clip();
-		} break;
-		case MENU_OPTION_X_AXIS:
-		case MENU_OPTION_Y_AXIS:
-		case MENU_OPTION_Z_AXIS: {
-			int new_axis = p_option - MENU_OPTION_X_AXIS;
-			for (int i = 0; i < 3; i++) {
-				int idx = options->get_popup()->get_item_index(MENU_OPTION_X_AXIS + i);
-				options->get_popup()->set_item_checked(idx, i == new_axis);
-			}
-
-			if (edit_axis != new_axis) {
-				int item1 = options->get_popup()->get_item_index(MENU_OPTION_NEXT_LEVEL);
-				int item2 = options->get_popup()->get_item_index(MENU_OPTION_PREV_LEVEL);
-				if (edit_axis == Vector3::AXIS_Y) {
-					options->get_popup()->set_item_text(item1, TTR("Next Plane"));
-					options->get_popup()->set_item_text(item2, TTR("Previous Plane"));
-					spin_box_label->set_text(TTR("Plane:"));
-				} else if (new_axis == Vector3::AXIS_Y) {
-					options->get_popup()->set_item_text(item1, TTR("Next Floor"));
-					options->get_popup()->set_item_text(item2, TTR("Previous Floor"));
-					spin_box_label->set_text(TTR("Floor:"));
-				}
-			}
-			edit_axis = Vector3::Axis(new_axis);
-			update_grid();
-			_update_clip();
-
-		} break;
-		case MENU_OPTION_CURSOR_ROTATE_Y: {
-			Basis r;
-			if (input_action == INPUT_PASTE) {
-				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 1, 0), -Math_PI / 2.0);
-				paste_indicator.orientation = r.get_orthogonal_index();
-				_update_paste_indicator();
-				break;
-			}
-
-			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 1, 0), -Math_PI / 2.0);
-			cursor_rot = r.get_orthogonal_index();
-			_update_cursor_transform();
-		} break;
-		case MENU_OPTION_CURSOR_ROTATE_X: {
-			Basis r;
-			if (input_action == INPUT_PASTE) {
-				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(1, 0, 0), -Math_PI / 2.0);
-				paste_indicator.orientation = r.get_orthogonal_index();
-				_update_paste_indicator();
-				break;
-			}
-
-			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(1, 0, 0), -Math_PI / 2.0);
-			cursor_rot = r.get_orthogonal_index();
-			_update_cursor_transform();
-		} break;
-		case MENU_OPTION_CURSOR_ROTATE_Z: {
-			Basis r;
-			if (input_action == INPUT_PASTE) {
-				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 0, 1), -Math_PI / 2.0);
-				paste_indicator.orientation = r.get_orthogonal_index();
-				_update_paste_indicator();
-				break;
-			}
-
-			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 0, 1), -Math_PI / 2.0);
-			cursor_rot = r.get_orthogonal_index();
-			_update_cursor_transform();
-		} break;
-		case MENU_OPTION_CURSOR_BACK_ROTATE_Y: {
-			Basis r;
-			if (input_action == INPUT_PASTE) {
-				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 1, 0), Math_PI / 2.0);
-				paste_indicator.orientation = r.get_orthogonal_index();
-				_update_paste_indicator();
-				break;
-			}
-
-			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 1, 0), Math_PI / 2.0);
-			cursor_rot = r.get_orthogonal_index();
-			_update_cursor_transform();
-		} break;
-		case MENU_OPTION_CURSOR_BACK_ROTATE_X: {
-			Basis r;
-			if (input_action == INPUT_PASTE) {
-				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(1, 0, 0), Math_PI / 2.0);
-				paste_indicator.orientation = r.get_orthogonal_index();
-				_update_paste_indicator();
-				break;
-			}
-
-			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(1, 0, 0), Math_PI / 2.0);
-			cursor_rot = r.get_orthogonal_index();
-			_update_cursor_transform();
-		} break;
-		case MENU_OPTION_CURSOR_BACK_ROTATE_Z: {
-			Basis r;
-			if (input_action == INPUT_PASTE) {
-				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 0, 1), Math_PI / 2.0);
-				paste_indicator.orientation = r.get_orthogonal_index();
-				_update_paste_indicator();
-				break;
-			}
-
-			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 0, 1), Math_PI / 2.0);
-			cursor_rot = r.get_orthogonal_index();
-			_update_cursor_transform();
-		} break;
-		case MENU_OPTION_CURSOR_CLEAR_ROTATION: {
-			if (input_action == INPUT_PASTE) {
-				paste_indicator.orientation = 0;
-				_update_paste_indicator();
-				break;
-			}
-
-			cursor_rot = 0;
-			_update_cursor_transform();
-		} break;
-
-		case MENU_OPTION_PASTE_SELECTS: {
-			int idx = options->get_popup()->get_item_index(MENU_OPTION_PASTE_SELECTS);
-			options->get_popup()->set_item_checked(idx, !options->get_popup()->is_item_checked(idx));
-		} break;
-
-		case MENU_OPTION_SELECTION_DUPLICATE:
-		case MENU_OPTION_SELECTION_CUT: {
-			if (!(selection.active && input_action == INPUT_NONE)) {
-				break;
-			}
-
-			_set_clipboard_data();
-
-			if (p_option == MENU_OPTION_SELECTION_CUT) {
-				_delete_selection();
-			}
-
-			input_action = INPUT_PASTE;
-			paste_indicator.click = selection.begin;
-			paste_indicator.current = selection.begin;
-			paste_indicator.begin = selection.begin;
-			paste_indicator.end = selection.end;
-			paste_indicator.orientation = 0;
-			_update_paste_indicator();
-		} break;
-		case MENU_OPTION_SELECTION_CLEAR: {
-			if (!selection.active) {
-				break;
-			}
-
-			_delete_selection();
-
-		} break;
-		case MENU_OPTION_SELECTION_FILL: {
-			if (!selection.active) {
-				return;
-			}
-
-			_fill_selection();
-
-		} break;
-		case MENU_OPTION_GRIDMAP_SETTINGS: {
-			settings_dialog->popup_centered(settings_vbc->get_combined_minimum_size() + Size2(50, 50) * EDSCALE);
+		case 2: {
+			rotate_axis = Vector3(0, 0, 1);
 		} break;
 	}
+
+	float rotate_delta = Math_PI / 2.0 * ((p_rotation_type / 3) ? 1 : -1);
+
+	Basis r;
+	if (input_action == INPUT_PASTE) {
+		r.set_orthogonal_index(paste_indicator.orientation);
+		r.rotate(rotate_axis, rotate_delta);
+		paste_indicator.orientation = r.get_orthogonal_index();
+		_update_paste_indicator();
+		return;
+	}
+
+	r.set_orthogonal_index(cursor_rot);
+	r.rotate(rotate_axis, rotate_delta);
+	cursor_rot = r.get_orthogonal_index();
+	_update_cursor_transform();
+}
+
+void GridMapEditor::_menu_clear_rotation() {
+	if (input_action == INPUT_PASTE) {
+		paste_indicator.orientation = 0;
+		_update_paste_indicator();
+		return;
+	}
+
+	cursor_rot = 0;
+	_update_cursor_transform();
+}
+
+// TODO: Is this pointless?
+/*void GridMapEditor::_menu_paste_selects() {
+	int idx = options->get_popup()->get_item_index(MENU_OPTION_PASTE_SELECTS);
+	options->get_popup()->set_item_checked(idx, !options->get_popup()->is_item_checked(idx));
+}*/
+
+// TODO: Option for this?
+void GridMapEditor::_menu_selection_paste() {
+	input_action = INPUT_PASTE;
+	paste_indicator.click = selection.begin;
+	paste_indicator.current = selection.begin;
+	paste_indicator.begin = selection.begin;
+	paste_indicator.end = selection.end;
+	paste_indicator.orientation = 0;
+	_update_paste_indicator();
+}
+
+void GridMapEditor::_menu_selection_duplicate() {
+	if (selection.active && input_action == INPUT_NONE) {
+		_set_clipboard_data();
+		_menu_selection_paste();
+	}
+}
+
+void GridMapEditor::_menu_selection_cut() {
+	if (selection.active && input_action == INPUT_NONE) {
+		_set_clipboard_data();
+		_menu_selection_clear();
+		_menu_selection_paste();
+	}
+	
+}
+
+void GridMapEditor::_menu_selection_clear() {
+	if (selection.active) {
+		_delete_selection();
+	}
+}
+
+void GridMapEditor::_menu_selection_fill() {
+	if (selection.active) {
+		_fill_selection();
+	}
+}
+
+void GridMapEditor::_menu_open_settings() {
+	settings_dialog->popup_centered(settings_vbc->get_combined_minimum_size() + Size2(50, 50) * EDSCALE);
 }
 
 void GridMapEditor::_update_cursor_transform() {
@@ -337,10 +247,10 @@ void GridMapEditor::_set_selection(bool p_active, const Vector3 &p_begin, const 
 		_update_selection_transform();
 	}
 
-	options->get_popup()->set_item_disabled(options->get_popup()->get_item_index(MENU_OPTION_SELECTION_CLEAR), !selection.active);
-	options->get_popup()->set_item_disabled(options->get_popup()->get_item_index(MENU_OPTION_SELECTION_CUT), !selection.active);
-	options->get_popup()->set_item_disabled(options->get_popup()->get_item_index(MENU_OPTION_SELECTION_DUPLICATE), !selection.active);
-	options->get_popup()->set_item_disabled(options->get_popup()->get_item_index(MENU_OPTION_SELECTION_FILL), !selection.active);
+	selection_duplicate->set_disabled(!selection.active);
+	selection_cut->set_disabled(!selection.active);
+	selection_clear->set_disabled(!selection.active);
+	selection_fill->set_disabled(!selection.active);
 }
 
 bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, bool p_click) {
@@ -1161,8 +1071,8 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	spatial_editor_hb->set_alignment(BoxContainer::ALIGN_END);
 	Node3DEditor::get_singleton()->add_control_to_menu_panel(spatial_editor_hb);
 
-	spin_box_label = memnew(Label);
-	spin_box_label->set_text(TTR("Floor:"));
+	Label *spin_box_label = memnew(Label);
+	spin_box_label->set_text(TTR("Plane:"));
 	spatial_editor_hb->add_child(spin_box_label);
 
 	floor = memnew(SpinBox);
@@ -1183,21 +1093,60 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	spatial_editor_hb->hide();
 
 	options->set_text(TTR("Grid Map"));
-	options->get_popup()->add_check_item(TTR("Snap View"), MENU_OPTION_LOCK_VIEW);
+	
+	Ref<CheckBox> snap_view = options->get_popup()->add_check_button(TTR("Snap View"));
+	snap_view->connect("toggled", callable_mp(this, &GridMapEditor::_menu_snap_view));
+	
 	options->get_popup()->add_separator();
-	options->get_popup()->add_item(TTR("Previous Floor"), MENU_OPTION_PREV_LEVEL, KEY_Q);
-	options->get_popup()->add_item(TTR("Next Floor"), MENU_OPTION_NEXT_LEVEL, KEY_E);
+	
+	// TODO: Shortcut Q
+	Ref<Button> previous_level = options->get_popup()->add_button(TTR("Previous Plane"));
+	previous_level->connect("pressed", callable_mp(this, &GridMapEditor::_menu_change_level), varray(-1));
+	
+	// TODO: Shortcut E
+	Ref<Button> next_level = options->get_popup()->add_button(TTR("Next Plane"));
+	next_level->connect("pressed", callable_mp(this, &GridMapEditor::_menu_change_level), varray(1));
+	
 	options->get_popup()->add_separator();
-	options->get_popup()->add_radio_check_item(TTR("Clip Disabled"), MENU_OPTION_CLIP_DISABLED);
-	options->get_popup()->set_item_checked(options->get_popup()->get_item_index(MENU_OPTION_CLIP_DISABLED), true);
-	options->get_popup()->add_radio_check_item(TTR("Clip Above"), MENU_OPTION_CLIP_ABOVE);
-	options->get_popup()->add_radio_check_item(TTR("Clip Below"), MENU_OPTION_CLIP_BELOW);
+	
+	Ref<ButtonGroup> clip_group = Ref<ButtonGroup>(memnew(ButtonGroup));
+	Vector<Ref<Button>> clip_buttons;
+	clip_buttons.push_back(options->get_popup()->add_radio_button(TTR("Clip Disabled"), clip_group));
+	clip_buttons.push_back(options->get_popup()->add_radio_button(TTR("Clip Above"), clip_group));
+	clip_buttons.push_back(options->get_popup()->add_radio_button(TTR("Clip Below"), clip_group));
+	for (int i = 0; i < 3; ++i) {
+		clip_buttons.get(i)->connect("pressed", callable_mp(this, &GridMapEditor::_menu_change_clip), varray(i));
+	}
+	clip_buttons.get(0)->set_pressed(true);
+	
 	options->get_popup()->add_separator();
-	options->get_popup()->add_radio_check_item(TTR("Edit X Axis"), MENU_OPTION_X_AXIS, KEY_Z);
-	options->get_popup()->add_radio_check_item(TTR("Edit Y Axis"), MENU_OPTION_Y_AXIS, KEY_X);
-	options->get_popup()->add_radio_check_item(TTR("Edit Z Axis"), MENU_OPTION_Z_AXIS, KEY_C);
-	options->get_popup()->set_item_checked(options->get_popup()->get_item_index(MENU_OPTION_Y_AXIS), true);
+	
+	// TODO: Shortcuts Z, X, C
+	Ref<ButtonGroup> axis_group = Ref<ButtonGroup>(memnew(ButtonGroup));
+	Vector<Ref<Button>> axis_buttons;
+	axis_buttons.push_back(options->get_popup()->add_radio_button(TTR("Edit X Axis"), axis_group));
+	axis_buttons.push_back(options->get_popup()->add_radio_button(TTR("Edit Y Axis"), axis_group));
+	axis_buttons.push_back(options->get_popup()->add_radio_button(TTR("Edit Z Axis"), axis_group));
+	for (int i = 0; i < 3; ++i) {
+		clip_buttons.get(i)->connect("pressed", callable_mp(this, &GridMapEditor::_menu_change_axis), varray(Vector3::Axis(i)));
+	}
+	axis_buttons.get(1)->set_pressed(true);
+	
 	options->get_popup()->add_separator();
+	
+	// TODO: Shortcuts A, S, D
+	options->get_popup()->add_button(TTR("Cursor Rotate X"));
+	options->get_popup()->add_button(TTR("Cursor Rotate Y"));
+	options->get_popup()->add_button(TTR("Cursor Rotate Z"));
+	
+	// TODO: Shortcuts Shift+A, Shift+S, Shift+D
+	options->get_popup()->add_button(TTR("Cursor Back Rotate X"));
+	options->get_popup()->add_button(TTR("Cursor Back Rotate Y"));
+	options->get_popup()->add_button(TTR("Cursor Back Rotate Z"));
+	
+	// TODO: Shortcut W
+	options->get_popup()->add_button(TTR("Cursor Clear Rotation"));
+	
 	options->get_popup()->add_item(TTR("Cursor Rotate X"), MENU_OPTION_CURSOR_ROTATE_X, KEY_A);
 	options->get_popup()->add_item(TTR("Cursor Rotate Y"), MENU_OPTION_CURSOR_ROTATE_Y, KEY_S);
 	options->get_popup()->add_item(TTR("Cursor Rotate Z"), MENU_OPTION_CURSOR_ROTATE_Z, KEY_D);
@@ -1206,12 +1155,16 @@ GridMapEditor::GridMapEditor(EditorNode *p_editor) {
 	options->get_popup()->add_item(TTR("Cursor Back Rotate Z"), MENU_OPTION_CURSOR_BACK_ROTATE_Z, KEY_MASK_SHIFT + KEY_D);
 	options->get_popup()->add_item(TTR("Cursor Clear Rotation"), MENU_OPTION_CURSOR_CLEAR_ROTATION, KEY_W);
 	options->get_popup()->add_separator();
-	options->get_popup()->add_check_item(TTR("Paste Selects"), MENU_OPTION_PASTE_SELECTS);
-	options->get_popup()->add_separator();
-	options->get_popup()->add_item(TTR("Duplicate Selection"), MENU_OPTION_SELECTION_DUPLICATE, KEY_MASK_CTRL + KEY_C);
-	options->get_popup()->add_item(TTR("Cut Selection"), MENU_OPTION_SELECTION_CUT, KEY_MASK_CTRL + KEY_X);
-	options->get_popup()->add_item(TTR("Clear Selection"), MENU_OPTION_SELECTION_CLEAR, KEY_DELETE);
-	options->get_popup()->add_item(TTR("Fill Selection"), MENU_OPTION_SELECTION_FILL, KEY_MASK_CTRL + KEY_F);
+
+	selection_paste_selects = options->get_popup()->add_check_button(TTR("Paste Selects"));
+	// TODO: Shortcuts CTRL+C, CTRL+X, DELETE, CTRL+F
+	// TODO: CTRL+F -> CTRL+V?
+	selection_duplicate = options->get_popup()->add_button(TTR("Duplicate Selection"));
+	selection_duplicate->connect("pressed", callable_mp(this, &GridMapEditor::_menu_selection_duplicate));
+	selection_cut = options->get_popup()->add_button(TTR("Cut Selection"));
+	selection_cut->connect("pressed", callable_mp(this, &GridMapEditor::_menu_selection_duplicate));
+	selection_clear = options->get_popup()->add_button(TTR("Clear Selection"));
+	selection_fill = options->get_popup()->add_button(TTR("Fill Selection"));
 
 	options->get_popup()->add_separator();
 	options->get_popup()->add_item(TTR("Settings..."), MENU_OPTION_GRIDMAP_SETTINGS);
