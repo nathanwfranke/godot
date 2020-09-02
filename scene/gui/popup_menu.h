@@ -143,10 +143,7 @@ protected:
 
 public:
 	void add_item(Control *p_item);
-	Control *get_item(int p_id);
-	
-	Button *get_button(int p_id);
-	
+
 	Button *add_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
 	CheckBox *add_check_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
 	CheckBox *add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
@@ -200,13 +197,19 @@ public:
 	Ref<ShortCut> get_item_shortcut(int p_idx) const;
 	int get_item_state(int p_idx) const;*/
 
+	Control *get_item(const int &p_id);
+
+	Button *get_button(const int &p_id);
+	CheckBox *get_check_button(const int &p_id);
+	CheckBox *get_radio_button(const int &p_id);
+
 	int get_current_index() const;
 	int get_item_count() const;
 
 	bool activate_item_by_event(const Ref<InputEvent> &p_event, bool p_for_global_only = false);
 	void activate_item(int p_item);
 
-	void remove_item(int p_idx);
+	void remove_item(const int &p_id);
 
 	void clear();
 

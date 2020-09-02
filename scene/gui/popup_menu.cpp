@@ -195,24 +195,6 @@ void PopupMenu::add_item(Control *p_item) {
 	item_container->add_child(p_item);
 }
 
-Control *PopupMenu::get_item(int p_id) {
-	return items.get(p_id);
-}
-
-Button *PopupMenu::get_button(int p_id) {
-	Button *button = get_item(p_id);
-	ERR_FAIL_COND_V_MSG(!button.is_valid(), button, String("Item at ") + Variant(p_id) + String(" is not a button"));
-	if (button.is_valid()) {
-		return button;
-	}
-	return items.get(p_id);
-}
-
-void PopupMenu::remove_item(int p_id) {
-	items.remove(p_id);
-	item_container->remove_child(item_container->get_child(p_id));
-}
-
 Button *PopupMenu::add_button(const String &p_label, Ref<ShortCut> p_shortcut, const Ref<Texture2D> p_icon) {
 	Button *button = memnew(Button);
 	button->set_text(p_label);
@@ -245,6 +227,33 @@ SplitContainer *PopupMenu::add_separator() {
 	SplitContainer *sep = memnew(VSplitContainer);
 	add_item(sep);
 	return sep;
+}
+
+Control *PopupMenu::get_item(const int p_id) {
+	return items.get(p_id);
+}
+
+Button *PopupMenu::get_button(int p_id) {
+	Button *button = Object::cast_to<Button>(get_item(p_id));
+	ERR_FAIL_COND_V_MSG(!button, nullptr, "Item at " + Variant(p_id) + " is not a button");
+	return button;
+}
+
+CheckBox *PopupMenu::get_check_button(const int p_id) {
+	CheckBox *button = Object::cast_to<CheckBox>(get_item(p_id));
+	ERR_FAIL_COND_V_MSG(!button, nullptr, "Item at " + Variant(p_id) + " is not a check button");
+	return button;
+}
+
+CheckBox *PopupMenu::get_radio_button(const int p_id) {
+	CheckBox *button = Object::cast_to<CheckBox>(get_item(p_id));
+	ERR_FAIL_COND_V_MSG(!button, nullptr, "Item at " + Variant(p_id) + " is not a radio button");
+	return button;
+}
+
+void PopupMenu::remove_item(const int p_id) {
+	items.remove(p_id);
+	item_container->remove_child(item_container->get_child(p_id));
 }
 
 void PopupMenu::clear() {

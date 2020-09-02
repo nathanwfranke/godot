@@ -60,8 +60,8 @@ void GridMapEditor::_menu_snap_view(bool p_checked) {
 	lock_view = p_checked;
 }
 
-void GridMapEditor::_menu_change_clip(ClipMode p_clip_mode) {
-	clip_mode = p_clip_mode;
+void GridMapEditor::_menu_change_clip(int p_clip_mode) {
+	clip_mode = ClipMode(p_clip_mode);
 	_update_clip();
 }
 

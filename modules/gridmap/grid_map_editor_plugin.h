@@ -172,7 +172,7 @@ class GridMapEditor : public VBoxContainer {
 	
 	void _menu_change_level(int p_delta);
 	void _menu_snap_view(bool p_pressed);
-	void _menu_change_clip(ClipMode p_clip_mode);
+	void _menu_change_clip(int p_clip_mode);
 	void _menu_change_axis(Vector3::Axis p_axis);
 	
 	void _menu_cursor_rotate(int p_rotation_type);

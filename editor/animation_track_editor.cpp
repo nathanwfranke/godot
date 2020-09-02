@@ -5703,9 +5703,15 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	edit->set_flat(false);
 	edit->set_disabled(true);
 	edit->set_tooltip(TTR("Animation properties."));
-	edit->get_popup()->add_button(TTR("Copy Tracks"))->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_copy_tracks));
-	edit->get_popup()->add_button(TTR("Paste Tracks"), EDIT_PASTE_TRACKS);
+	
+	Button *copy_tracks = edit->get_popup()->add_button(TTR("Copy Tracks"));
+	copy_tracks->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_copy_tracks));
+	
+	Button *paste_tracks = edit->get_popup()->add_button(TTR("Paste Tracks"));
+	paste_tracks->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_paste_tracks));
+	
 	edit->get_popup()->add_separator();
+	
 	edit->get_popup()->add_button(TTR("Scale Selection"), EDIT_SCALE_SELECTION);
 	edit->get_popup()->add_button(TTR("Scale From Cursor"), EDIT_SCALE_FROM_CURSOR);
 	edit->get_popup()->add_separator();

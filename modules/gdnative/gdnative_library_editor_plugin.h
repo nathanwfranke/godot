@@ -31,6 +31,7 @@
 #ifndef GDNATIVE_LIBRARY_EDITOR_PLUGIN_H
 #define GDNATIVE_LIBRARY_EDITOR_PLUGIN_H
 
+#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 #include "editor/editor_node.h"
 #include "gdnative.h"
@@ -77,7 +78,6 @@ protected:
 	void _on_item_button(Object *item, int column, int id);
 	void _on_library_selected(const String &file);
 	void _on_dependencies_selected(const PackedStringArray &files);
-	void _on_filter_selected(int id);
 	void _on_item_collapsed(Object *p_item);
 	void _on_item_activated();
 	void _on_create_new_entry();

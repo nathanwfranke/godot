@@ -41,7 +41,6 @@
 class VisualScriptEditorSignalEdit;
 class VisualScriptEditorVariableEdit;
 
-#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 
 class VisualScriptEditor : public ScriptEditorBase {
@@ -65,7 +64,6 @@ class VisualScriptEditor : public ScriptEditorBase {
 	};
 
 	enum PortAction {
-
 		CREATE_CALL_SET_GET,
 		CREATE_ACTION,
 	};
@@ -73,7 +71,6 @@ class VisualScriptEditor : public ScriptEditorBase {
 	enum MemberAction {
 		MEMBER_EDIT,
 		MEMBER_REMOVE
-
 	};
 
 	enum MemberType {

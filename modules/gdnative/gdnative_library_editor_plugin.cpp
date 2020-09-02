@@ -28,6 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 #include "gdnative_library_editor_plugin.h"
 #include "gdnative.h"
@@ -61,10 +62,11 @@ void GDNativeLibraryEditor::_update_tree() {
 	PopupMenu *filter_list = filter->get_popup();
 	String text = "";
 	for (int i = 0; i < filter_list->get_item_count(); i++) {
-		if (!filter_list->is_item_checked(i)) {
+		Button *filter = filter_list->get_check_button(i);
+		if (!filter->is_pressed()) {
 			continue;
 		}
-		Map<String, NativePlatformConfig>::Element *E = platforms.find(filter_list->get_item_metadata(i));
+		Map<String, NativePlatformConfig>::Element *E = platforms.find(filter->get_meta("platform_key"));
 		if (!text.empty()) {
 			text += ", ";
 		}
@@ -165,12 +167,6 @@ void GDNativeLibraryEditor::_on_library_selected(const String &file) {
 
 void GDNativeLibraryEditor::_on_dependencies_selected(const PackedStringArray &files) {
 	_set_target_value(file_dialog->get_meta("section"), file_dialog->get_meta("target"), files);
-}
-
-void GDNativeLibraryEditor::_on_filter_selected(int index) {
-	PopupMenu *filter_list = filter->get_popup();
-	filter_list->set_item_checked(index, !filter_list->is_item_checked(index));
-	_update_tree();
 }
 
 void GDNativeLibraryEditor::_on_item_collapsed(Object *p_item) {
@@ -341,14 +337,12 @@ GDNativeLibraryEditor::GDNativeLibraryEditor() {
 	PopupMenu *filter_list = filter->get_popup();
 	filter_list->set_hide_on_checkable_item_selection(false);
 
-	int idx = 0;
 	for (Map<String, NativePlatformConfig>::Element *E = platforms.front(); E; E = E->next()) {
-		filter_list->add_check_item(E->get().name, idx);
-		filter_list->set_item_metadata(idx, E->key());
-		filter_list->set_item_checked(idx, true);
-		idx += 1;
+		CheckBox *filter = filter_list->add_check_button(E->get().name);
+		filter->set_meta("platform_key", E->key());
+		filter->set_pressed(true);
+		filter->connect("pressed", callable_mp(this, &GDNativeLibraryEditor::_update_tree));
 	}
-	filter_list->connect("index_pressed", callable_mp(this, &GDNativeLibraryEditor::_on_filter_selected));
 
 	tree = memnew(Tree);
 	container->add_child(tree);
