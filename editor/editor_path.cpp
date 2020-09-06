@@ -61,10 +61,6 @@ void EditorPath::_add_children_to_popup(Object *p_obj, int p_depth) {
 
 		Button *button = get_popup()->add_icon_button(E->get().name.capitalize(), icon);
 		button->connect("pressed", callable_mp(this, &EditorPath::_obj_pressed), varray(obj));
-		/*int index = get_popup()->get_item_count();
-		get_popup()->add_icon_item(icon, E->get().name.capitalize(), objects.size());
-		get_popup()->set_item_h_offset(index, p_depth * 10 * EDSCALE);
-		objects.push_back(obj->get_instance_id());*/
 
 		_add_children_to_popup(obj, p_depth + 1);
 	}

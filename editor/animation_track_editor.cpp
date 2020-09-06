@@ -2716,9 +2716,6 @@ void AnimationTrackEdit::_gui_input(const Ref<InputEvent> &p_event) {
 
 				Button *del = menu->add_icon_button(TTR("Delete Key(s)"), get_theme_icon("Remove", "EditorIcons"));
 				del->connect("pressed", callable_mp(this, &AnimationTrackEdit::_menu_key_delete));
-
-				/*menu->add_icon_item(get_theme_icon("Duplicate", "EditorIcons"), TTR("Duplicate Key(s)"), MENU_KEY_DUPLICATE);
-				menu->add_icon_item(get_theme_icon("Remove", "EditorIcons"), TTR("Delete Key(s)"), MENU_KEY_DELETE);*/
 			}
 			menu->set_as_minsize();
 
@@ -5706,14 +5703,6 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	Button *delete_selection = edit->get_popup()->add_button(TTR("Delete Selection"), ED_SHORTCUT("animation_editor/delete_selection", TTR("Delete Selection"), KEY_DELETE));
 	delete_selection->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_delete_selection));
 
-	/*edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/duplicate_selection_transposed", TTR("Duplicate Transposed"), KEY_MASK_SHIFT | KEY_MASK_CMD | KEY_D), EDIT_DUPLICATE_TRANSPOSED);
-	edit->get_popup()->set_item_shortcut_disabled(edit->get_popup()->get_item_index(EDIT_DUPLICATE_SELECTION), true);
-	edit->get_popup()->set_item_shortcut_disabled(edit->get_popup()->get_item_index(EDIT_DUPLICATE_TRANSPOSED), true);
-	edit->get_popup()->add_separator();
-	edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/delete_selection", TTR("Delete Selection"), KEY_DELETE), EDIT_DELETE_SELECTION);
-	edit->get_popup()->set_item_shortcut_disabled(edit->get_popup()->get_item_index(EDIT_DELETE_SELECTION), true);*/
-	//this shortcut will be checked from the track itself. so no need to enable it here (will conflict with scenetree dock)
-
 	edit->get_popup()->add_separator();
 
 	Button *prev_step = edit->get_popup()->add_button(TTR("Go to Previous Step"), ED_SHORTCUT("animation_editor/goto_prev_step", TTR("Go to Previous Step"), KEY_MASK_CMD | KEY_LEFT));
@@ -5721,20 +5710,12 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	Button *next_step = edit->get_popup()->add_button(TTR("Go to Next Step"), ED_SHORTCUT("animation_editor/goto_next_step", TTR("Go to Next Step"), KEY_MASK_CMD | KEY_RIGHT));
 	next_step->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_move_step), varray(1));
 
-	/*edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/goto_next_step", TTR("Go to Next Step"), KEY_MASK_CMD | KEY_RIGHT), EDIT_GOTO_NEXT_STEP);
-	edit->get_popup()->add_shortcut(ED_SHORTCUT("animation_editor/goto_prev_step", TTR("Go to Previous Step"), KEY_MASK_CMD | KEY_LEFT), EDIT_GOTO_PREV_STEP);*/
-
 	edit->get_popup()->add_separator();
 
 	Button *optimize = edit->get_popup()->add_button(TTR("Optimize Animation"));
 	optimize->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_optimize), varray(false));
 	Button *clean_up = edit->get_popup()->add_button(TTR("Clean-Up Animation"));
 	clean_up->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_clean_up), varray(false));
-
-	/*edit->get_popup()->add_button(TTR("Optimize Animation"), EDIT_OPTIMIZE_ANIMATION);
-	edit->get_popup()->add_button(TTR("Clean-Up Animation"), EDIT_CLEAN_UP_ANIMATION);*/
-
-	//edit->get_popup()->connect("id_pressed", callable_mp(this, &AnimationTrackEditor::_edit_menu_pressed));
 
 	pick_track = memnew(SceneTreeDialog);
 	add_child(pick_track);

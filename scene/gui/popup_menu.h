@@ -46,53 +46,6 @@
 class PopupMenu : public Popup {
 	GDCLASS(PopupMenu, Popup);
 
-	/*struct Item {
-		Ref<Texture2D> icon;
-		String text;
-		String xl_text;
-		bool checked;
-		enum {
-			CHECKABLE_TYPE_NONE,
-			CHECKABLE_TYPE_CHECK_BOX,
-			CHECKABLE_TYPE_RADIO_BUTTON,
-		} checkable_type;
-		int max_states;
-		int state;
-		bool separator;
-		bool disabled;
-		int id;
-		Variant metadata;
-		String submenu;
-		String tooltip;
-		uint32_t accel;
-		int _ofs_cache;
-		int _height_cache;
-		int h_ofs;
-		Ref<Shortcut> shortcut;
-		bool shortcut_is_global;
-		bool shortcut_is_disabled;
-
-		// Returns (0,0) if icon is null.
-		Size2 get_icon_size() const {
-			return icon.is_null() ? Size2() : icon->get_size();
-		}
-
-		Item() {
-			checked = false;
-			checkable_type = CHECKABLE_TYPE_NONE;
-			separator = false;
-			max_states = 0;
-			state = 0;
-			accel = 0;
-			disabled = false;
-			_ofs_cache = 0;
-			_height_cache = 0;
-			h_ofs = 0;
-			shortcut_is_global = false;
-			shortcut_is_disabled = false;
-		}
-	};*/
-
 	Timer *submenu_timer;
 	List<Rect2> autohide_areas;
 	Vector<Control *> items;
@@ -159,55 +112,7 @@ public:
 
 	Label *add_label(const String &p_label);
 
-	/*void add_check_item(const String &p_label, int p_id = -1, uint32_t p_accel = 0);
-	void add_icon_check_item(const Ref<Texture2D> &p_icon, const String &p_label, int p_id = -1, uint32_t p_accel = 0);
-	void add_radio_check_item(const String &p_label, int p_id = -1, uint32_t p_accel = 0);
-	void add_icon_radio_check_item(const Ref<Texture2D> &p_icon, const String &p_label, int p_id = -1, uint32_t p_accel = 0);
-
-	void add_multistate_item(const String &p_label, int p_max_states, int p_default_state = 0, int p_id = -1, uint32_t p_accel = 0);
-
-	void add_shortcut(const Ref<Shortcut> &p_shortcut, int p_id = -1, bool p_global = false);
-	void add_icon_shortcut(const Ref<Texture2D> &p_icon, const Ref<Shortcut> &p_shortcut, int p_id = -1, bool p_global = false);
-	void add_check_shortcut(const Ref<Shortcut> &p_shortcut, int p_id = -1, bool p_global = false);
-	void add_icon_check_shortcut(const Ref<Texture2D> &p_icon, const Ref<Shortcut> &p_shortcut, int p_id = -1, bool p_global = false);
-	void add_radio_check_shortcut(const Ref<Shortcut> &p_shortcut, int p_id = -1, bool p_global = false);
-	void add_icon_radio_check_shortcut(const Ref<Texture2D> &p_icon, const Ref<Shortcut> &p_shortcut, int p_id = -1, bool p_global = false);
-
-	void add_submenu_item(const String &p_label, const String &p_submenu, int p_id = -1);*/
 	SplitContainer *add_separator();
-
-	/*void set_item_text(int p_idx, const String &p_text);
-	void set_item_icon(int p_idx, const Ref<Texture2D> &p_icon);
-	void set_item_checked(int p_idx, bool p_checked);
-	void set_item_id(int p_idx, int p_id);
-	void set_item_accelerator(int p_idx, uint32_t p_accel);
-	void set_item_metadata(int p_idx, const Variant &p_meta);
-	void set_item_disabled(int p_idx, bool p_disabled);
-	void set_item_submenu(int p_idx, const String &p_submenu);
-	void set_item_as_separator(int p_idx, bool p_separator);
-	void set_item_as_checkable(int p_idx, bool p_checkable);
-	void set_item_as_radio_checkable(int p_idx, bool p_radio_checkable);
-	void set_item_tooltip(int p_idx, const String &p_tooltip);
-	void set_item_shortcut(int p_idx, const Ref<ShortCut> &p_shortcut);
-
-	void toggle_item_checked(int p_idx);
-
-	String get_item_text(int p_idx) const;
-	int get_item_idx_from_text(const String &text) const;
-	Ref<Texture2D> get_item_icon(int p_idx) const;
-	bool is_item_checked(int p_idx) const;
-	int get_item_id(int p_idx) const;
-	int get_item_index(int p_id) const;
-	uint32_t get_item_accelerator(int p_idx) const;
-	Variant get_item_metadata(int p_idx) const;
-	bool is_item_disabled(int p_idx) const;
-	String get_item_submenu(int p_idx) const;
-	bool is_item_separator(int p_idx);
-	bool is_item_checkable(int p_idx);
-	bool is_item_radio_checkable(int p_idx);
-	String get_item_tooltip(int p_idx);
-	Ref<ShortCut> get_item_shortcut(int p_idx) const;
-	int get_item_state(int p_idx) const;*/
 
 	Control *get_item(const int &p_id);
 
@@ -217,9 +122,6 @@ public:
 
 	int get_current_index() const;
 	int get_item_count() const;
-
-	//bool activate_item_by_event(const Ref<InputEvent> &p_event, bool p_for_global_only = false);
-	//void activate_item(int p_item);
 
 	void remove_item(const int &p_id);
 

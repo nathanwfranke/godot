@@ -195,8 +195,6 @@ class ConnectionsDock : public VBoxContainer {
 	void _menu_slot_go_to_method();
 	void _menu_slot_disconnect();
 
-	void _handle_signal_menu_option(int option);
-	void _handle_slot_menu_option(int option);
 	void _rmb_pressed(Vector2 position);
 	void _close();
 

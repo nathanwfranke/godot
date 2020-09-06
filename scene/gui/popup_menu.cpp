@@ -124,70 +124,6 @@ int PopupMenu::get_item_count() const {
 	return items.size();
 }
 
-/*bool PopupMenu::activate_item_by_event(const Ref<InputEvent> &p_event, bool p_for_global_only) {
-	uint32_t code = 0;
-	Ref<InputEventKey> k = p_event;
-
-	if (k.is_valid()) {
-		code = k->get_keycode();
-		if (code == 0) {
-			code = k->get_unicode();
-		}
-		if (k->get_control()) {
-			code |= KEY_MASK_CTRL;
-		}
-		if (k->get_alt()) {
-			code |= KEY_MASK_ALT;
-		}
-		if (k->get_metakey()) {
-			code |= KEY_MASK_META;
-		}
-		if (k->get_shift()) {
-			code |= KEY_MASK_SHIFT;
-		}
-	}
-
-	for (int i = 0; i < items.size(); i++) {
-		Ref<Button> item(items.get(i));
-		
-		if (item->is_disabled()) {
-			continue;
-		}
-
-		if (item->get_shortcut().is_valid() && item->get_shortcut()->is_shortcut(p_event)) {
-			//activate_item(i);
-			item->set_pressed(true);
-			return true;
-		}
-
-		/*if (code != 0 && items[i].accel == code) {
-			activate_item(i);
-			return true;
-		}*/
-
-		/*if (items[i].submenu != "") {
-			Node *n = get_node(items[i].submenu);
-			if (!n) {
-				continue;
-			}
-
-			PopupMenu *pm = Object::cast_to<PopupMenu>(n);
-			if (!pm) {
-				continue;
-			}
-
-			if (pm->activate_item_by_event(p_event, p_for_global_only)) {
-				return true;
-			}
-		}* /
-	}
-	return false;
-}*/
-
-/*void PopupMenu::activate_item(int p_item) {
-	get_item(p_item)->grab_focus();
-}*/
-
 void PopupMenu::_select_item(Control *p_item) {
 	int index = _get_items().find(p_item);
 	emit_signal("selected", index);
@@ -341,25 +277,9 @@ bool PopupMenu::get_allow_search() const {
 	return allow_search;
 }
 
-/*String PopupMenu::get_tooltip(const Point2 &p_pos) const {
-	int over = _get_mouse_over(p_pos);
-	if (over < 0 || over >= items.size()) {
-		return "";
-	}
-	return nget_item(over).tooltip;
-}*/
-
 void PopupMenu::set_parent_rect(const Rect2 &p_rect) {
 	parent_rect = p_rect;
 }
-
-/*void PopupMenu::get_translatable_strings(List<String> *p_strings) const {
-	for (int i = 0; i < items.size(); i++) {
-		if (items[i].xl_text != "") {
-			p_strings->push_back(items[i].xl_text);
-		}
-	}
-}*/
 
 void PopupMenu::add_autohide_area(const Rect2 &p_area) {
 	autohide_areas.push_back(p_area);

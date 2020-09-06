@@ -102,7 +102,6 @@ class EditorPropertyArray : public EditorProperty {
 	void _edit_pressed();
 	void _property_changed(const String &p_property, Variant p_value, const String &p_name = "", bool p_changing = false);
 	void _change_type(Object *p_button, int p_index);
-	//void _change_type_menu(int p_index);
 
 	void _menu_change_type(Variant::Type p_type);
 	void _menu_remove();
@@ -145,7 +144,6 @@ class EditorPropertyDictionary : public EditorProperty {
 	void _edit_pressed();
 	void _property_changed(const String &p_property, Variant p_value, const String &p_name = "", bool p_changing = false);
 	void _change_type(Object *p_button, int p_index);
-	//void _change_type_menu(int p_index);
 
 	void _menu_change_type(Variant::Type p_type);
 	void _menu_remove();

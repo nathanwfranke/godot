@@ -820,47 +820,6 @@ void ConnectionsDock::_menu_slot_disconnect() {
 	update_tree();
 }
 
-/*void ConnectionsDock::_handle_signal_menu_option(int option) {
-	TreeItem *item = tree->get_selected();
-
-	if (!item) {
-		return;
-	}
-
-	switch (option) {
-		case CONNECT: {
-			_open_connection_dialog(*item);
-		} break;
-		case DISCONNECT_ALL: {
-			StringName signal_name = item->get_metadata(0).operator Dictionary()["name"];
-			disconnect_all_dialog->set_text(vformat(TTR("Are you sure you want to remove all connections from the \"%s\" signal?"), signal_name));
-			disconnect_all_dialog->popup_centered();
-		} break;
-	}
-}
-
-void ConnectionsDock::_handle_slot_menu_option(int option) {
-	TreeItem *item = tree->get_selected();
-
-	if (!item) {
-		return;
-	}
-
-	switch (option) {
-		case EDIT: {
-			Connection c = item->get_metadata(0);
-			_open_connection_dialog(c);
-		} break;
-		case GO_TO_SCRIPT: {
-			_go_to_script(*item);
-		} break;
-		case DISCONNECT: {
-			_disconnect(*item);
-			update_tree();
-		} break;
-	}
-}*/
-
 void ConnectionsDock::_rmb_pressed(Vector2 position) {
 	TreeItem *item = tree->get_selected();
 
@@ -1143,16 +1102,12 @@ ConnectionsDock::ConnectionsDock(EditorNode *p_editor) {
 
 	signal_menu = memnew(PopupMenu);
 	add_child(signal_menu);
-	//signal_menu->connect("id_pressed", callable_mp(this, &ConnectionsDock::_handle_signal_menu_option));
 	{
 		Button *connect = signal_menu->add_button(TTR("Connect..."));
 		connect->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_signal_connect));
 		Button *disconnect_all = signal_menu->add_button(TTR("Disconnect All"));
 		disconnect_all->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_signal_disconnect_all));
 	}
-
-	/*signal_menu->add_item(TTR("Connect..."), CONNECT);
-	signal_menu->add_item(TTR("Disconnect All"), DISCONNECT_ALL);*/
 
 	slot_menu = memnew(PopupMenu);
 	add_child(slot_menu);
@@ -1164,10 +1119,6 @@ ConnectionsDock::ConnectionsDock(EditorNode *p_editor) {
 		Button *disconnect = slot_menu->add_button(TTR("Disconnect"));
 		disconnect->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_slot_disconnect));
 	}
-	/*slot_menu->connect("id_pressed", callable_mp(this, &ConnectionsDock::_handle_slot_menu_option));
-	slot_menu->add_item(TTR("Edit..."), EDIT);
-	slot_menu->add_item(TTR("Go To Method"), GO_TO_SCRIPT);
-	slot_menu->add_item(TTR("Disconnect"), DISCONNECT);*/
 
 	connect_dialog->connect("connected", callable_mp(this, &ConnectionsDock::_make_or_edit_connection));
 	tree->connect("item_selected", callable_mp(this, &ConnectionsDock::_tree_item_selected));

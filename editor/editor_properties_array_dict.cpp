@@ -199,28 +199,6 @@ void EditorPropertyArray::_menu_remove() {
 	_remove_pressed(changing_type_idx);
 }
 
-/*void EditorPropertyArray::_change_type_menu(int p_index) {
-	if (p_index == Variant::VARIANT_MAX) {
-		_remove_pressed(changing_type_idx);
-		return;
-	}
-
-	Variant value;
-	Callable::CallError ce;
-	value = Variant::construct(Variant::Type(p_index), nullptr, 0, ce);
-	Variant array = object->get_array();
-	array.set(changing_type_idx, value);
-
-	emit_changed(get_edited_property(), array, "", true);
-
-	if (array.get_type() == Variant::ARRAY) {
-		array = array.call("duplicate"); //dupe, so undo/redo works better
-	}
-
-	object->set_array(array);
-	update_property();
-}*/
-
 void EditorPropertyArray::_object_id_selected(const StringName &p_property, ObjectID p_id) {
 	emit_signal("object_id_selected", p_property, p_id);
 }
@@ -608,7 +586,6 @@ EditorPropertyArray::EditorPropertyArray() {
 	updating = false;
 	change_type = memnew(PopupMenu);
 	add_child(change_type);
-	//change_type->connect("id_pressed", callable_mp(this, &EditorPropertyArray::_change_type_menu));
 
 	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
 		String type = Variant::get_type_name(Variant::Type(i));
@@ -711,40 +688,6 @@ void EditorPropertyDictionary::_menu_remove() {
 	Variant key = dict.get_key_at_index(changing_type_idx);
 	dict.erase(key);
 }
-
-/*void EditorPropertyDictionary::_change_type_menu(int p_index) {
-	if (changing_type_idx < 0) {
-		Variant value;
-		Callable::CallError ce;
-		value = Variant::construct(Variant::Type(p_index), nullptr, 0, ce);
-		if (changing_type_idx == -1) {
-			object->set_new_item_key(value);
-		} else {
-			object->set_new_item_value(value);
-		}
-		update_property();
-		return;
-	}
-
-	Dictionary dict = object->get_dict();
-
-	if (p_index < Variant::VARIANT_MAX) {
-		Variant value;
-		Callable::CallError ce;
-		value = Variant::construct(Variant::Type(p_index), nullptr, 0, ce);
-		Variant key = dict.get_key_at_index(changing_type_idx);
-		dict[key] = value;
-	} else {
-		Variant key = dict.get_key_at_index(changing_type_idx);
-		dict.erase(key);
-	}
-
-	emit_changed(get_edited_property(), dict, "", false);
-
-	dict = dict.duplicate(); //dupe, so undo/redo works better
-	object->set_dict(dict);
-	update_property();
-}*/
 
 void EditorPropertyDictionary::update_property() {
 	Variant updated_val = get_edited_object()->get(get_edited_property());
@@ -1139,7 +1082,6 @@ EditorPropertyDictionary::EditorPropertyDictionary() {
 	updating = false;
 	change_type = memnew(PopupMenu);
 	add_child(change_type);
-	//change_type->connect("id_pressed", callable_mp(this, &EditorPropertyDictionary::_change_type_menu));
 
 	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
 		String type = Variant::get_type_name(Variant::Type(i));

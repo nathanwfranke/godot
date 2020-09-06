@@ -652,7 +652,6 @@ void AnimationBezierTrackEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			menu->clear();
 			Button *insert = menu->add_icon_button(TTR("Insert Key Here"), bezier_icon);
 			insert->connect("pressed", callable_mp(this, &AnimationBezierTrackEdit::_menu_insert));
-			//menu->add_icon_item(bezier_icon, TTR("Insert Key Here"), MENU_KEY_INSERT);
 			if (selection.size()) {
 				menu->add_separator();
 				Button *duplicate = menu->add_icon_button(TTR("Duplicate Selected Key(s)"), get_theme_icon("Duplicate", "EditorIcons"));
