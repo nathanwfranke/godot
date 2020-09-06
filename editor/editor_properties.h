@@ -251,7 +251,7 @@ private:
 	Button *button;
 
 	void _button_pressed();
-	void _menu_pressed(int p_menu);
+	void _menu_set_layer(int p_layer, bool p_active);
 
 protected:
 	static void _bind_methods();

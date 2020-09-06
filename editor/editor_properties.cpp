@@ -744,9 +744,8 @@ void EditorPropertyLayers::_button_pressed() {
 		if (i == 5 || i == 10 || i == 15) {
 			layers->add_separator();
 		}
-		layers->add_check_item(grid->names[i], i);
-		int idx = layers->get_item_index(i);
-		layers->set_item_checked(idx, grid->value & (1 << i));
+		CheckBox *box = layers->add_check_button(grid->names[i]);
+		box->set_pressed(grid->value & (1 << i));
 	}
 
 	Rect2 gp = button->get_screen_rect();
@@ -756,14 +755,11 @@ void EditorPropertyLayers::_button_pressed() {
 	layers->popup();
 }
 
-void EditorPropertyLayers::_menu_pressed(int p_menu) {
-	if (grid->value & (1 << p_menu)) {
-		grid->value &= ~(1 << p_menu);
-	} else {
-		grid->value |= (1 << p_menu);
+void EditorPropertyLayers::_menu_set_layer(int p_layer, bool p_active) {
+	if (grid->value & (1 << p_layer) != p_active) {
+		grid->value &= ~(1 << p_layer);
 	}
 	grid->update();
-	layers->set_item_checked(layers->get_item_index(p_menu), grid->value & (1 << p_menu));
 	_grid_changed(grid->value);
 }
 
