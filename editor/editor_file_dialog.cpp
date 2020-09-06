@@ -564,16 +564,25 @@ void EditorFileDialog::_item_list_item_rmb_selected(int p_item, const Vector2 &p
 	}
 
 	if (single_item_selected) {
-		item_menu->add_icon_item(item_list->get_theme_icon("ActionCopy", "EditorIcons"), TTR("Copy Path"), ITEM_MENU_COPY_PATH);
+		Button *copy_path = item_menu->add_icon_button(TTR("Copy Path"), item_list->get_theme_icon("ActionCopy", "EditorIcons"));
+		copy_path->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_copy_path));
+
+		//item_menu->add_icon_item(item_list->get_theme_icon("ActionCopy", "EditorIcons"), TTR("Copy Path"), ITEM_MENU_COPY_PATH);
 	}
 	if (allow_delete) {
-		item_menu->add_icon_item(item_list->get_theme_icon("Remove", "EditorIcons"), TTR("Delete"), ITEM_MENU_DELETE, KEY_DELETE);
+		Button *del = item_menu->add_icon_button(TTR("Delete"), item_list->get_theme_icon("Remove", "EditorIcons"), ED_SHORTCUT("file_dialog/delete", TTR("Delete"), KEY_DELETE));
+		del->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_copy_path));
+
+		//item_menu->add_icon_item(item_list->get_theme_icon("Remove", "EditorIcons"), TTR("Delete"), ITEM_MENU_DELETE, KEY_DELETE);
 	}
 	if (single_item_selected) {
 		item_menu->add_separator();
 		Dictionary item_meta = item_list->get_item_metadata(p_item);
 		String item_text = item_meta["dir"] ? TTR("Open in File Manager") : TTR("Show in File Manager");
-		item_menu->add_icon_item(item_list->get_theme_icon("Filesystem", "EditorIcons"), item_text, ITEM_MENU_SHOW_IN_EXPLORER);
+		Button *show_in_explorer = item_menu->add_icon_button(item_text, item_list->get_theme_icon("Filesystem", "EditorIcons"));
+		show_in_explorer->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_show_in_explorer));
+
+		//item_menu->add_icon_item(item_list->get_theme_icon("Filesystem", "EditorIcons"), item_text, ITEM_MENU_SHOW_IN_EXPLORER);
 	}
 
 	if (item_menu->get_item_count() > 0) {
@@ -589,55 +598,62 @@ void EditorFileDialog::_item_list_rmb_clicked(const Vector2 &p_pos) {
 	}
 
 	item_menu->clear();
-	item_menu->set_size(Size2(1, 1));
 
 	if (can_create_dir) {
-		item_menu->add_icon_item(item_list->get_theme_icon("folder", "FileDialog"), TTR("New Folder..."), ITEM_MENU_NEW_FOLDER, KEY_MASK_CMD | KEY_N);
+		Button *new_folder = item_menu->add_button(TTR("New Folder..."), ED_SHORTCUT("file_dialog/create_folder", TTR("Create Folder"), KEY_MASK_CMD | KEY_N), item_list->get_theme_icon("folder", "FileDialog"));
+		new_folder->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_new_folder));
+		
+		//item_menu->add_icon_item(item_list->get_theme_icon("folder", "FileDialog"), TTR("New Folder..."), ITEM_MENU_NEW_FOLDER, KEY_MASK_CMD | KEY_N);
 	}
-	item_menu->add_icon_item(item_list->get_theme_icon("Reload", "EditorIcons"), TTR("Refresh"), ITEM_MENU_REFRESH, KEY_F5);
-	item_menu->add_separator();
-	item_menu->add_icon_item(item_list->get_theme_icon("Filesystem", "EditorIcons"), TTR("Open in File Manager"), ITEM_MENU_SHOW_IN_EXPLORER);
+	Button *refresh = item_menu->add_button(TTR("Refresh"), ED_SHORTCUT("file_dialog/refresh", TTR("Refresh"), KEY_F5), item_list->get_theme_icon("Reload", "EditorIcons"));
+	refresh->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_refresh));
 
+	//item_menu->add_icon_item(item_list->get_theme_icon("Reload", "EditorIcons"), TTR("Refresh"), ITEM_MENU_REFRESH, KEY_F5);
+
+	item_menu->add_separator();
+	
+	Button *show_in_explorer = item_menu->add_icon_button(TTR("Open in File Manager"), item_list->get_theme_icon("Filesystem", "EditorIcons"));
+	show_in_explorer->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_show_in_explorer));
+
+	//item_menu->add_icon_item(item_list->get_theme_icon("Filesystem", "EditorIcons"), TTR("Open in File Manager"), ITEM_MENU_SHOW_IN_EXPLORER);
+
+	item_menu->set_as_minsize();
 	item_menu->set_position(item_list->get_global_position() + p_pos);
 	item_menu->popup();
 }
 
-void EditorFileDialog::_item_menu_id_pressed(int p_option) {
-	switch (p_option) {
-		case ITEM_MENU_COPY_PATH: {
-			Dictionary item_meta = item_list->get_item_metadata(item_list->get_current());
-			DisplayServer::get_singleton()->clipboard_set(item_meta["path"]);
-		} break;
+void EditorFileDialog::_item_menu_copy_path() {
+	Dictionary item_meta = item_list->get_item_metadata(item_list->get_current());
+	DisplayServer::get_singleton()->clipboard_set(item_meta["path"]);
+}
 
-		case ITEM_MENU_DELETE: {
-			_delete_items();
-		} break;
+void EditorFileDialog::_item_menu_delete() {
+	_delete_items();
+}
 
-		case ITEM_MENU_REFRESH: {
-			invalidate();
-		} break;
+void EditorFileDialog::_item_menu_refresh() {
+	invalidate();
+}
 
-		case ITEM_MENU_NEW_FOLDER: {
-			_make_dir();
-		} break;
+void EditorFileDialog::_item_menu_new_folder() {
+	_make_dir();
+}
 
-		case ITEM_MENU_SHOW_IN_EXPLORER: {
-			String path;
-			int idx = item_list->get_current();
-			if (idx == -1 || item_list->get_selected_items().size() == 0) {
-				// Folder background was clicked. Open this folder.
-				path = ProjectSettings::get_singleton()->globalize_path(dir_access->get_current_dir());
-			} else {
-				// Specific item was clicked. Open folders directly, or the folder containing a selected file.
-				Dictionary item_meta = item_list->get_item_metadata(idx);
-				path = ProjectSettings::get_singleton()->globalize_path(item_meta["path"]);
-				if (!item_meta["dir"]) {
-					path = path.get_base_dir();
-				}
-			}
-			OS::get_singleton()->shell_open(String("file://") + path);
-		} break;
+void EditorFileDialog::_item_menu_show_in_explorer() {
+	String path;
+	int idx = item_list->get_current();
+	if (idx == -1 || item_list->get_selected_items().size() == 0) {
+		// Folder background was clicked. Open this folder.
+		path = ProjectSettings::get_singleton()->globalize_path(dir_access->get_current_dir());
+	} else {
+		// Specific item was clicked. Open folders directly, or the folder containing a selected file.
+		Dictionary item_meta = item_list->get_item_metadata(idx);
+		path = ProjectSettings::get_singleton()->globalize_path(item_meta["path"]);
+		if (!item_meta["dir"]) {
+			path = path.get_base_dir();
+		}
 	}
+	OS::get_singleton()->shell_open(String("file://") + path);
 }
 
 bool EditorFileDialog::_is_open_should_be_disabled() {
@@ -1450,12 +1466,12 @@ EditorFileDialog::EditorFileDialog() {
 	ED_SHORTCUT("file_dialog/go_back", TTR("Go Back"), KEY_MASK_ALT | KEY_LEFT);
 	ED_SHORTCUT("file_dialog/go_forward", TTR("Go Forward"), KEY_MASK_ALT | KEY_RIGHT);
 	ED_SHORTCUT("file_dialog/go_up", TTR("Go Up"), KEY_MASK_ALT | KEY_UP);
-	ED_SHORTCUT("file_dialog/refresh", TTR("Refresh"), KEY_F5);
+	//ED_SHORTCUT("file_dialog/refresh", TTR("Refresh"), KEY_F5);
 	ED_SHORTCUT("file_dialog/toggle_hidden_files", TTR("Toggle Hidden Files"), KEY_MASK_CMD | KEY_H);
 	ED_SHORTCUT("file_dialog/toggle_favorite", TTR("Toggle Favorite"), KEY_MASK_ALT | KEY_F);
 	ED_SHORTCUT("file_dialog/toggle_mode", TTR("Toggle Mode"), KEY_MASK_ALT | KEY_V);
-	ED_SHORTCUT("file_dialog/create_folder", TTR("Create Folder"), KEY_MASK_CMD | KEY_N);
-	ED_SHORTCUT("file_dialog/delete", TTR("Delete"), KEY_DELETE);
+	//ED_SHORTCUT("file_dialog/create_folder", TTR("Create Folder"), KEY_MASK_CMD | KEY_N);
+	//ED_SHORTCUT("file_dialog/delete", TTR("Delete"), KEY_DELETE);
 	ED_SHORTCUT("file_dialog/focus_path", TTR("Focus Path"), KEY_MASK_CMD | KEY_D);
 	ED_SHORTCUT("file_dialog/move_favorite_up", TTR("Move Favorite Up"), KEY_MASK_CMD | KEY_UP);
 	ED_SHORTCUT("file_dialog/move_favorite_down", TTR("Move Favorite Down"), KEY_MASK_CMD | KEY_DOWN);
@@ -1608,7 +1624,6 @@ EditorFileDialog::EditorFileDialog() {
 	list_vb->add_child(item_list);
 
 	item_menu = memnew(PopupMenu);
-	item_menu->connect("id_pressed", callable_mp(this, &EditorFileDialog::_item_menu_id_pressed));
 	add_child(item_menu);
 
 	// Other stuff.

@@ -81,8 +81,9 @@ void EditorRunNative::_notification(int p_what) {
 					} else {
 						mb->set_tooltip(eep->get_options_tooltip());
 						for (int i = 0; i < dc; i++) {
-							mb->get_popup()->add_icon_item(eep->get_option_icon(i), eep->get_option_label(i));
-							mb->get_popup()->set_item_tooltip(mb->get_popup()->get_item_count() - 1, eep->get_option_tooltip(i));
+							Button *platform_button = mb->get_popup()->add_icon_button(eep->get_option_label(i), eep->get_option_icon(i));
+							platform_button->set_tooltip(eep->get_option_tooltip(i));
+							//mb->get_popup()->set_item_tooltip(mb->get_popup()->get_item_count() - 1, eep->get_option_tooltip(i));
 						}
 					}
 				}

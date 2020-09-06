@@ -506,20 +506,18 @@ void EditorAudioBus::_effect_edited() {
 	}
 }
 
-void EditorAudioBus::_effect_add(int p_which) {
+void EditorAudioBus::_effect_add(StringName p_name, String p_text) {
 	if (updating_bus) {
 		return;
 	}
 
-	StringName name = effect_options->get_item_metadata(p_which);
-
-	Object *fx = ClassDB::instance(name);
+	Object *fx = ClassDB::instance(p_name);
 	ERR_FAIL_COND(!fx);
 	AudioEffect *afx = Object::cast_to<AudioEffect>(fx);
 	ERR_FAIL_COND(!afx);
 	Ref<AudioEffect> afxr = Ref<AudioEffect>(afx);
 
-	afxr->set_name(effect_options->get_item_text(p_which));
+	afxr->set_name(p_text);
 
 	UndoRedo *ur = EditorNode::get_undo_redo();
 	ur->create_action(TTR("Add Audio Bus Effect"));
@@ -556,16 +554,16 @@ void EditorAudioBus::_unhandled_key_input(Ref<InputEvent> p_event) {
 	}
 }
 
-void EditorAudioBus::_bus_popup_pressed(int p_option) {
-	if (p_option == 2) {
-		// Reset volume
-		emit_signal("vol_reset_request");
-	} else if (p_option == 1) {
-		emit_signal("delete_request");
-	} else if (p_option == 0) {
-		//duplicate
-		emit_signal("duplicate_request", get_index());
-	}
+void EditorAudioBus::_bus_popup_duplicate() {
+	emit_signal("duplicate_request", get_index());
+}
+
+void EditorAudioBus::_bus_popup_delete() {
+	emit_signal("delete_request");
+}
+
+void EditorAudioBus::_bus_popup_reset_volume() {
+	emit_signal("vol_reset_request");
 }
 
 Variant EditorAudioBus::get_drag_data(const Point2 &p_point) {
@@ -915,7 +913,6 @@ EditorAudioBus::EditorAudioBus(EditorAudioBuses *p_buses, bool p_is_master) {
 	set_focus_mode(FOCUS_CLICK);
 
 	effect_options = memnew(PopupMenu);
-	effect_options->connect("index_pressed", callable_mp(this, &EditorAudioBus::_effect_add));
 	add_child(effect_options);
 	List<StringName> effects;
 	ClassDB::get_inheriters_from_class("AudioEffect", &effects);
@@ -927,27 +924,24 @@ EditorAudioBus::EditorAudioBus(EditorAudioBuses *p_buses, bool p_is_master) {
 
 		Ref<Texture2D> icon = EditorNode::get_singleton()->get_class_icon(E->get());
 		String name = E->get().operator String().replace("AudioEffect", "");
-		effect_options->add_item(name);
-		effect_options->set_item_metadata(effect_options->get_item_count() - 1, E->get());
-		effect_options->set_item_icon(effect_options->get_item_count() - 1, icon);
+		Button *effect_button = effect_options->add_icon_button(name, icon);
+		effect_button->connect("pressed", callable_mp(this, &EditorAudioBus::_effect_add), varray(E->get(), name));
 	}
 
 	bus_popup = bus_options->get_popup();
-	
+
 	{
-		Control *duplicate = bus_popup->add_icon_button(TTR("Duplicate"));
-		Control *del = bus_popup->add_button(TTR("Delete"));
-		Control *reset_volume = bus_popup->add_button(TTR("Reset Volume"));
+		Button *duplicate = bus_popup->add_icon_button(TTR("Duplicate"), get_theme_icon("Duplicate", "EditorIcons"));
+		duplicate->connect("pressed", callable_mp(this, &EditorAudioBus::_bus_popup_duplicate));
+		Button *del = bus_popup->add_button(TTR("Delete"), get_theme_icon("Remove", "EditorIcons"));
+		del->connect("pressed", callable_mp(this, &EditorAudioBus::_bus_popup_delete));
+		del->set_disabled(is_master);
+		Button *reset_volume = bus_popup->add_button(TTR("Reset Volume"));
+		reset_volume->connect("pressed", callable_mp(this, &EditorAudioBus::_bus_popup_reset_volume));
 	}
-	
-	bus_popup->add_item(TTR("Duplicate"));
-	bus_popup->add_item(TTR("Delete"));
-	bus_popup->set_item_disabled(1, is_master);
-	bus_popup->add_item(TTR("Reset Volume"));
-	bus_popup->connect("index_pressed", callable_mp(this, &EditorAudioBus::_bus_popup_pressed));
 
 	delete_effect_popup = memnew(PopupMenu);
-	delete_effect_popup->add_item(TTR("Delete Effect"));
+	delete_effect_popup->add_button(TTR("Delete Effect"));
 	add_child(delete_effect_popup);
 	delete_effect_popup->connect("index_pressed", callable_mp(this, &EditorAudioBus::_delete_effect_pressed));
 }

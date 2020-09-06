@@ -59,10 +59,12 @@ void EditorPath::_add_children_to_popup(Object *p_obj, int p_depth) {
 
 		Ref<Texture2D> icon = EditorNode::get_singleton()->get_object_icon(obj);
 
-		int index = get_popup()->get_item_count();
+		Button *button = get_popup()->add_icon_button(E->get().name.capitalize(), icon);
+		button->connect("pressed", callable_mp(this, &EditorPath::_obj_pressed), varray(obj));
+		/*int index = get_popup()->get_item_count();
 		get_popup()->add_icon_item(icon, E->get().name.capitalize(), objects.size());
 		get_popup()->set_item_h_offset(index, p_depth * 10 * EDSCALE);
-		objects.push_back(obj->get_instance_id());
+		objects.push_back(obj->get_instance_id());*/
 
 		_add_children_to_popup(obj, p_depth + 1);
 	}
@@ -80,8 +82,7 @@ void EditorPath::_about_to_show() {
 
 	_add_children_to_popup(obj);
 	if (get_popup()->get_item_count() == 0) {
-		get_popup()->add_item(TTR("No sub-resources found."));
-		get_popup()->set_item_disabled(0, true);
+		get_popup()->add_label(TTR("No sub-resources found."));
 	}
 }
 
@@ -126,15 +127,9 @@ void EditorPath::update_path() {
 	}
 }
 
-void EditorPath::_id_pressed(int p_idx) {
-	ERR_FAIL_INDEX(p_idx, objects.size());
-
-	Object *obj = ObjectDB::get_instance(objects[p_idx]);
-	if (!obj) {
-		return;
-	}
-
-	EditorNode::get_singleton()->push_item(obj);
+void EditorPath::_obj_pressed(Object *p_obj) {
+	ERR_FAIL_NULL(p_obj);
+	EditorNode::get_singleton()->push_item(p_obj);
 }
 
 void EditorPath::_notification(int p_what) {
@@ -153,5 +148,4 @@ EditorPath::EditorPath(EditorHistory *p_history) {
 	set_clip_text(true);
 	set_text_align(ALIGN_LEFT);
 	get_popup()->connect("about_to_popup", callable_mp(this, &EditorPath::_about_to_show));
-	get_popup()->connect("id_pressed", callable_mp(this, &EditorPath::_id_pressed));
 }

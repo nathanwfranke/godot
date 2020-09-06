@@ -133,7 +133,8 @@ public:
 	virtual bool handles(Object *p_object) const override;
 	virtual int get_flags() const override;
 
-	virtual void set_item_text(int p_idx, const String &p_text) override { pp->set_item_text(p_idx, p_text); }
+	// TODO: This
+	/*virtual void set_item_text(int p_idx, const String &p_text) override { pp->set_item_text(p_idx, p_text); }
 	virtual String get_item_text(int p_idx) const override { return pp->get_item_text(p_idx); }
 
 	virtual void set_item_icon(int p_idx, const Ref<Texture2D> &p_tex) override { pp->set_item_icon(p_idx, p_tex); }
@@ -158,7 +159,7 @@ public:
 
 	virtual void add_item() override;
 	virtual int get_item_count() const override;
-	virtual void erase(int p_idx) override;
+	virtual void erase(int p_idx) override;*/
 
 	ItemListPopupMenuPlugin();
 };

@@ -92,9 +92,10 @@ class EditorAudioBus : public PanelContainer {
 
 	void _gui_input(const Ref<InputEvent> &p_event);
 	void _unhandled_key_input(Ref<InputEvent> p_event);
-	
-	
-	void _bus_popup_pressed(int p_option);
+
+	void _bus_popup_duplicate();
+	void _bus_popup_delete();
+	void _bus_popup_reset_volume();
 
 	void _name_changed(const String &p_new_name);
 	void _name_focus_exit() { _name_changed(track_name->get_text()); }
@@ -108,7 +109,7 @@ class EditorAudioBus : public PanelContainer {
 	void _bypass_toggled();
 	void _send_selected(int p_which);
 	void _effect_edited();
-	void _effect_add(int p_which);
+	void _effect_add(StringName p_name, String p_text);
 	void _effect_selected();
 	void _delete_effect_pressed(int p_option);
 	void _effect_rmb(const Vector2 &p_pos);

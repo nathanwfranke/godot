@@ -228,8 +228,15 @@ CheckBox *PopupMenu::add_radio_button(const String &p_label, Ref<ButtonGroup> p_
 	return button;
 }
 
-Button *PopupMenu::add_icon_button(const String &p_label, Ref<Texture2D> p_icon) {
-	return add_button(p_label, Ref<ShortCut>(), p_icon);
+Button *PopupMenu::add_icon_button(const String &p_label, Ref<Texture2D> p_icon, Ref<ShortCut> p_shortcut) {
+	return add_button(p_label, p_shortcut, p_icon);
+}
+
+Label *PopupMenu::add_label(const String &p_label) {
+	Label *label = memnew(Label);
+	label->set_text(p_label);
+	add_item(label);
+	return label;
 }
 
 SplitContainer *PopupMenu::add_separator() {

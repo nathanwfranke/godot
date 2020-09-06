@@ -42,7 +42,7 @@ class EditorPath : public MenuButton {
 	Vector<ObjectID> objects;
 	EditorPath();
 
-	void _id_pressed(int p_idx);
+	void _obj_pressed(Object *p_obj);
 	void _about_to_show();
 	void _add_children_to_popup(Object *p_obj, int p_depth = 0);
 

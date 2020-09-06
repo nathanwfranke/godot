@@ -31,7 +31,6 @@
 #ifndef GDNATIVE_LIBRARY_EDITOR_PLUGIN_H
 #define GDNATIVE_LIBRARY_EDITOR_PLUGIN_H
 
-#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 #include "editor/editor_node.h"
 #include "gdnative.h"

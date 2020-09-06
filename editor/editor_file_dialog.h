@@ -165,6 +165,13 @@ private:
 
 	void _item_list_item_rmb_selected(int p_item, const Vector2 &p_pos);
 	void _item_list_rmb_clicked(const Vector2 &p_pos);
+	
+	void _item_menu_copy_path();
+	void _item_menu_delete();
+	void _item_menu_refresh();
+	void _item_menu_new_folder();
+	void _item_menu_show_in_explorer();
+	
 	void _item_menu_id_pressed(int p_option);
 
 	void _select_drive(int p_idx);

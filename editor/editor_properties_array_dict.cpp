@@ -178,7 +178,28 @@ void EditorPropertyArray::_change_type(Object *p_button, int p_index) {
 	change_type->popup();
 }
 
-void EditorPropertyArray::_change_type_menu(int p_index) {
+void EditorPropertyArray::_menu_change_type(Variant::Type p_type) {
+	Variant value;
+	Callable::CallError ce;
+	value = Variant::construct(p_type, nullptr, 0, ce);
+	Variant array = object->get_array();
+	array.set(changing_type_idx, value);
+
+	emit_changed(get_edited_property(), array, "", true);
+
+	if (array.get_type() == Variant::ARRAY) {
+		array = array.call("duplicate"); //dupe, so undo/redo works better
+	}
+
+	object->set_array(array);
+	update_property();
+}
+
+void EditorPropertyArray::_menu_remove() {
+	_remove_pressed(changing_type_idx);
+}
+
+/*void EditorPropertyArray::_change_type_menu(int p_index) {
 	if (p_index == Variant::VARIANT_MAX) {
 		_remove_pressed(changing_type_idx);
 		return;
@@ -198,7 +219,7 @@ void EditorPropertyArray::_change_type_menu(int p_index) {
 
 	object->set_array(array);
 	update_property();
-}
+}*/
 
 void EditorPropertyArray::_object_id_selected(const StringName &p_property, ObjectID p_id) {
 	emit_signal("object_id_selected", p_property, p_id);
@@ -587,14 +608,18 @@ EditorPropertyArray::EditorPropertyArray() {
 	updating = false;
 	change_type = memnew(PopupMenu);
 	add_child(change_type);
-	change_type->connect("id_pressed", callable_mp(this, &EditorPropertyArray::_change_type_menu));
+	//change_type->connect("id_pressed", callable_mp(this, &EditorPropertyArray::_change_type_menu));
 
 	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
 		String type = Variant::get_type_name(Variant::Type(i));
-		change_type->add_item(type, i);
+		Button *variant_button = change_type->add_button(type);
+		variant_button->connect("pressed", callable_mp(this, &EditorPropertyArray::_menu_change_type), varray(Variant::Type(i)));
 	}
 	change_type->add_separator();
-	change_type->add_item(TTR("Remove Item"), Variant::VARIANT_MAX);
+
+	Button *remove_button = change_type->add_button(TTR("Remove Item"));
+	remove_button->connect("pressed", callable_mp(this, &EditorPropertyArray::_menu_remove));
+
 	changing_type_idx = -1;
 
 	subtype = Variant::NIL;
@@ -653,7 +678,41 @@ void EditorPropertyDictionary::_add_key_value() {
 	update_property();
 }
 
-void EditorPropertyDictionary::_change_type_menu(int p_index) {
+void EditorPropertyDictionary::_menu_change_type(Variant::Type p_type) {
+	Variant value;
+	Callable::CallError ce;
+	value = Variant::construct(p_type, nullptr, 0, ce);
+
+	if (changing_type_idx < 0) {
+		if (changing_type_idx == -1) {
+			object->set_new_item_key(value);
+		} else {
+			object->set_new_item_value(value);
+		}
+		update_property();
+		return;
+	}
+
+	Dictionary dict = object->get_dict();
+
+	Variant key = dict.get_key_at_index(changing_type_idx);
+	dict[key] = value;
+
+	emit_changed(get_edited_property(), dict, "", false);
+
+	dict = dict.duplicate(); //dupe, so undo/redo works better
+	object->set_dict(dict);
+	update_property();
+}
+
+void EditorPropertyDictionary::_menu_remove() {
+	Dictionary dict = object->get_dict();
+
+	Variant key = dict.get_key_at_index(changing_type_idx);
+	dict.erase(key);
+}
+
+/*void EditorPropertyDictionary::_change_type_menu(int p_index) {
 	if (changing_type_idx < 0) {
 		Variant value;
 		Callable::CallError ce;
@@ -685,7 +744,7 @@ void EditorPropertyDictionary::_change_type_menu(int p_index) {
 	dict = dict.duplicate(); //dupe, so undo/redo works better
 	object->set_dict(dict);
 	update_property();
-}
+}*/
 
 void EditorPropertyDictionary::update_property() {
 	Variant updated_val = get_edited_object()->get(get_edited_property());
@@ -1080,13 +1139,17 @@ EditorPropertyDictionary::EditorPropertyDictionary() {
 	updating = false;
 	change_type = memnew(PopupMenu);
 	add_child(change_type);
-	change_type->connect("id_pressed", callable_mp(this, &EditorPropertyDictionary::_change_type_menu));
+	//change_type->connect("id_pressed", callable_mp(this, &EditorPropertyDictionary::_change_type_menu));
 
 	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
 		String type = Variant::get_type_name(Variant::Type(i));
-		change_type->add_item(type, i);
+		Button *variant_button = change_type->add_button(type);
+		variant_button->connect("pressed", callable_mp(this, &EditorPropertyDictionary::_menu_change_type), varray(Variant::Type(i)));
 	}
 	change_type->add_separator();
-	change_type->add_item(TTR("Remove Item"), Variant::VARIANT_MAX);
+
+	Button *remove_button = change_type->add_button(TTR("Remove Item"));
+	remove_button->connect("pressed", callable_mp(this, &EditorPropertyDictionary::_menu_remove));
+
 	changing_type_idx = -1;
 }

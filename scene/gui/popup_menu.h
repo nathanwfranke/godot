@@ -33,6 +33,7 @@
 
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
+#include "scene/gui/label.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/popup.h"
 #include "scene/gui/scroll_container.h"
@@ -154,7 +155,9 @@ public:
 	// Helper method since buttons with icons but without shortcuts are common.
 	// TODO: Question: Should every button have an icon and a shortcut (Configurable in editor theme and settings, respectively)
 	//       If so, we should remove this method in favor of "add_button"
-	Button *add_icon_button(const String &p_label, Ref<Texture2D> p_icon);
+	Button *add_icon_button(const String &p_label, Ref<Texture2D> p_icon, Ref<ShortCut> p_shortcut = Ref<ShortCut>());
+
+	Label *add_label(const String &p_label);
 
 	/*void add_check_item(const String &p_label, int p_id = -1, uint32_t p_accel = 0);
 	void add_icon_check_item(const Ref<Texture2D> &p_icon, const String &p_label, int p_id = -1, uint32_t p_accel = 0);

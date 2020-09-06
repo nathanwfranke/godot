@@ -28,7 +28,6 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 #include "gdnative_library_editor_plugin.h"
 #include "gdnative.h"

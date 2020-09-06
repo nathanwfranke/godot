@@ -2701,7 +2701,6 @@ void AnimationTrackEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			if (!menu) {
 				menu = memnew(PopupMenu);
 				add_child(menu);
-				menu->connect("id_pressed", callable_mp(this, &AnimationTrackEdit::_menu_selected));
 			}
 
 			menu->clear();
@@ -5391,50 +5390,6 @@ void AnimationTrackEditor::_edit_clean_up(bool p_confirm) {
 		}
 	} else {
 		_cleanup_animation(animation);
-	}
-}
-
-void AnimationTrackEditor::_edit_menu_pressed(int p_option) {
-	last_menu_track_opt = p_option;
-	switch (p_option) {
-		case EDIT_SCALE_SELECTION:
-		case EDIT_SCALE_FROM_CURSOR: {
-		} break;
-		case EDIT_SCALE_CONFIRM: {
-		} break;
-		case EDIT_DUPLICATE_SELECTION: {
-		} break;
-		case EDIT_DUPLICATE_TRANSPOSED: {
-		} break;
-		case EDIT_DELETE_SELECTION: {
-		} break;
-		case EDIT_GOTO_NEXT_STEP: {
-		} break;
-		case EDIT_GOTO_PREV_STEP: {
-
-		} break;
-		case EDIT_OPTIMIZE_ANIMATION: {
-			optimize_dialog->popup_centered(Size2(250, 180) * EDSCALE);
-
-		} break;
-		case EDIT_OPTIMIZE_ANIMATION_CONFIRM: {
-
-		} break;
-		case EDIT_CLEAN_UP_ANIMATION: {
-
-		} break;
-		case EDIT_CLEAN_UP_ANIMATION_CONFIRM: {
-			if (cleanup_all->is_pressed()) {
-				List<StringName> names;
-				AnimationPlayerEditor::singleton->get_player()->get_animation_list(&names);
-				for (List<StringName>::Element *E = names.front(); E; E = E->next()) {
-					_cleanup_animation(AnimationPlayerEditor::singleton->get_player()->get_animation(E->get()));
-				}
-			} else {
-				_cleanup_animation(animation);
-			}
-
-		} break;
 	}
 }
 
