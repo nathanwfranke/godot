@@ -788,7 +788,39 @@ void ConnectionsDock::_go_to_script(TreeItem &item) {
 	}
 }
 
-void ConnectionsDock::_handle_signal_menu_option(int option) {
+void ConnectionsDock::_menu_signal_connect() {
+	ERR_FAIL_NULL(tree->get_selected());
+	_open_connection_dialog(*tree->get_selected());
+}
+
+void ConnectionsDock::_menu_signal_disconnect_all() {
+	ERR_FAIL_NULL(tree->get_selected());
+	StringName signal_name = tree->get_selected()->get_metadata(0).operator Dictionary()["name"];
+	
+	// Kind of unnecessary
+	//disconnect_all_dialog->set_text(vformat(TTR("Are you sure you want to remove all connections from the \"%s\" signal?"), signal_name));
+	
+	disconnect_all_dialog->popup_centered();
+}
+
+void ConnectionsDock::_menu_slot_edit() {
+	ERR_FAIL_NULL(tree->get_selected());
+	Connection c = tree->get_selected()->get_metadata(0);
+	_open_connection_dialog(c);
+}
+
+void ConnectionsDock::_menu_slot_go_to_method() {
+	ERR_FAIL_NULL(tree->get_selected());
+	_go_to_script(*tree->get_selected());
+}
+
+void ConnectionsDock::_menu_slot_disconnect() {
+	ERR_FAIL_NULL(tree->get_selected());
+	_disconnect(*tree->get_selected());
+	update_tree();
+}
+
+/*void ConnectionsDock::_handle_signal_menu_option(int option) {
 	TreeItem *item = tree->get_selected();
 
 	if (!item) {
@@ -827,7 +859,7 @@ void ConnectionsDock::_handle_slot_menu_option(int option) {
 			update_tree();
 		} break;
 	}
-}
+}*/
 
 void ConnectionsDock::_rmb_pressed(Vector2 position) {
 	TreeItem *item = tree->get_selected();
@@ -1111,16 +1143,31 @@ ConnectionsDock::ConnectionsDock(EditorNode *p_editor) {
 
 	signal_menu = memnew(PopupMenu);
 	add_child(signal_menu);
-	signal_menu->connect("id_pressed", callable_mp(this, &ConnectionsDock::_handle_signal_menu_option));
-	signal_menu->add_item(TTR("Connect..."), CONNECT);
-	signal_menu->add_item(TTR("Disconnect All"), DISCONNECT_ALL);
+	//signal_menu->connect("id_pressed", callable_mp(this, &ConnectionsDock::_handle_signal_menu_option));
+	{
+		Button *connect = signal_menu->add_button(TTR("Connect..."));
+		connect->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_signal_connect));
+		Button *disconnect_all = signal_menu->add_button(TTR("Disconnect All"));
+		disconnect_all->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_signal_disconnect_all));
+	}
+
+	/*signal_menu->add_item(TTR("Connect..."), CONNECT);
+	signal_menu->add_item(TTR("Disconnect All"), DISCONNECT_ALL);*/
 
 	slot_menu = memnew(PopupMenu);
 	add_child(slot_menu);
-	slot_menu->connect("id_pressed", callable_mp(this, &ConnectionsDock::_handle_slot_menu_option));
+	{
+		Button *edit = slot_menu->add_button(TTR("Edit..."));
+		edit->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_slot_edit));
+		Button *go_to_method = slot_menu->add_button(TTR("Go To Method"));
+		go_to_method->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_slot_go_to_method));
+		Button *disconnect = slot_menu->add_button(TTR("Disconnect"));
+		disconnect->connect("pressed", callable_mp(this, &ConnectionsDock::_menu_slot_disconnect));
+	}
+	/*slot_menu->connect("id_pressed", callable_mp(this, &ConnectionsDock::_handle_slot_menu_option));
 	slot_menu->add_item(TTR("Edit..."), EDIT);
 	slot_menu->add_item(TTR("Go To Method"), GO_TO_SCRIPT);
-	slot_menu->add_item(TTR("Disconnect"), DISCONNECT);
+	slot_menu->add_item(TTR("Disconnect"), DISCONNECT);*/
 
 	connect_dialog->connect("connected", callable_mp(this, &ConnectionsDock::_make_or_edit_connection));
 	tree->connect("item_selected", callable_mp(this, &ConnectionsDock::_tree_item_selected));

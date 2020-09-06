@@ -141,12 +141,21 @@ protected:
 	void _notification(int p_what);
 	static void _bind_methods();
 
+private:
+	void _select_item(Control *p_item);
+
 public:
 	void add_item(Control *p_item);
 
 	Button *add_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
 	CheckBox *add_check_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
 	CheckBox *add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
+
+	// Helper method since buttons with icons but without shortcuts are common.
+	// TODO: Question: Should every button have an icon and a shortcut (Configurable in editor theme and settings, respectively)
+	//       If so, we should remove this method in favor of "add_button"
+	Button *add_icon_button(const String &p_label, Ref<Texture2D> p_icon);
+
 	/*void add_check_item(const String &p_label, int p_id = -1, uint32_t p_accel = 0);
 	void add_icon_check_item(const Ref<Texture2D> &p_icon, const String &p_label, int p_id = -1, uint32_t p_accel = 0);
 	void add_radio_check_item(const String &p_label, int p_id = -1, uint32_t p_accel = 0);
@@ -206,8 +215,8 @@ public:
 	int get_current_index() const;
 	int get_item_count() const;
 
-	bool activate_item_by_event(const Ref<InputEvent> &p_event, bool p_for_global_only = false);
-	void activate_item(int p_item);
+	//bool activate_item_by_event(const Ref<InputEvent> &p_event, bool p_for_global_only = false);
+	//void activate_item(int p_item);
 
 	void remove_item(const int &p_id);
 

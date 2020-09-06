@@ -122,20 +122,6 @@ class AnimationTrackEditor;
 class AnimationTrackEdit : public Control {
 	GDCLASS(AnimationTrackEdit, Control);
 
-	enum {
-		MENU_CALL_MODE_CONTINUOUS,
-		MENU_CALL_MODE_DISCRETE,
-		MENU_CALL_MODE_TRIGGER,
-		MENU_CALL_MODE_CAPTURE,
-		MENU_INTERPOLATION_NEAREST,
-		MENU_INTERPOLATION_LINEAR,
-		MENU_INTERPOLATION_CUBIC,
-		MENU_LOOP_WRAP,
-		MENU_LOOP_CLAMP,
-		MENU_KEY_INSERT,
-		MENU_KEY_DUPLICATE,
-		MENU_KEY_DELETE
-	};
 	AnimationTimelineEdit *timeline;
 	UndoRedo *undo_redo;
 	Popup *path_popup;
@@ -169,7 +155,12 @@ class AnimationTrackEdit : public Control {
 	Ref<Texture2D> icon_cache;
 	String path_cache;
 
-	void _menu_selected(int p_index);
+	void _menu_update_mode(int p_index);
+	void _menu_interpolation(int p_index);
+	void _menu_loop(int p_index);
+	void _menu_key_insert();
+	void _menu_key_duplicate();
+	void _menu_key_delete();
 
 	void _path_entered(const String &p_text);
 	void _play_position_draw();
@@ -445,16 +436,28 @@ class AnimationTrackEditor : public VBoxContainer {
 
 	ConfirmationDialog *scale_dialog;
 	SpinBox *scale;
+	bool scale_cursor_pivot;
 
 	void _select_all_tracks_for_copy();
 
 	void _edit_copy_tracks();
+	void _edit_copy_tracks_confirm();
+	void _edit_paste_tracks();
+	void _edit_scale_selection(bool p_cursor_pivot);
+	void _edit_scale_selection_confirm();
+	void _edit_duplicate_selection();
+	void _edit_duplicate_transposed();
+	void _edit_delete_selection();
+	void _edit_move_step(int p_delta);
+	void _edit_optimize(bool p_confirm);
+	void _edit_clean_up(bool p_confirm);
+
 	void _edit_menu_pressed(int p_option);
 	int last_menu_track_opt;
 
 	void _cleanup_animation(Ref<Animation> p_animation);
 
-	void _anim_duplicate_keys(bool transpose);
+	void _anim_duplicate_keys(bool p_transpose);
 
 	void _view_group_toggle();
 	Button *view_group;

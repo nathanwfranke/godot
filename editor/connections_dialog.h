@@ -188,6 +188,13 @@ class ConnectionsDock : public VBoxContainer {
 	void _open_connection_dialog(ConnectDialog::ConnectionData cToEdit);
 	void _go_to_script(TreeItem &item);
 
+	void _menu_signal_connect();
+	void _menu_signal_disconnect_all();
+
+	void _menu_slot_edit();
+	void _menu_slot_go_to_method();
+	void _menu_slot_disconnect();
+
 	void _handle_signal_menu_option(int option);
 	void _handle_slot_menu_option(int option);
 	void _rmb_pressed(Vector2 position);

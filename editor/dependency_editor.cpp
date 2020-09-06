@@ -259,7 +259,7 @@ void DependencyEditorOwners::_list_rmb_select(int p_item, const Vector2 &p_pos) 
 	file_options->clear();
 	file_options->set_size(Size2(1, 1));
 	if (p_item >= 0) {
-		file_options->add_item(TTR("Open"), FILE_OPEN);
+		file_options->add_button(TTR("Open"));
 	}
 
 	file_options->set_position(owners->get_global_position() + p_pos);

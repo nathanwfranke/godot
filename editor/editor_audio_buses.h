@@ -92,6 +92,8 @@ class EditorAudioBus : public PanelContainer {
 
 	void _gui_input(const Ref<InputEvent> &p_event);
 	void _unhandled_key_input(Ref<InputEvent> p_event);
+	
+	
 	void _bus_popup_pressed(int p_option);
 
 	void _name_changed(const String &p_new_name);

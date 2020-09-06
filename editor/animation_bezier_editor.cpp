@@ -650,12 +650,16 @@ void AnimationBezierTrackEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			Vector2 popup_pos = get_global_transform().xform(mb->get_position());
 
 			menu->clear();
-			menu->add_icon_item(bezier_icon, TTR("Insert Key Here"), MENU_KEY_INSERT);
+			Button *insert = menu->add_icon_button(TTR("Insert Key Here"), bezier_icon);
+			insert->connect("pressed", callable_mp(this, &AnimationBezierTrackEdit::_menu_insert));
+			//menu->add_icon_item(bezier_icon, TTR("Insert Key Here"), MENU_KEY_INSERT);
 			if (selection.size()) {
 				menu->add_separator();
-				menu->add_icon_item(get_theme_icon("Duplicate", "EditorIcons"), TTR("Duplicate Selected Key(s)"), MENU_KEY_DUPLICATE);
+				Button *duplicate = menu->add_icon_button(TTR("Duplicate Selected Key(s)"), get_theme_icon("Duplicate", "EditorIcons"));
+				duplicate->connect("pressed", callable_mp(this, &AnimationBezierTrackEdit::duplicate_selection));
 				menu->add_separator();
-				menu->add_icon_item(get_theme_icon("Remove", "EditorIcons"), TTR("Delete Selected Key(s)"), MENU_KEY_DELETE);
+				Button *del = menu->add_icon_button(TTR("Delete Selected Key(s)"), get_theme_icon("Remove", "EditorIcons"));
+				del->connect("pressed", callable_mp(this, &AnimationBezierTrackEdit::delete_selection));
 			}
 
 			menu->set_as_minsize();
@@ -1007,38 +1011,27 @@ void AnimationBezierTrackEdit::_gui_input(const Ref<InputEvent> &p_event) {
 	}
 }
 
-void AnimationBezierTrackEdit::_menu_selected(int p_index) {
-	switch (p_index) {
-		case MENU_KEY_INSERT: {
-			Array new_point;
-			new_point.resize(5);
+void AnimationBezierTrackEdit::_menu_insert() {
+	Array new_point;
+	new_point.resize(5);
 
-			float h = (get_size().height / 2 - menu_insert_key.y) * v_zoom + v_scroll;
+	float h = (get_size().height / 2 - menu_insert_key.y) * v_zoom + v_scroll;
 
-			new_point[0] = h;
-			new_point[1] = -0.25;
-			new_point[2] = 0;
-			new_point[3] = 0.25;
-			new_point[4] = 0;
+	new_point[0] = h;
+	new_point[1] = -0.25;
+	new_point[2] = 0;
+	new_point[3] = 0.25;
+	new_point[4] = 0;
 
-			float time = ((menu_insert_key.x - timeline->get_name_limit()) / timeline->get_zoom_scale()) + timeline->get_value();
-			while (animation->track_find_key(track, time, true) != -1) {
-				time += 0.001;
-			}
-
-			undo_redo->create_action(TTR("Add Bezier Point"));
-			undo_redo->add_do_method(animation.ptr(), "track_insert_key", track, time, new_point);
-			undo_redo->add_undo_method(animation.ptr(), "track_remove_key_at_position", track, time);
-			undo_redo->commit_action();
-
-		} break;
-		case MENU_KEY_DUPLICATE: {
-			duplicate_selection();
-		} break;
-		case MENU_KEY_DELETE: {
-			delete_selection();
-		} break;
+	float time = ((menu_insert_key.x - timeline->get_name_limit()) / timeline->get_zoom_scale()) + timeline->get_value();
+	while (animation->track_find_key(track, time, true) != -1) {
+		time += 0.001;
 	}
+
+	undo_redo->create_action(TTR("Add Bezier Point"));
+	undo_redo->add_do_method(animation.ptr(), "track_insert_key", track, time, new_point);
+	undo_redo->add_undo_method(animation.ptr(), "track_remove_key_at_position", track, time);
+	undo_redo->commit_action();
 }
 
 void AnimationBezierTrackEdit::duplicate_selection() {
@@ -1171,7 +1164,6 @@ AnimationBezierTrackEdit::AnimationBezierTrackEdit() {
 
 	menu = memnew(PopupMenu);
 	add_child(menu);
-	menu->connect("id_pressed", callable_mp(this, &AnimationBezierTrackEdit::_menu_selected));
 
 	//set_mouse_filter(MOUSE_FILTER_PASS); //scroll has to work too for selection
 }

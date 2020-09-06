@@ -78,7 +78,8 @@ class AnimationBezierTrackEdit : public Control {
 	void _zoom_changed();
 
 	void _gui_input(const Ref<InputEvent> &p_event);
-	void _menu_selected(int p_index);
+
+	void _menu_insert();
 
 	bool *block_animation_update_ptr; //used to block all tracks re-gen (speed up)
 

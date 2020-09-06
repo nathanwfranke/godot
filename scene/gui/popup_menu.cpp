@@ -58,8 +58,6 @@ void PopupMenu::_gui_input(const Ref<InputEvent> &p_event) {
 			
 			if (item.is_valid() && item->get_text().findn(search_string) == 0) {
 				mouse_over = i;
-				// TODO: Remove this signal
-				emit_signal("id_focused", i);
 				item->grab_focus();
 				set_input_as_handled();
 				break;
@@ -126,7 +124,7 @@ int PopupMenu::get_item_count() const {
 	return items.size();
 }
 
-bool PopupMenu::activate_item_by_event(const Ref<InputEvent> &p_event, bool p_for_global_only) {
+/*bool PopupMenu::activate_item_by_event(const Ref<InputEvent> &p_event, bool p_for_global_only) {
 	uint32_t code = 0;
 	Ref<InputEventKey> k = p_event;
 
@@ -181,13 +179,19 @@ bool PopupMenu::activate_item_by_event(const Ref<InputEvent> &p_event, bool p_fo
 			if (pm->activate_item_by_event(p_event, p_for_global_only)) {
 				return true;
 			}
-		}*/
+		}* /
 	}
 	return false;
-}
+}*/
 
-void PopupMenu::activate_item(int p_item) {
+/*void PopupMenu::activate_item(int p_item) {
 	get_item(p_item)->grab_focus();
+}*/
+
+void PopupMenu::_select_item(Control *p_item) {
+	int index = _get_items().find(p_item);
+	emit_signal("selected", index);
+	hide();
 }
 
 void PopupMenu::add_item(Control *p_item) {
@@ -200,6 +204,7 @@ Button *PopupMenu::add_button(const String &p_label, Ref<ShortCut> p_shortcut, c
 	button->set_text(p_label);
 	button->set_shortcut(p_shortcut);
 	button->set_icon(p_icon);
+	button->connect("pressed", callable_mp(this, &PopupMenu::_select_item), varray(button));
 	add_item(button);
 	return button;
 }
@@ -223,35 +228,39 @@ CheckBox *PopupMenu::add_radio_button(const String &p_label, Ref<ButtonGroup> p_
 	return button;
 }
 
+Button *PopupMenu::add_icon_button(const String &p_label, Ref<Texture2D> p_icon) {
+	return add_button(p_label, Ref<ShortCut>(), p_icon);
+}
+
 SplitContainer *PopupMenu::add_separator() {
 	SplitContainer *sep = memnew(VSplitContainer);
 	add_item(sep);
 	return sep;
 }
 
-Control *PopupMenu::get_item(const int p_id) {
+Control *PopupMenu::get_item(const int &p_id) {
 	return items.get(p_id);
 }
 
-Button *PopupMenu::get_button(int p_id) {
+Button *PopupMenu::get_button(const int &p_id) {
 	Button *button = Object::cast_to<Button>(get_item(p_id));
 	ERR_FAIL_COND_V_MSG(!button, nullptr, "Item at " + Variant(p_id) + " is not a button");
 	return button;
 }
 
-CheckBox *PopupMenu::get_check_button(const int p_id) {
+CheckBox *PopupMenu::get_check_button(const int &p_id) {
 	CheckBox *button = Object::cast_to<CheckBox>(get_item(p_id));
 	ERR_FAIL_COND_V_MSG(!button, nullptr, "Item at " + Variant(p_id) + " is not a check button");
 	return button;
 }
 
-CheckBox *PopupMenu::get_radio_button(const int p_id) {
+CheckBox *PopupMenu::get_radio_button(const int &p_id) {
 	CheckBox *button = Object::cast_to<CheckBox>(get_item(p_id));
 	ERR_FAIL_COND_V_MSG(!button, nullptr, "Item at " + Variant(p_id) + " is not a radio button");
 	return button;
 }
 
-void PopupMenu::remove_item(const int p_id) {
+void PopupMenu::remove_item(const int &p_id) {
 	items.remove(p_id);
 	item_container->remove_child(item_container->get_child(p_id));
 }
@@ -401,9 +410,7 @@ void PopupMenu::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "submenu_popup_delay"), "set_submenu_popup_delay", "get_submenu_popup_delay");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "allow_search"), "set_allow_search", "get_allow_search");
 
-	ADD_SIGNAL(MethodInfo("id_pressed", PropertyInfo(Variant::INT, "id")));
-	ADD_SIGNAL(MethodInfo("id_focused", PropertyInfo(Variant::INT, "id")));
-	ADD_SIGNAL(MethodInfo("index_pressed", PropertyInfo(Variant::INT, "index")));
+	ADD_SIGNAL(MethodInfo("selected", PropertyInfo(Variant::INT, "index")));
 }
 
 void PopupMenu::popup(const Rect2 &p_bounds) {

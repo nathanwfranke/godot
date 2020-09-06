@@ -933,6 +933,13 @@ EditorAudioBus::EditorAudioBus(EditorAudioBuses *p_buses, bool p_is_master) {
 	}
 
 	bus_popup = bus_options->get_popup();
+	
+	{
+		Control *duplicate = bus_popup->add_icon_button(TTR("Duplicate"));
+		Control *del = bus_popup->add_button(TTR("Delete"));
+		Control *reset_volume = bus_popup->add_button(TTR("Reset Volume"));
+	}
+	
 	bus_popup->add_item(TTR("Duplicate"));
 	bus_popup->add_item(TTR("Delete"));
 	bus_popup->set_item_disabled(1, is_master);
