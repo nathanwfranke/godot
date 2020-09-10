@@ -331,7 +331,7 @@ class EditorPropertyEasing : public EditorProperty {
 
 	void _drag_easing(const Ref<InputEvent> &p_ev);
 	void _draw_easing();
-	void _set_preset(int);
+	void _set_preset(double p_value);
 
 	void _setup_spin();
 	void _spin_value_changed(double p_value);

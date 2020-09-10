@@ -6371,10 +6371,12 @@ EditorNode::EditorNode() {
 	update_spinner->set_icon(gui_base->get_theme_icon("Progress1", "EditorIcons"));
 	update_spinner->get_popup()->connect("id_pressed", callable_mp(this, &EditorNode::_menu_option));
 	p = update_spinner->get_popup();
-	p->add_radio_check_item(TTR("Update Continuously"), SETTINGS_UPDATE_CONTINUOUSLY);
-	p->add_radio_check_item(TTR("Update When Changed"), SETTINGS_UPDATE_WHEN_CHANGED);
+	
+	ButtonGroup *group = memnew(ButtonGroup);
+	p->add_radio_button(TTR("Update Continuously"), group);
+	p->add_radio_button(TTR("Update When Changed"), group);
 	p->add_separator();
-	p->add_item(TTR("Hide Update Spinner"), SETTINGS_UPDATE_SPINNER_HIDE);
+	p->add_button(TTR("Hide Update Spinner"));
 	_update_update_spinner();
 
 	// Instantiate and place editor docks

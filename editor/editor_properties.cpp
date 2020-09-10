@@ -1025,10 +1025,8 @@ void EditorPropertyEasing::update_property() {
 	easing_draw->update();
 }
 
-void EditorPropertyEasing::_set_preset(int p_preset) {
-	static const float preset_value[EASING_MAX] = { 0.0, 1.0, 2.0, 0.5, -2.0, -0.5 };
-
-	emit_changed(get_edited_property(), preset_value[p_preset]);
+void EditorPropertyEasing::_set_preset(double p_value) {
+	emit_changed(get_edited_property(), p_value);
 	easing_draw->update();
 }
 
@@ -1076,14 +1074,20 @@ void EditorPropertyEasing::_notification(int p_what) {
 		case NOTIFICATION_THEME_CHANGED:
 		case NOTIFICATION_ENTER_TREE: {
 			preset->clear();
-			preset->add_icon_item(get_theme_icon("CurveConstant", "EditorIcons"), "Zero", EASING_ZERO);
-			preset->add_icon_item(get_theme_icon("CurveLinear", "EditorIcons"), "Linear", EASING_LINEAR);
-			preset->add_icon_item(get_theme_icon("CurveIn", "EditorIcons"), "In", EASING_IN);
-			preset->add_icon_item(get_theme_icon("CurveOut", "EditorIcons"), "Out", EASING_OUT);
+			static const float preset_value[EASING_MAX] = { 0.0, 1.0, 2.0, 0.5, -2.0, -0.5 };
+			Vector<Button *> preset_buttons;
+			preset_buttons.push_back(preset->add_icon_button("Zero", get_theme_icon("CurveConstant", "EditorIcons")));
+			preset_buttons.push_back(preset->add_icon_button("Linear", get_theme_icon("CurveLinear", "EditorIcons")));
+			preset_buttons.push_back(preset->add_icon_button("In", get_theme_icon("CurveIn", "EditorIcons")));
+			preset_buttons.push_back(preset->add_icon_button("Out", get_theme_icon("CurveOut", "EditorIcons")));
 			if (full) {
-				preset->add_icon_item(get_theme_icon("CurveInOut", "EditorIcons"), "In-Out", EASING_IN_OUT);
-				preset->add_icon_item(get_theme_icon("CurveOutIn", "EditorIcons"), "Out-In", EASING_OUT_IN);
+				preset_buttons.push_back(preset->add_icon_button("In-Out", get_theme_icon("CurveInOut", "EditorIcons")));
+				preset_buttons.push_back(preset->add_icon_button("Out-In", get_theme_icon("CurveOutIn", "EditorIcons")));
 			}
+			for (int i = 0; i < preset_buttons.size(); ++i) {
+				preset_buttons[i]->connect("pressed", callable_mp(this, &EditorPropertyEasing::_set_preset), varray(preset_value[i]));
+			}
+			
 			easing_draw->set_custom_minimum_size(Size2(0, get_theme_font("font", "Label")->get_height() * 2));
 		} break;
 	}
@@ -1101,7 +1105,6 @@ EditorPropertyEasing::EditorPropertyEasing() {
 
 	preset = memnew(PopupMenu);
 	add_child(preset);
-	preset->connect("id_pressed", callable_mp(this, &EditorPropertyEasing::_set_preset));
 
 	spin = memnew(EditorSpinSlider);
 	spin->set_flat(true);
