@@ -98,17 +98,30 @@ protected:
 private:
 	void _select_item(Control *p_item);
 
+	// Private helper method. Used by add_button, add_check_button, and add_radio_button
+	void _populate_button(Button *p_button, const String &p_label, Ref<Shortcut> p_shortcut, Ref<Texture2D> p_icon, Callable p_callback, const Vector<Variant> &p_binds);
+
 public:
 	void add_item(Control *p_item);
 
-	Button *add_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
-	CheckBox *add_check_button(const String &p_label, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
-	CheckBox *add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<ShortCut> p_shortcut = Ref<ShortCut>(), Ref<Texture2D> p_icon = Ref<Texture2D>());
+	// Author Note: I really wish I could implement an unordered list of parameters that I could do in JavaScript
+	// add_button(TTR("My Button"), { shortcut: my_shortcut, icon: my_icon, callback: callable_mp(this, &MyClass::my_method) })
+	// Relevant SO: https://stackoverflow.com/questions/11516657/c-structure-initialization
+	// Dot notation available in C++20 (?)
+	Button *add_button(const String &p_label, const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>(), const Callable p_callback = Callable(), const Vector<Variant> &p_binds = Vector<Variant>());
+	CheckBox *add_check_button(const String &p_label, const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>(), const Callable p_callback = Callable(), const Vector<Variant> &p_binds = Vector<Variant>());
+	CheckBox *add_radio_button(const String &p_label, const Ref<ButtonGroup> p_group, Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>(), const Callable p_callback = Callable(), const Vector<Variant> &p_binds = Vector<Variant>());
 
-	// Helper method since buttons with icons but without shortcuts are common.
-	// TODO: Question: Should every button have an icon and a shortcut (Configurable in editor theme and settings, respectively)
-	//       If so, we should remove this method in favor of "add_button"
-	Button *add_icon_button(const String &p_label, Ref<Texture2D> p_icon, Ref<ShortCut> p_shortcut = Ref<ShortCut>());
+	// Helper method since buttons with icons but without shortcuts are common
+	// TODO: Question: Should every button have a shortcut (Config in settings) and an icon (Config in editor theme)?
+	// If so, we should remove this method in favor of "add_button"
+	// Additionally, we could pass in an ID an automatically get the shortcut and icon
+	Button *add_icon_button(const String &p_label, const Ref<Texture2D> p_icon, const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Callable p_callback = Callable(), const Vector<Variant> &p_binds = Vector<Variant>());
+
+	// Callback helper methods
+	Button *add_callback_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds = Vector<Variant>(), const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>());
+	Button *add_callback_check_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds = Vector<Variant>(), const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>());
+	Button *add_callback_radio_button(const String &p_label, const Ref<ButtonGroup> p_group, const Callable p_callback, const Vector<Variant> &p_binds = Vector<Variant>(), const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>());
 
 	Label *add_label(const String &p_label);
 

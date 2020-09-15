@@ -5677,45 +5677,22 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	edit->set_disabled(true);
 	edit->set_tooltip(TTR("Animation properties."));
 
-	Button *copy_tracks = edit->get_popup()->add_button(TTR("Copy Tracks"));
-	copy_tracks->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_copy_tracks));
-
-	Button *paste_tracks = edit->get_popup()->add_button(TTR("Paste Tracks"));
-	paste_tracks->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_paste_tracks));
-
+	edit->get_popup()->add_callback_button(TTR("Copy Tracks"), callable_mp(this, &AnimationTrackEditor::_edit_copy_tracks));
+	edit->get_popup()->add_callback_button(TTR("Paste Tracks"), callable_mp(this, &AnimationTrackEditor::_edit_paste_tracks));
 	edit->get_popup()->add_separator();
-
-	Button *scale_selection = edit->get_popup()->add_button(TTR("Scale Selection"));
-	scale_selection->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_scale_selection), varray(false));
-	Button *scale_selection_cursor = edit->get_popup()->add_button(TTR("Scale From Cursor"));
-	scale_selection_cursor->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_scale_selection), varray(true));
-
+	edit->get_popup()->add_callback_button(TTR("Scale Selection"), callable_mp(this, &AnimationTrackEditor::_edit_scale_selection), varray(false));
+	edit->get_popup()->add_callback_button(TTR("Scale From Cursor"), callable_mp(this, &AnimationTrackEditor::_edit_scale_selection), varray(true));
 	edit->get_popup()->add_separator();
-
-	Button *duplicate_selection = edit->get_popup()->add_button(TTR("Duplicate Selection"), ED_SHORTCUT("animation_editor/duplicate_selection", TTR("Duplicate Selection"), KEY_MASK_CMD | KEY_D));
-	duplicate_selection->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_duplicate_selection));
-
-	Button *duplicate_transposed = edit->get_popup()->add_button(TTR("Duplicate Transposed"), ED_SHORTCUT("animation_editor/duplicate_selection_transposed", TTR("Duplicate Transposed"), KEY_MASK_SHIFT | KEY_MASK_CMD | KEY_D));
-	duplicate_transposed->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_duplicate_transposed));
-
+	edit->get_popup()->add_callback_button(TTR("Duplicate Selection"), callable_mp(this, &AnimationTrackEditor::_edit_duplicate_selection), varray(), ED_SHORTCUT("animation_editor/duplicate_selection", TTR("Duplicate Selection"), KEY_MASK_CMD | KEY_D));
+	edit->get_popup()->add_callback_button(TTR("Duplicate Transposed"), callable_mp(this, &AnimationTrackEditor::_edit_duplicate_transposed), varray(), ED_SHORTCUT("animation_editor/duplicate_selection_transposed", TTR("Duplicate Transposed"), KEY_MASK_SHIFT | KEY_MASK_CMD | KEY_D));
 	edit->get_popup()->add_separator();
-
-	Button *delete_selection = edit->get_popup()->add_button(TTR("Delete Selection"), ED_SHORTCUT("animation_editor/delete_selection", TTR("Delete Selection"), KEY_DELETE));
-	delete_selection->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_delete_selection));
-
+	edit->get_popup()->add_callback_button(TTR("Delete Selection"), callable_mp(this, &AnimationTrackEditor::_edit_delete_selection), varray(), ED_SHORTCUT("animation_editor/delete_selection", TTR("Delete Selection"), KEY_DELETE));
 	edit->get_popup()->add_separator();
-
-	Button *prev_step = edit->get_popup()->add_button(TTR("Go to Previous Step"), ED_SHORTCUT("animation_editor/goto_prev_step", TTR("Go to Previous Step"), KEY_MASK_CMD | KEY_LEFT));
-	prev_step->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_move_step), varray(-1));
-	Button *next_step = edit->get_popup()->add_button(TTR("Go to Next Step"), ED_SHORTCUT("animation_editor/goto_next_step", TTR("Go to Next Step"), KEY_MASK_CMD | KEY_RIGHT));
-	next_step->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_move_step), varray(1));
-
+	edit->get_popup()->add_callback_button(TTR("Go to Previous Step"), callable_mp(this, &AnimationTrackEditor::_edit_move_step), varray(-1), ED_SHORTCUT("animation_editor/goto_prev_step", TTR("Go to Previous Step"), KEY_MASK_CMD | KEY_LEFT));
+	edit->get_popup()->add_callback_button(TTR("Go to Next Step"), callable_mp(this, &AnimationTrackEditor::_edit_move_step), varray(1), ED_SHORTCUT("animation_editor/goto_next_step", TTR("Go to Next Step"), KEY_MASK_CMD | KEY_LEFT));
 	edit->get_popup()->add_separator();
-
-	Button *optimize = edit->get_popup()->add_button(TTR("Optimize Animation"));
-	optimize->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_optimize), varray(false));
-	Button *clean_up = edit->get_popup()->add_button(TTR("Clean-Up Animation"));
-	clean_up->connect("pressed", callable_mp(this, &AnimationTrackEditor::_edit_clean_up), varray(false));
+	edit->get_popup()->add_callback_button(TTR("Optimize Animation"), callable_mp(this, &AnimationTrackEditor::_edit_optimize), varray(false));
+	edit->get_popup()->add_callback_button(TTR("Clean-Up Animation"), callable_mp(this, &AnimationTrackEditor::_edit_clean_up), varray(false));
 
 	pick_track = memnew(SceneTreeDialog);
 	add_child(pick_track);

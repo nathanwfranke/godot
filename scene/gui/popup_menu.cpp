@@ -131,41 +131,61 @@ void PopupMenu::_select_item(Control *p_item) {
 }
 
 void PopupMenu::add_item(Control *p_item) {
+	ERR_FAIL_NULL_MSG(p_item, "Cannot add null item to PopupMenu");
+
 	items.push_back(p_item);
 	item_container->add_child(p_item);
 }
 
-Button *PopupMenu::add_button(const String &p_label, Ref<ShortCut> p_shortcut, const Ref<Texture2D> p_icon) {
+void PopupMenu::_populate_button(Button *p_button, const String &p_label, Ref<Shortcut> p_shortcut, Ref<Texture2D> p_icon, Callable p_callback, const Vector<Variant> &p_binds) {
+	p_button->set_text(p_label);
+	p_button->set_shortcut(p_shortcut);
+	p_button->set_icon(p_icon);
+
+	// Popup select item
+	p_button->connect("pressed", callable_mp(this, &PopupMenu::_select_item), varray(p_button));
+
+	// Custom callback
+	if (!p_callback.is_null()) {
+		p_button->connect("pressed", p_callback, p_binds);
+	}
+
+	add_item(p_button);
+}
+
+Button *PopupMenu::add_button(const String &p_label, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon, const Callable p_callback, const Vector<Variant> &p_binds) {
 	Button *button = memnew(Button);
-	button->set_text(p_label);
-	button->set_shortcut(p_shortcut);
-	button->set_icon(p_icon);
-	button->connect("pressed", callable_mp(this, &PopupMenu::_select_item), varray(button));
-	add_item(button);
+	_populate_button(button, p_label, p_shortcut, p_icon, p_callback, p_binds);
 	return button;
 }
 
-CheckBox *PopupMenu::add_check_button(const String &p_label, Ref<ShortCut> p_shortcut, const Ref<Texture2D> p_icon) {
+CheckBox *PopupMenu::add_check_button(const String &p_label, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon, const Callable p_callback, const Vector<Variant> &p_binds) {
 	CheckBox *button = memnew(CheckBox);
-	button->set_text(p_label);
-	button->set_shortcut(p_shortcut);
-	button->set_icon(p_icon);
-	add_item(button);
+	_populate_button(button, p_label, p_shortcut, p_icon, p_callback, p_binds);
 	return button;
 }
 
-CheckBox *PopupMenu::add_radio_button(const String &p_label, Ref<ButtonGroup> p_group, Ref<ShortCut> p_shortcut, Ref<Texture2D> p_icon) {
+CheckBox *PopupMenu::add_radio_button(const String &p_label, const Ref<ButtonGroup> p_group, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon, const Callable p_callback, const Vector<Variant> &p_binds) {
 	CheckBox *button = memnew(CheckBox);
-	button->set_text(p_label);
+	_populate_button(button, p_label, p_shortcut, p_icon, p_callback, p_binds);
 	button->set_button_group(p_group);
-	button->set_shortcut(p_shortcut);
-	button->set_icon(p_icon);
-	add_item(button);
 	return button;
 }
 
-Button *PopupMenu::add_icon_button(const String &p_label, Ref<Texture2D> p_icon, Ref<ShortCut> p_shortcut) {
-	return add_button(p_label, p_shortcut, p_icon);
+Button *PopupMenu::add_icon_button(const String &p_label, const Ref<Texture2D> p_icon, const Ref<Shortcut> p_shortcut, const Callable p_callback, const Vector<Variant> &p_binds) {
+	return add_button(p_label, p_shortcut, p_icon, p_callback, p_binds);
+}
+
+Button *PopupMenu::add_callback_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon) {
+	return add_button(p_label, p_shortcut, p_icon, p_callback, p_binds);
+}
+
+Button *PopupMenu::add_callback_check_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon) {
+	return add_check_button(p_label, p_shortcut, p_icon, p_callback, p_binds);
+}
+
+Button *PopupMenu::add_callback_radio_button(const String &p_label, const Ref<ButtonGroup> p_group, const Callable p_callback, const Vector<Variant> &p_binds, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon) {
+	return add_radio_button(p_label, p_group, p_shortcut, p_icon, p_callback, p_binds);
 }
 
 Label *PopupMenu::add_label(const String &p_label) {
@@ -214,7 +234,7 @@ void PopupMenu::clear() {
 	}
 }
 
-void PopupMenu::_ref_shortcut(Ref<ShortCut> p_sc) {
+void PopupMenu::_ref_shortcut(Ref<Shortcut> p_sc) {
 	if (!shortcut_refcount.has(p_sc)) {
 		shortcut_refcount[p_sc] = 1;
 		p_sc->connect("changed", callable_mp((CanvasItem *)this, &CanvasItem::update));

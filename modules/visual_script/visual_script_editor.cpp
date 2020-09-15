@@ -44,6 +44,7 @@
 #include "visual_script_func_nodes.h"
 #include "visual_script_nodes.h"
 
+#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 class VisualScriptEditorSignalEdit : public Object {
 	GDCLASS(VisualScriptEditorSignalEdit, Object);
@@ -4714,33 +4715,15 @@ VisualScriptEditor::VisualScriptEditor() {
 	edit_menu->set_text(TTR("Edit"));
 	edit_menu->set_switch_on_hover(true);
 
-	Button *delete_selected = edit_menu->get_popup()->add_button(TTR("Delete Selected"), ED_GET_SHORTCUT("visual_script_editor/delete_selected"));
-	delete_selected->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_delete_selected));
-
-	Button *toggle_breakpoint = edit_menu->get_popup()->add_button(TTR("Toggle Breakpoint"), ED_GET_SHORTCUT("visual_script_editor/toggle_breakpoint"));
-	toggle_breakpoint->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_toggle_breakpoint));
-
-	Button *find_node_type = edit_menu->get_popup()->add_button(TTR("Find Node Type"), ED_GET_SHORTCUT("visual_script_editor/find_node_type"));
-	find_node_type->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_find_node_type));
-
+	edit_menu->get_popup()->add_callback_button(TTR("Delete Selected"), callable_mp(this, &VisualScriptEditor::_menu_delete_selected), varray(), ED_GET_SHORTCUT("visual_script_editor/delete_selected"));
+	edit_menu->get_popup()->add_callback_button(TTR("Toggle Breakpoint"), callable_mp(this, &VisualScriptEditor::_menu_toggle_breakpoint), varray(), ED_GET_SHORTCUT("visual_script_editor/toggle_breakpoint"));
+	edit_menu->get_popup()->add_callback_button(TTR("Find Node Type"), callable_mp(this, &VisualScriptEditor::_menu_find_node_type), varray(), ED_GET_SHORTCUT("visual_script_editor/find_node_type"));
+	edit_menu->get_popup()->add_callback_button(TTR("Copy Nodes"), callable_mp(this, &VisualScriptEditor::_menu_copy_nodes), varray(), ED_GET_SHORTCUT("visual_script_editor/copy_nodes"));
+	edit_menu->get_popup()->add_callback_button(TTR("Cut Nodes"), callable_mp(this, &VisualScriptEditor::_menu_cut_nodes), varray(), ED_GET_SHORTCUT("visual_script_editor/cut_nodes"));
+	edit_menu->get_popup()->add_callback_button(TTR("Paste Nodes"), callable_mp(this, &VisualScriptEditor::_menu_paste_nodes), varray(), ED_GET_SHORTCUT("visual_script_editor/paste_nodes"));
 	edit_menu->get_popup()->add_separator();
-
-	Button *copy_nodes = edit_menu->get_popup()->add_button(TTR("Copy Nodes"), ED_GET_SHORTCUT("visual_script_editor/copy_nodes"));
-	copy_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_copy_nodes));
-
-	Button *cut_nodes = edit_menu->get_popup()->add_button(TTR("Cut Nodes"), ED_GET_SHORTCUT("visual_script_editor/cut_nodes"));
-	cut_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_cut_nodes));
-
-	Button *paste_nodes = edit_menu->get_popup()->add_button(TTR("Paste Nodes"), ED_GET_SHORTCUT("visual_script_editor/paste_nodes"));
-	paste_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_paste_nodes));
-
-	edit_menu->get_popup()->add_separator();
-
-	Button *create_function = edit_menu->get_popup()->add_button(TTR("Make Function"), ED_GET_SHORTCUT("visual_script_editor/create_function"));
-	create_function->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_cut_nodes));
-
-	Button *refresh_nodes = edit_menu->get_popup()->add_button(TTR("Refresh Graph"), ED_GET_SHORTCUT("visual_script_editor/refresh_nodes"));
-	refresh_nodes->connect("pressed", callable_mp(this, &VisualScriptEditor::_menu_paste_nodes));
+	edit_menu->get_popup()->add_callback_button(TTR("Make Function"), callable_mp(this, &VisualScriptEditor::_menu_create_function), varray(), ED_GET_SHORTCUT("visual_script_editor/create_function"));
+	edit_menu->get_popup()->add_callback_button(TTR("Refresh Graph"), callable_mp(this, &VisualScriptEditor::_menu_refresh_nodes), varray(), ED_GET_SHORTCUT("visual_script_editor/refresh_nodes"));
 
 	members_section = memnew(VBoxContainer);
 	// Add but wait until done setting up this.
