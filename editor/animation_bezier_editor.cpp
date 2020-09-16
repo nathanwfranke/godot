@@ -650,15 +650,12 @@ void AnimationBezierTrackEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			Vector2 popup_pos = get_global_transform().xform(mb->get_position());
 
 			menu->clear();
-			Button *insert = menu->add_icon_button(TTR("Insert Key Here"), bezier_icon);
-			insert->connect("pressed", callable_mp(this, &AnimationBezierTrackEdit::_menu_insert));
+			menu->add_callback_button(TTR("Insert Key Here"), callable_mp(this, &AnimationBezierTrackEdit::_menu_insert), varray(), Ref<Shortcut>(), bezier_icon);
 			if (selection.size()) {
 				menu->add_separator();
-				Button *duplicate = menu->add_icon_button(TTR("Duplicate Selected Key(s)"), get_theme_icon("Duplicate", "EditorIcons"));
-				duplicate->connect("pressed", callable_mp(this, &AnimationBezierTrackEdit::duplicate_selection));
+				menu->add_callback_button(TTR("Duplicate Selected Key(s)"), callable_mp(this, &AnimationBezierTrackEdit::duplicate_selection), varray(), Ref<Shortcut>(), get_theme_icon("Duplicate", "EditorIcons"));
 				menu->add_separator();
-				Button *del = menu->add_icon_button(TTR("Delete Selected Key(s)"), get_theme_icon("Remove", "EditorIcons"));
-				del->connect("pressed", callable_mp(this, &AnimationBezierTrackEdit::delete_selection));
+				menu->add_callback_button(TTR("Delete Selected Key(s)"), callable_mp(this, &AnimationBezierTrackEdit::delete_selection), varray(), Ref<Shortcut>(), get_theme_icon("Remove", "EditorIcons"));
 			}
 
 			menu->set_as_minsize();

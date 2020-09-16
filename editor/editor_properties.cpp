@@ -744,8 +744,7 @@ void EditorPropertyLayers::_button_pressed() {
 		if (i == 5 || i == 10 || i == 15) {
 			layers->add_separator();
 		}
-		CheckBox *box = layers->add_check_button(grid->names[i]);
-		box->set_pressed(grid->value & (1 << i));
+		layers->add_callback_check_button(grid->names[i], callable_mp(this, &EditorPropertyLayers::_layer_selected))->set_pressed(grid->value & (1 << i));
 	}
 
 	Rect2 gp = button->get_screen_rect();
@@ -782,7 +781,8 @@ EditorPropertyLayers::EditorPropertyLayers() {
 	layers = memnew(PopupMenu);
 	add_child(layers);
 	layers->set_hide_on_checkable_item_selection(false);
-	layers->connect("id_pressed", callable_mp(this, &EditorPropertyLayers::_menu_pressed));
+	// This shouldn't be needed anymore
+	//layers->connect("selected", callable_mp(this, &EditorPropertyLayers::_layer_selected));
 	layers->connect("popup_hide", callable_mp((BaseButton *)button, &BaseButton::set_pressed), varray(false));
 }
 
@@ -2608,8 +2608,8 @@ void EditorPropertyResource::_update_menu_items() {
 	menu->clear();
 
 	if (get_edited_property() == "script" && base_type == "Script" && Object::cast_to<Node>(get_edited_object())) {
-		menu->add_icon_item(get_theme_icon("ScriptCreate", "EditorIcons"), TTR("New Script"), OBJ_MENU_NEW_SCRIPT);
-		menu->add_icon_item(get_theme_icon("ScriptExtend", "EditorIcons"), TTR("Extend Script"), OBJ_MENU_EXTEND_SCRIPT);
+		menu->add_callback_button(TTR("New Script"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_NEW_SCRIPT), get_theme_icon("ScriptCreate", "EditorIcons"));
+		menu->add_callback_button(TTR("Extend Script"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_EXTEND_SCRIPT), get_theme_icon("ScriptExtend", "EditorIcons"));
 		menu->add_separator();
 	} else if (base_type != "") {
 		int idx = 0;
@@ -2676,7 +2676,7 @@ void EditorPropertyResource::_update_menu_items() {
 				}
 
 				int id = TYPE_BASE_ID + idx;
-				menu->add_icon_item(icon, vformat(TTR("New %s"), t), id);
+				menu->add_callback_button(vformat(TTR("New %s"), t), callable_mp(this, &EditorPropertyResource::_menu_option), varray(id), icon);
 
 				idx++;
 			}
@@ -2687,17 +2687,17 @@ void EditorPropertyResource::_update_menu_items() {
 		}
 	}
 
-	menu->add_icon_item(get_theme_icon("Load", "EditorIcons"), TTR("Load"), OBJ_MENU_LOAD);
+	menu->add_callback_button(TTR("Load"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_LOAD), get_theme_icon("Load", "EditorIcons"));
 
 	if (!res.is_null()) {
-		menu->add_icon_item(get_theme_icon("Edit", "EditorIcons"), TTR("Edit"), OBJ_MENU_EDIT);
-		menu->add_icon_item(get_theme_icon("Clear", "EditorIcons"), TTR("Clear"), OBJ_MENU_CLEAR);
-		menu->add_icon_item(get_theme_icon("Duplicate", "EditorIcons"), TTR("Make Unique"), OBJ_MENU_MAKE_UNIQUE);
-		menu->add_icon_item(get_theme_icon("Save", "EditorIcons"), TTR("Save"), OBJ_MENU_SAVE);
+		menu->add_callback_button(TTR("Edit"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_EDIT), get_theme_icon("Edit", "EditorIcons"));
+		menu->add_callback_button(TTR("Clear"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_CLEAR), get_theme_icon("Clear", "EditorIcons"));
+		menu->add_callback_button(TTR("Duplicate"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_MAKE_UNIQUE), get_theme_icon("Make Unique", "EditorIcons"));
+		menu->add_callback_button(TTR("Save"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_SAVE), get_theme_icon("Save", "EditorIcons"));
 		RES r = res;
 		if (r.is_valid() && r->get_path().is_resource_file()) {
 			menu->add_separator();
-			menu->add_item(TTR("Show in FileSystem"), OBJ_MENU_SHOW_IN_FILE_SYSTEM);
+			menu->add_callback_button(TTR("Show in FileSystem"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_SHOW_IN_FILE_SYSTEM));
 		}
 	}
 
@@ -2720,11 +2720,11 @@ void EditorPropertyResource::_update_menu_items() {
 		menu->add_separator();
 
 		if (!res.is_null()) {
-			menu->add_item(TTR("Copy"), OBJ_MENU_COPY);
+			menu->add_callback_button(TTR("Copy"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_COPY));
 		}
 
 		if (paste_valid) {
-			menu->add_item(TTR("Paste"), OBJ_MENU_PASTE);
+			menu->add_callback_button(TTR("Paste"), callable_mp(this, &EditorPropertyResource::_menu_option), varray(OBJ_MENU_PASTE));
 		}
 	}
 
@@ -2742,7 +2742,7 @@ void EditorPropertyResource::_update_menu_items() {
 				icon = get_theme_icon(what, "Resource");
 			}
 
-			menu->add_icon_item(icon, vformat(TTR("Convert To %s"), what), CONVERT_BASE_ID + i);
+			menu->add_callback_button(vformat(TTR("Convert To %s"), what), callable_mp(this, &EditorPropertyResource::_menu_option), varray(CONVERT_BASE_ID + i), icon);
 		}
 	}
 }
@@ -3174,7 +3174,7 @@ EditorPropertyResource::EditorPropertyResource() {
 	edit = memnew(Button);
 	edit->set_flat(true);
 	edit->set_toggle_mode(true);
-	menu->connect("id_pressed", callable_mp(this, &EditorPropertyResource::_menu_option));
+	//menu->connect("id_pressed", callable_mp(this, &EditorPropertyResource::_menu_option));
 	menu->connect("popup_hide", callable_mp((BaseButton *)edit, &BaseButton::set_pressed), varray(false));
 	edit->connect("pressed", callable_mp(this, &EditorPropertyResource::_update_menu));
 	hbc->add_child(edit);

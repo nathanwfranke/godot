@@ -250,6 +250,7 @@ private:
 	PopupMenu *layers;
 	Button *button;
 
+	void _layer_selected(int p_which);
 	void _button_pressed();
 	void _menu_set_layer(int p_layer, bool p_active);
 
