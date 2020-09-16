@@ -116,12 +116,17 @@ public:
 	// TODO: Question: Should every button have a shortcut (Config in settings) and an icon (Config in editor theme)?
 	// If so, we should remove this method in favor of "add_button"
 	// Additionally, we could pass in an ID an automatically get the shortcut and icon
-	Button *add_icon_button(const String &p_label, const Ref<Texture2D> p_icon, const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Callable p_callback = Callable(), const Vector<Variant> &p_binds = Vector<Variant>());
+	Button *add_icon_button(const String &p_label, const Ref<Texture2D> p_icon, const Callable p_callback = Callable(), const Vector<Variant> &p_binds = Vector<Variant>());
+
+	// Add button automatically from shortcut information
+	Button *nadd_shortcut(const Ref<Shortcut> p_shortcut, const Callable p_callback = Callable(), const Vector<Variant> &p_binds = Vector<Variant>());
 
 	// Callback helper methods
 	Button *add_callback_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds = Vector<Variant>(), const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>());
 	Button *add_callback_check_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds = Vector<Variant>(), const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>());
 	Button *add_callback_radio_button(const String &p_label, const Ref<ButtonGroup> p_group, const Callable p_callback, const Vector<Variant> &p_binds = Vector<Variant>(), const Ref<Shortcut> p_shortcut = Ref<Shortcut>(), const Ref<Texture2D> p_icon = Ref<Texture2D>());
+
+	Button *add_submenu_button(PopupMenu *p_submenu, const String &p_label, const Ref<Texture2D> p_icon = Ref<Texture2D>());
 
 	Label *add_label(const String &p_label);
 

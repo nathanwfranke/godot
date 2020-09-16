@@ -355,15 +355,12 @@ void EditorNode::_update_scene_tabs() {
 	}
 }
 
-void EditorNode::_version_control_menu_option(int p_idx) {
-	switch (vcs_actions_menu->get_item_id(p_idx)) {
-		case RUN_VCS_SETTINGS: {
-			VersionControlEditorPlugin::get_singleton()->popup_vcs_set_up_dialog(gui_base);
-		} break;
-		case RUN_VCS_SHUT_DOWN: {
-			VersionControlEditorPlugin::get_singleton()->shut_down();
-		} break;
-	}
+void EditorNode::_version_control_setup() {
+	VersionControlEditorPlugin::get_singleton()->popup_vcs_set_up_dialog(gui_base);
+}
+
+void EditorNode::_version_control_shutdown() {
+	VersionControlEditorPlugin::get_singleton()->shut_down();
 }
 
 void EditorNode::_update_title() {
@@ -4705,30 +4702,27 @@ void EditorNode::_scene_tab_input(const Ref<InputEvent> &p_input) {
 			scene_tabs_context_menu->clear();
 			scene_tabs_context_menu->set_size(Size2(1, 1));
 
-			scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/new_scene"), FILE_NEW_SCENE);
+			scene_tabs_context_menu->nadd_shortcut(ED_GET_SHORTCUT("editor/new_scene"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_NEW_SCENE));
 			if (scene_tabs->get_hovered_tab() >= 0) {
-				scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/save_scene"), FILE_SAVE_SCENE);
-				scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/save_scene_as"), FILE_SAVE_AS_SCENE);
+				scene_tabs_context_menu->nadd_shortcut(ED_GET_SHORTCUT("editor/save_scene"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_SAVE_SCENE));
+				scene_tabs_context_menu->nadd_shortcut(ED_GET_SHORTCUT("editor/save_scene_as"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_SAVE_AS_SCENE));
 			}
-			scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/save_all_scenes"), FILE_SAVE_ALL_SCENES);
+			scene_tabs_context_menu->nadd_shortcut(ED_GET_SHORTCUT("editor/save_all_scenes"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_SAVE_ALL_SCENES));
 			if (scene_tabs->get_hovered_tab() >= 0) {
 				scene_tabs_context_menu->add_separator();
-				scene_tabs_context_menu->add_item(TTR("Show in FileSystem"), FILE_SHOW_IN_FILESYSTEM);
-				scene_tabs_context_menu->add_item(TTR("Play This Scene"), RUN_PLAY_SCENE);
-
+				scene_tabs_context_menu->add_callback_button(TTR("Show in FileSystem"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_SHOW_IN_FILESYSTEM));
+				scene_tabs_context_menu->add_callback_button(TTR("Play This Scene"), callable_mp(this, &EditorNode::_menu_option), varray(RUN_PLAY_SCENE));
 				scene_tabs_context_menu->add_separator();
 				Ref<Shortcut> close_tab_sc = ED_GET_SHORTCUT("editor/close_scene");
 				close_tab_sc->set_name(TTR("Close Tab"));
-				scene_tabs_context_menu->add_shortcut(close_tab_sc, FILE_CLOSE);
+				scene_tabs_context_menu->nadd_shortcut(close_tab_sc, callable_mp(this, &EditorNode::_menu_option), varray(FILE_CLOSE));
 				Ref<Shortcut> undo_close_tab_sc = ED_GET_SHORTCUT("editor/reopen_closed_scene");
 				undo_close_tab_sc->set_name(TTR("Undo Close Tab"));
-				scene_tabs_context_menu->add_shortcut(undo_close_tab_sc, FILE_OPEN_PREV);
-				if (previous_scenes.empty()) {
-					scene_tabs_context_menu->set_item_disabled(scene_tabs_context_menu->get_item_index(FILE_OPEN_PREV), true);
-				}
-				scene_tabs_context_menu->add_item(TTR("Close Other Tabs"), FILE_CLOSE_OTHERS);
-				scene_tabs_context_menu->add_item(TTR("Close Tabs to the Right"), FILE_CLOSE_RIGHT);
-				scene_tabs_context_menu->add_item(TTR("Close All Tabs"), FILE_CLOSE_ALL);
+				scene_tabs_context_menu->nadd_shortcut(undo_close_tab_sc, callable_mp(this, &EditorNode::_menu_option), varray(FILE_OPEN_PREV))->set_disabled(previous_scenes.empty());
+
+				scene_tabs_context_menu->add_callback_button(TTR("Close Other Tabs"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_CLOSE_OTHERS));
+				scene_tabs_context_menu->add_callback_button(TTR("Close Tabs to the Right"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_CLOSE_RIGHT));
+				scene_tabs_context_menu->add_callback_button(TTR("Close All Tabs"), callable_mp(this, &EditorNode::_menu_option), varray(FILE_CLOSE_ALL));
 			}
 			scene_tabs_context_menu->set_position(mb->get_global_position());
 			scene_tabs_context_menu->popup();
@@ -5958,7 +5952,7 @@ EditorNode::EditorNode() {
 
 	scene_tabs_context_menu = memnew(PopupMenu);
 	tabbar_container->add_child(scene_tabs_context_menu);
-	scene_tabs_context_menu->connect("id_pressed", callable_mp(this, &EditorNode::_menu_option));
+	//scene_tabs_context_menu->connect("id_pressed", callable_mp(this, &EditorNode::_menu_option));
 
 	srt->add_child(tabbar_container);
 	tabbar_container->add_child(scene_tabs);
@@ -6067,47 +6061,40 @@ EditorNode::EditorNode() {
 
 	p = file_menu->get_popup();
 
-	p->add_shortcut(ED_SHORTCUT("editor/new_scene", TTR("New Scene")), FILE_NEW_SCENE);
-	p->add_shortcut(ED_SHORTCUT("editor/new_inherited_scene", TTR("New Inherited Scene...")), FILE_NEW_INHERITED_SCENE);
-	p->add_shortcut(ED_SHORTCUT("editor/open_scene", TTR("Open Scene..."), KEY_MASK_CMD + KEY_O), FILE_OPEN_SCENE);
-	p->add_shortcut(ED_SHORTCUT("editor/reopen_closed_scene", TTR("Reopen Closed Scene"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_T), FILE_OPEN_PREV);
-	p->add_submenu_item(TTR("Open Recent"), "RecentScenes", FILE_OPEN_RECENT);
-
-	p->add_separator();
-	p->add_shortcut(ED_SHORTCUT("editor/save_scene", TTR("Save Scene"), KEY_MASK_CMD + KEY_S), FILE_SAVE_SCENE);
-	p->add_shortcut(ED_SHORTCUT("editor/save_scene_as", TTR("Save Scene As..."), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_S), FILE_SAVE_AS_SCENE);
-	p->add_shortcut(ED_SHORTCUT("editor/save_all_scenes", TTR("Save All Scenes"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_S), FILE_SAVE_ALL_SCENES);
-
-	p->add_separator();
-
-	p->add_shortcut(ED_SHORTCUT("editor/quick_open", TTR("Quick Open..."), KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_O), FILE_QUICK_OPEN);
-	p->add_shortcut(ED_SHORTCUT("editor/quick_open_scene", TTR("Quick Open Scene..."), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_O), FILE_QUICK_OPEN_SCENE);
-	p->add_shortcut(ED_SHORTCUT("editor/quick_open_script", TTR("Quick Open Script..."), KEY_MASK_CMD + KEY_MASK_ALT + KEY_O), FILE_QUICK_OPEN_SCRIPT);
-
-	p->add_separator();
-	PopupMenu *pm_export = memnew(PopupMenu);
-	pm_export->set_name("Export");
-	p->add_child(pm_export);
-	p->add_submenu_item(TTR("Convert To..."), "Export");
-	pm_export->add_shortcut(ED_SHORTCUT("editor/convert_to_MeshLibrary", TTR("MeshLibrary...")), FILE_EXPORT_MESH_LIBRARY);
-	pm_export->add_shortcut(ED_SHORTCUT("editor/convert_to_TileSet", TTR("TileSet...")), FILE_EXPORT_TILESET);
-	pm_export->connect("id_pressed", callable_mp(this, &EditorNode::_menu_option));
-
-	p->add_separator();
-	p->add_shortcut(ED_SHORTCUT("editor/undo", TTR("Undo"), KEY_MASK_CMD + KEY_Z), EDIT_UNDO, true);
-	p->add_shortcut(ED_SHORTCUT("editor/redo", TTR("Redo"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_Z), EDIT_REDO, true);
-
-	p->add_separator();
-	p->add_shortcut(ED_SHORTCUT("editor/reload_saved_scene", TTR("Reload Saved Scene")), EDIT_RELOAD_SAVED_SCENE);
-	p->add_shortcut(ED_SHORTCUT("editor/close_scene", TTR("Close Scene"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_W), FILE_CLOSE);
-
+	p->nadd_shortcut(ED_SHORTCUT("editor/new_scene", TTR("New Scene")), callable_mp(this, &EditorNode::_menu_option), varray(FILE_NEW_SCENE));
+	p->nadd_shortcut(ED_SHORTCUT("editor/new_inherited_scene", TTR("New Inherited Scene...")), callable_mp(this, &EditorNode::_menu_option), varray(FILE_NEW_INHERITED_SCENE));
+	p->nadd_shortcut(ED_SHORTCUT("editor/open_scene", TTR("Open Scene..."), KEY_MASK_CMD + KEY_O), callable_mp(this, &EditorNode::_menu_option), varray(FILE_OPEN_SCENE));
+	p->nadd_shortcut(ED_SHORTCUT("editor/reopen_closed_scene", TTR("Reopen Closed Scene"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_T), callable_mp(this, &EditorNode::_menu_option), varray(FILE_OPEN_PREV));
 	recent_scenes = memnew(PopupMenu);
-	recent_scenes->set_name("RecentScenes");
-	p->add_child(recent_scenes);
+	p->add_submenu_button(recent_scenes, TTR("Open Recent"));
 	recent_scenes->connect("id_pressed", callable_mp(this, &EditorNode::_open_recent_scene));
 
 	p->add_separator();
-	p->add_shortcut(ED_SHORTCUT("editor/file_quit", TTR("Quit"), KEY_MASK_CMD + KEY_Q), FILE_QUIT, true);
+	p->nadd_shortcut(ED_SHORTCUT("editor/save_scene", TTR("Save Scene"), KEY_MASK_CMD + KEY_S), callable_mp(this, &EditorNode::_menu_option), varray(FILE_SAVE_SCENE));
+	p->nadd_shortcut(ED_SHORTCUT("editor/save_scene_as", TTR("Save Scene As..."), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_S), callable_mp(this, &EditorNode::_menu_option), varray(FILE_SAVE_AS_SCENE));
+	p->nadd_shortcut(ED_SHORTCUT("editor/save_all_scenes", TTR("Save All Scenes"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_S), callable_mp(this, &EditorNode::_menu_option), varray(FILE_SAVE_ALL_SCENES));
+	p->add_separator();
+	p->nadd_shortcut(ED_SHORTCUT("editor/quick_open", TTR("Quick Open..."), KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_O), callable_mp(this, &EditorNode::_menu_option), varray(FILE_QUICK_OPEN));
+	p->nadd_shortcut(ED_SHORTCUT("editor/quick_open_scene", TTR("Quick Open Scene..."), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_O), callable_mp(this, &EditorNode::_menu_option), varray(FILE_QUICK_OPEN_SCENE));
+	p->nadd_shortcut(ED_SHORTCUT("editor/quick_open_script", TTR("Quick Open Script..."), KEY_MASK_CMD + KEY_MASK_ALT + KEY_O), callable_mp(this, &EditorNode::_menu_option), varray(FILE_QUICK_OPEN_SCRIPT));
+	p->add_separator();
+
+	PopupMenu *pm_export = memnew(PopupMenu);
+	p->add_submenu_button(pm_export, TTR("Convert To..."));
+	pm_export->nadd_shortcut(ED_SHORTCUT("editor/convert_to_MeshLibrary", TTR("MeshLibrary...")), callable_mp(this, &EditorNode::_menu_option), varray(FILE_EXPORT_MESH_LIBRARY));
+	pm_export->nadd_shortcut(ED_SHORTCUT("editor/convert_to_TileSet", TTR("TileSet...")), callable_mp(this, &EditorNode::_menu_option), varray(FILE_EXPORT_TILESET));
+	pm_export->connect("id_pressed", callable_mp(this, &EditorNode::_menu_option));
+
+	p->add_separator();
+	p->nadd_shortcut(ED_SHORTCUT("editor/undo", TTR("Undo"), KEY_MASK_CMD + KEY_Z), callable_mp(this, &EditorNode::_menu_option), varray(EDIT_UNDO));
+	p->nadd_shortcut(ED_SHORTCUT("editor/redo", TTR("Redo"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_Z), callable_mp(this, &EditorNode::_menu_option), varray(EDIT_REDO));
+
+	p->add_separator();
+	p->nadd_shortcut(ED_SHORTCUT("editor/reload_saved_scene", TTR("Reload Saved Scene")), callable_mp(this, &EditorNode::_menu_option), varray(EDIT_RELOAD_SAVED_SCENE));
+	p->nadd_shortcut(ED_SHORTCUT("editor/close_scene", TTR("Close Scene"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_W), callable_mp(this, &EditorNode::_menu_option), varray(FILE_CLOSE));
+
+	p->add_separator();
+	p->nadd_shortcut(ED_SHORTCUT("editor/file_quit", TTR("Quit"), KEY_MASK_CMD + KEY_Q), callable_mp(this, &EditorNode::_menu_option), varray(FILE_QUIT));
 
 	project_menu = memnew(MenuButton);
 	project_menu->set_flat(false);
@@ -6119,39 +6106,34 @@ EditorNode::EditorNode() {
 
 	p = project_menu->get_popup();
 
-	p->add_shortcut(ED_SHORTCUT("editor/project_settings", TTR("Project Settings...")), RUN_SETTINGS);
+	p->nadd_shortcut(ED_SHORTCUT("editor/project_settings", TTR("Project Settings...")), callable_mp(this, &EditorNode::_menu_option), varray(RUN_SETTINGS));
 	p->connect("id_pressed", callable_mp(this, &EditorNode::_menu_option));
 
 	vcs_actions_menu = VersionControlEditorPlugin::get_singleton()->get_version_control_actions_panel();
-	vcs_actions_menu->set_name("Version Control");
-	vcs_actions_menu->connect("index_pressed", callable_mp(this, &EditorNode::_version_control_menu_option));
 	p->add_separator();
-	p->add_child(vcs_actions_menu);
-	p->add_submenu_item(TTR("Version Control"), "Version Control");
-	vcs_actions_menu->add_item(TTR("Set Up Version Control"), RUN_VCS_SETTINGS);
-	vcs_actions_menu->add_item(TTR("Shut Down Version Control"), RUN_VCS_SHUT_DOWN);
+	p->add_submenu_button(vcs_actions_menu, TTR("Version Control"));
+	vcs_actions_menu->add_callback_button(TTR("Set Up Version Control"), callable_mp(this, &EditorNode::_version_control_setup));
+	vcs_actions_menu->add_callback_button(TTR("Shut Down Version Control"), callable_mp(this, &EditorNode::_version_control_shutdown));
 
 	p->add_separator();
-	p->add_shortcut(ED_SHORTCUT("editor/export", TTR("Export...")), FILE_EXPORT_PROJECT);
-	p->add_item(TTR("Install Android Build Template..."), FILE_INSTALL_ANDROID_SOURCE);
-	p->add_item(TTR("Open Project Data Folder"), RUN_PROJECT_DATA_FOLDER);
+	p->nadd_shortcut(ED_SHORTCUT("editor/export", TTR("Export...")), callable_mp(this, &EditorNode::_menu_option), varray(FILE_EXPORT_PROJECT));
+	p->add_callback_button(TTR("Install Android Build Template..."), callable_mp(this, &EditorNode::_menu_option), varray(FILE_INSTALL_ANDROID_SOURCE));
+	p->add_callback_button(TTR("Open Project Data Folder"), callable_mp(this, &EditorNode::_menu_option), varray(RUN_PROJECT_DATA_FOLDER));
 
 	plugin_config_dialog = memnew(PluginConfigDialog);
 	plugin_config_dialog->connect("plugin_ready", callable_mp(this, &EditorNode::_on_plugin_ready));
 	gui_base->add_child(plugin_config_dialog);
 
 	tool_menu = memnew(PopupMenu);
-	tool_menu->set_name("Tools");
 	tool_menu->connect("index_pressed", callable_mp(this, &EditorNode::_tool_menu_option));
-	p->add_child(tool_menu);
-	p->add_submenu_item(TTR("Tools"), "Tools");
-	tool_menu->add_item(TTR("Orphan Resource Explorer..."), TOOLS_ORPHAN_RESOURCES);
+	p->add_submenu_button(tool_menu, TTR("Tools"));
+	tool_menu->add_callback_button(TTR("Orphan Resource Explorer..."), callable_mp(this, &EditorNode::_tool_menu_option), varray(TOOLS_ORPHAN_RESOURCES));
 
 	p->add_separator();
 #ifdef OSX_ENABLED
-	p->add_shortcut(ED_SHORTCUT("editor/quit_to_project_list", TTR("Quit to Project List"), KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_Q), RUN_PROJECT_MANAGER, true);
+	p->nadd_shortcut(ED_SHORTCUT("editor/quit_to_project_list", TTR("Quit to Project List"), KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_Q), callable_mp(this, &EditorNode::_menu_option), varray(RUN_PROJECT_MANAGER));
 #else
-	p->add_shortcut(ED_SHORTCUT("editor/quit_to_project_list", TTR("Quit to Project List"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_Q), RUN_PROJECT_MANAGER, true);
+	p->nadd_shortcut(ED_SHORTCUT("editor/quit_to_project_list", TTR("Quit to Project List"), KEY_MASK_CMD + KEY_MASK_SHIFT + KEY_Q), callable_mp(this, &EditorNode::_menu_option), varray(RUN_PROJECT_MANAGER));
 #endif
 
 	menu_hb->add_spacer();
@@ -6178,28 +6160,26 @@ EditorNode::EditorNode() {
 
 	p = settings_menu->get_popup();
 #ifdef OSX_ENABLED
-	p->add_shortcut(ED_SHORTCUT("editor/editor_settings", TTR("Editor Settings..."), KEY_MASK_CMD + KEY_COMMA), SETTINGS_PREFERENCES);
+	p->nadd_shortcut(ED_SHORTCUT("editor/editor_settings", TTR("Editor Settings..."), KEY_MASK_CMD + KEY_COMMA), callable_mp(this, &EditorNode::_menu_option), varray(SETTINGS_PREFERENCES));
 #else
-	p->add_shortcut(ED_SHORTCUT("editor/editor_settings", TTR("Editor Settings...")), SETTINGS_PREFERENCES);
+	p->nadd_shortcut(ED_SHORTCUT("editor/editor_settings", TTR("Editor Settings...")), callable_mp(this, &EditorNode::_menu_option), varray(SETTINGS_PREFERENCES));
 #endif
 	p->add_separator();
 
 	editor_layouts = memnew(PopupMenu);
-	editor_layouts->set_name("Layouts");
-	p->add_child(editor_layouts);
 	editor_layouts->connect("id_pressed", callable_mp(this, &EditorNode::_layout_menu_option));
-	p->add_submenu_item(TTR("Editor Layout"), "Layouts");
+	p->add_submenu_button(editor_layouts, TTR("Editor Layout"));
 	p->add_separator();
 #ifdef OSX_ENABLED
-	p->add_shortcut(ED_SHORTCUT("editor/take_screenshot", TTR("Take Screenshot"), KEY_MASK_CMD | KEY_F12), EDITOR_SCREENSHOT);
+	Button *screenshot_button = p->nadd_shortcut(ED_SHORTCUT("editor/take_screenshot", TTR("Take Screenshot"), KEY_MASK_CMD | KEY_F12), callable_mp(this, &EditorNode::_menu_option), varray(EDITOR_SCREENSHOT));
 #else
-	p->add_shortcut(ED_SHORTCUT("editor/take_screenshot", TTR("Take Screenshot"), KEY_MASK_CTRL | KEY_F12), EDITOR_SCREENSHOT);
+	Button *screenshot_button = p->nadd_shortcut(ED_SHORTCUT("editor/take_screenshot", TTR("Take Screenshot"), KEY_MASK_CTRL | KEY_F12), callable_mp(this, &EditorNode::_menu_option), varray(EDITOR_SCREENSHOT));
 #endif
-	p->set_item_tooltip(p->get_item_count() - 1, TTR("Screenshots are stored in the Editor Data/Settings Folder."));
+	screenshot_button->set_tooltip(TTR("Screenshots are stored in the Editor Data/Settings Folder."));
 #ifdef OSX_ENABLED
-	p->add_shortcut(ED_SHORTCUT("editor/fullscreen_mode", TTR("Toggle Fullscreen"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_F), SETTINGS_TOGGLE_FULLSCREEN);
+	p->nadd_shortcut(ED_SHORTCUT("editor/fullscreen_mode", TTR("Toggle Fullscreen"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_F), callable_mp(this, &EditorNode::_menu_option), varray(SETTINGS_TOGGLE_FULLSCREEN));
 #else
-	p->add_shortcut(ED_SHORTCUT("editor/fullscreen_mode", TTR("Toggle Fullscreen"), KEY_MASK_SHIFT | KEY_F11), SETTINGS_TOGGLE_FULLSCREEN);
+	p->nadd_shortcut(ED_SHORTCUT("editor/fullscreen_mode", TTR("Toggle Fullscreen"), KEY_MASK_SHIFT | KEY_F11), callable_mp(this, &EditorNode::_menu_option), varray(SETTINGS_TOGGLE_FULLSCREEN));
 #endif
 #if defined(WINDOWS_ENABLED) && defined(WINDOWS_SUBSYSTEM_CONSOLE)
 	// The console can only be toggled if the application was built for the console subsystem,

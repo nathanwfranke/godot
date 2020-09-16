@@ -44,7 +44,6 @@
 #include "visual_script_func_nodes.h"
 #include "visual_script_nodes.h"
 
-#define TOOLS_ENABLED
 #ifdef TOOLS_ENABLED
 class VisualScriptEditorSignalEdit : public Object {
 	GDCLASS(VisualScriptEditorSignalEdit, Object);

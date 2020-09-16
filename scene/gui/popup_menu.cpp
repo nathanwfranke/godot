@@ -172,20 +172,27 @@ CheckBox *PopupMenu::add_radio_button(const String &p_label, const Ref<ButtonGro
 	return button;
 }
 
-Button *PopupMenu::add_icon_button(const String &p_label, const Ref<Texture2D> p_icon, const Ref<Shortcut> p_shortcut, const Callable p_callback, const Vector<Variant> &p_binds) {
-	return add_button(p_label, p_shortcut, p_icon, p_callback, p_binds);
+Button *PopupMenu::add_icon_button(const String &p_label, const Ref<Texture2D> p_icon, const Callable p_callback, const Vector<Variant> &p_binds) {
+	return add_button(p_label, Ref<Shortcut>(), p_icon, p_callback, p_binds);
+}
+Button *PopupMenu::nadd_shortcut(const Ref<Shortcut> p_shortcut, const Callable p_callback, const Vector<Variant> &p_binds) {
+	return add_button(p_shortcut->get_as_text(), p_shortcut, Ref<Texture2D>(), p_callback, p_binds);
 }
 
 Button *PopupMenu::add_callback_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon) {
 	return add_button(p_label, p_shortcut, p_icon, p_callback, p_binds);
 }
-
 Button *PopupMenu::add_callback_check_button(const String &p_label, const Callable p_callback, const Vector<Variant> &p_binds, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon) {
 	return add_check_button(p_label, p_shortcut, p_icon, p_callback, p_binds);
 }
-
 Button *PopupMenu::add_callback_radio_button(const String &p_label, const Ref<ButtonGroup> p_group, const Callable p_callback, const Vector<Variant> &p_binds, const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon) {
 	return add_radio_button(p_label, p_group, p_shortcut, p_icon, p_callback, p_binds);
+}
+
+Button *PopupMenu::add_submenu_button(PopupMenu *p_submenu, const String &p_label, const Ref<Texture2D> p_icon) {
+	add_child(p_submenu);
+	Button *button = add_icon_button(p_label, p_icon, callable_mp(p_submenu, &PopupMenu::popup));
+	return button;
 }
 
 Label *PopupMenu::add_label(const String &p_label) {
