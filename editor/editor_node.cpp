@@ -935,7 +935,7 @@ void EditorNode::save_resource_in_path(const Ref<Resource> &p_resource, const St
 }
 
 void EditorNode::save_resource(const Ref<Resource> &p_resource) {
-	if (p_resource->get_path().is_resource_file()) {
+	if (p_resource->get_path() != String()) {
 		save_resource_in_path(p_resource, p_resource->get_path());
 	} else {
 		save_resource_as(p_resource);
@@ -976,7 +976,7 @@ void EditorNode::save_resource_as(const Ref<Resource> &p_resource, const String 
 
 	if (p_at_path != String()) {
 		file->set_current_dir(p_at_path);
-		if (p_resource->get_path().is_resource_file()) {
+		if (p_resource->get_path() != String()) {
 			file->set_current_file(p_resource->get_path().get_file());
 		} else {
 			if (extensions.size()) {
@@ -1129,7 +1129,7 @@ bool EditorNode::_find_and_save_resource(RES p_res, Map<RES, bool> &processed, i
 
 	bool subchanged = _find_and_save_edited_subresources(p_res.ptr(), processed, flags);
 
-	if (p_res->get_path().is_resource_file()) {
+	if (p_res->get_path() != String()) {
 		if (changed || subchanged) {
 			//save
 			ResourceSaver::save(p_res->get_path(), p_res, flags);
