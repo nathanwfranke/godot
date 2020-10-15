@@ -325,8 +325,8 @@ void FileSystemDock::_notification(int p_what) {
 
 			button_hist_next->set_icon(get_theme_icon("Forward", ei));
 			button_hist_prev->set_icon(get_theme_icon("Back", ei));
-			file_list_popup->connect("id_pressed", callable_mp(this, &FileSystemDock::_file_list_rmb_option));
-			tree_popup->connect("id_pressed", callable_mp(this, &FileSystemDock::_tree_rmb_option));
+			//file_list_popup->connect("id_pressed", callable_mp(this, &FileSystemDock::_file_list_rmb_option));
+			//tree_popup->connect("id_pressed", callable_mp(this, &FileSystemDock::_tree_rmb_option));
 
 			current_path->connect("text_entered", callable_mp(this, &FileSystemDock::_navigate_to_path), make_binds(false));
 
@@ -2303,8 +2303,8 @@ void FileSystemDock::_tree_rmb_select(const Vector2 &p_pos) {
 	tree_popup->clear();
 	if (paths.size() == 1) {
 		if (paths[0].ends_with("/")) {
-			tree_popup->add_icon_item(get_theme_icon("GuiTreeArrowDown", "EditorIcons"), TTR("Expand All"), FOLDER_EXPAND_ALL);
-			tree_popup->add_icon_item(get_theme_icon("GuiTreeArrowRight", "EditorIcons"), TTR("Collapse All"), FOLDER_COLLAPSE_ALL);
+			tree_popup->add_icon_button(TTR("Expand All"), get_theme_icon("GuiTreeArrowDown", "EditorIcons"), callable_mp(this, &FileSystemDock::_tree_rmb_option), varray(FOLDER_EXPAND_ALL));
+			tree_popup->add_icon_button(TTR("Collapse All"), get_theme_icon("GuiTreeArrowRight", "EditorIcons"), callable_mp(this, &FileSystemDock::_tree_rmb_option), varray(FOLDER_COLLAPSE_ALL));
 			tree_popup->add_separator();
 		}
 	}
@@ -2323,10 +2323,10 @@ void FileSystemDock::_tree_rmb_empty(const Vector2 &p_pos) {
 	path = "res://";
 	tree_popup->clear();
 	tree_popup->set_size(Size2(1, 1));
-	tree_popup->add_icon_item(get_theme_icon("Folder", "EditorIcons"), TTR("New Folder..."), FILE_NEW_FOLDER);
-	tree_popup->add_icon_item(get_theme_icon("PackedScene", "EditorIcons"), TTR("New Scene..."), FILE_NEW_SCENE);
-	tree_popup->add_icon_item(get_theme_icon("Script", "EditorIcons"), TTR("New Script..."), FILE_NEW_SCRIPT);
-	tree_popup->add_icon_item(get_theme_icon("Object", "EditorIcons"), TTR("New Resource..."), FILE_NEW_RESOURCE);
+	tree_popup->add_icon_button(TTR("New Folder..."), get_theme_icon("Folder", "EditorIcons"), callable_mp(this, &FileSystemDock::_tree_rmb_option), varray(FILE_NEW_FOLDER));
+	tree_popup->add_icon_button(TTR("New Scene..."), get_theme_icon("PackedScene", "EditorIcons"), callable_mp(this, &FileSystemDock::_tree_rmb_option), varray(FILE_NEW_SCENE));
+	tree_popup->add_icon_button(TTR("New Script..."), get_theme_icon("Script", "EditorIcons"), callable_mp(this, &FileSystemDock::_tree_rmb_option), varray(FILE_NEW_SCRIPT));
+	tree_popup->add_icon_button(TTR("New Resource..."), get_theme_icon("Object", "EditorIcons"), callable_mp(this, &FileSystemDock::_tree_rmb_option), varray(FILE_NEW_RESOURCE));
 	tree_popup->set_position(tree->get_global_position() + p_pos);
 	tree_popup->popup();
 }
@@ -2368,12 +2368,12 @@ void FileSystemDock::_file_list_rmb_pressed(const Vector2 &p_pos) {
 	file_list_popup->clear();
 	file_list_popup->set_size(Size2(1, 1));
 
-	file_list_popup->add_icon_item(get_theme_icon("Folder", "EditorIcons"), TTR("New Folder..."), FILE_NEW_FOLDER);
-	file_list_popup->add_icon_item(get_theme_icon("PackedScene", "EditorIcons"), TTR("New Scene..."), FILE_NEW_SCENE);
-	file_list_popup->add_icon_item(get_theme_icon("Script", "EditorIcons"), TTR("New Script..."), FILE_NEW_SCRIPT);
-	file_list_popup->add_icon_item(get_theme_icon("Object", "EditorIcons"), TTR("New Resource..."), FILE_NEW_RESOURCE);
+	file_list_popup->add_icon_button(TTR("New Folder..."), get_theme_icon("Folder", "EditorIcons"), callable_mp(this, &FileSystemDock::_file_list_rmb_option), varray(FILE_NEW_FOLDER));
+	file_list_popup->add_icon_button(TTR("New Scene..."), get_theme_icon("PackedScene", "EditorIcons"), callable_mp(this, &FileSystemDock::_file_list_rmb_option), varray(FILE_NEW_SCENE));
+	file_list_popup->add_icon_button(TTR("New Script..."), get_theme_icon("Script", "EditorIcons"), callable_mp(this, &FileSystemDock::_file_list_rmb_option), varray(FILE_NEW_SCRIPT));
+	file_list_popup->add_icon_button(TTR("New Resource..."), get_theme_icon("Object", "EditorIcons"), callable_mp(this, &FileSystemDock::_file_list_rmb_option), varray(FILE_NEW_RESOURCE));
 	file_list_popup->add_separator();
-	file_list_popup->add_icon_item(get_theme_icon("Filesystem", "EditorIcons"), TTR("Open in File Manager"), FILE_SHOW_IN_EXPLORER);
+	file_list_popup->add_icon_button(TTR("Open in File Manager"), get_theme_icon("Filesystem", "EditorIcons"), callable_mp(this, &FileSystemDock::_file_list_rmb_option), varray(FILE_SHOW_IN_EXPLORER));
 	file_list_popup->set_position(files->get_global_position() + p_pos);
 	file_list_popup->popup();
 }

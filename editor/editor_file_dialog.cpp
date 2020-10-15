@@ -568,7 +568,7 @@ void EditorFileDialog::_item_list_item_rmb_selected(int p_item, const Vector2 &p
 		copy_path->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_copy_path));
 	}
 	if (allow_delete) {
-		Button *del = item_menu->add_icon_button(TTR("Delete"), item_list->get_theme_icon("Remove", "EditorIcons"), ED_SHORTCUT("file_dialog/delete", TTR("Delete"), KEY_DELETE));
+		Button *del = item_menu->add_shortcut_icon_button(ED_SHORTCUT("file_dialog/delete", TTR("Delete"), KEY_DELETE), item_list->get_theme_icon("Remove", "EditorIcons"));
 		del->connect("pressed", callable_mp(this, &EditorFileDialog::_item_menu_copy_path));
 	}
 	if (single_item_selected) {

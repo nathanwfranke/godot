@@ -175,7 +175,11 @@ CheckBox *PopupMenu::add_radio_button(const String &p_label, const Ref<ButtonGro
 Button *PopupMenu::add_icon_button(const String &p_label, const Ref<Texture2D> p_icon, const Callable p_callback, const Vector<Variant> &p_binds) {
 	return add_button(p_label, Ref<Shortcut>(), p_icon, p_callback, p_binds);
 }
-Button *PopupMenu::nadd_shortcut(const Ref<Shortcut> p_shortcut, const Callable p_callback, const Vector<Variant> &p_binds) {
+Button *PopupMenu::add_shortcut_icon_button(const Ref<Shortcut> p_shortcut, const Ref<Texture2D> p_icon, const Callable p_callback, const Vector<Variant> &p_binds) {
+	return add_button(p_shortcut->get_as_text(), p_shortcut, p_icon, p_callback, p_binds);
+}
+
+Button *PopupMenu::add_shortcut_button(const Ref<Shortcut> p_shortcut, const Callable p_callback, const Vector<Variant> &p_binds) {
 	return add_button(p_shortcut->get_as_text(), p_shortcut, Ref<Texture2D>(), p_callback, p_binds);
 }
 
@@ -206,6 +210,18 @@ SplitContainer *PopupMenu::add_separator() {
 	SplitContainer *sep = memnew(VSplitContainer);
 	add_item(sep);
 	return sep;
+}
+
+int PopupMenu::get_item_index(const String &p_label) {
+	for(int i = 0; i < get_item_count(); ++i) {
+		Button *button = get_button(i);
+		if(button) {
+			if(button->get_text() == p_label) {
+				return i;
+			}
+		}
+	}
+	return -1;
 }
 
 Control *PopupMenu::get_item(const int &p_id) {

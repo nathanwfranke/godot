@@ -258,6 +258,7 @@ private:
 	HBoxContainer *menu_hb;
 	Control *viewport;
 	MenuButton *file_menu;
+	Button *file_menu_prev;
 	MenuButton *project_menu;
 	MenuButton *debug_menu;
 	MenuButton *settings_menu;
@@ -324,6 +325,8 @@ private:
 	CheckBox *file_export_lib_merge;
 	String current_path;
 	MenuButton *update_spinner;
+	Button *update_continuously;
+	Button *update_when_changed;
 
 	String defer_load_scene;
 	Node *_last_instanced_scene;
