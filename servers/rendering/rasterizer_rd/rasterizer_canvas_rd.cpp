@@ -455,7 +455,7 @@ void RasterizerCanvasRD::_render_item(RD::DrawListID p_draw_list, const Item *p_
 
 				//bind textures
 
-				_bind_canvas_texture(p_draw_list, rect->texture, current_filter, current_repeat, last_texture, push_constant, texpixel_size);
+				_bind_canvas_texture(p_draw_list, rect->texture, current_filter, (rect->flags & CANVAS_RECT_TILE) ? RenderingServer::CanvasItemTextureRepeat::CANVAS_ITEM_TEXTURE_REPEAT_ENABLED : current_repeat, last_texture, push_constant, texpixel_size);
 
 				Rect2 src_rect;
 				Rect2 dst_rect;

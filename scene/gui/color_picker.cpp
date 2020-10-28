@@ -395,10 +395,7 @@ void ColorPicker::_update_text_value() {
 void ColorPicker::_sample_draw() {
 	const Rect2 r = Rect2(Point2(), Size2(uv_edit->get_size().width, sample->get_size().height * 0.95));
 
-	if (color.a < 1.0) {
-		sample->draw_texture_rect(get_theme_icon("preset_bg", "ColorPicker"), r, true);
-	}
-
+	sample->draw_texture_rect(get_theme_icon("GuiMiniCheckerboard", "EditorIcons"), r, true);
 	sample->draw_rect(r, color);
 
 	if (color.r > 1 || color.g > 1 || color.b > 1) {
@@ -912,7 +909,7 @@ void ColorPickerButton::_notification(int p_what) {
 		case NOTIFICATION_DRAW: {
 			const Ref<StyleBox> normal = get_theme_stylebox("normal");
 			const Rect2 r = Rect2(normal->get_offset(), get_size() - normal->get_minimum_size());
-			draw_texture_rect(Control::get_theme_icon("bg", "ColorPickerButton"), r, true);
+			draw_texture_rect(get_theme_icon("GuiMiniCheckerboard", "EditorIcons"), r, true);
 			draw_rect(r, color);
 
 			if (color.r > 1 || color.g > 1 || color.b > 1) {

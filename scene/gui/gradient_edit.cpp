@@ -54,6 +54,9 @@ GradientEdit::GradientEdit() {
 
 	checker = Ref<ImageTexture>(memnew(ImageTexture));
 	Ref<Image> img = memnew(Image(checker_bg_png));
+	checker->create_from_image(img);
+	set_texture_repeat(TEXTURE_REPEAT_ENABLED); // Repeat background checkerboard
+	set_texture_filter(TEXTURE_FILTER_NEAREST); // Do not blur background checkerboard with filter
 }
 
 int GradientEdit::_get_point_from_pos(int x) {
@@ -412,18 +415,13 @@ void GradientEdit::_draw_checker(int x, int y, int w, int h) {
 	backPoints.push_back(Vector2(x, y + h));
 	backPoints.push_back(Vector2(x + w, y + h));
 	backPoints.push_back(Vector2(x + w, y));
-	Vector<Color> colorPoints;
-	colorPoints.push_back(Color(1, 1, 1, 1));
-	colorPoints.push_back(Color(1, 1, 1, 1));
-	colorPoints.push_back(Color(1, 1, 1, 1));
-	colorPoints.push_back(Color(1, 1, 1, 1));
 	Vector<Vector2> uvPoints;
 	//Draw checker pattern pixel-perfect and scale it by 2.
 	uvPoints.push_back(Vector2(x, y));
 	uvPoints.push_back(Vector2(x, y + h * .5f / checker->get_height()));
 	uvPoints.push_back(Vector2(x + w * .5f / checker->get_width(), y + h * .5f / checker->get_height()));
 	uvPoints.push_back(Vector2(x + w * .5f / checker->get_width(), y));
-	draw_polygon(backPoints, colorPoints, uvPoints, checker);
+	draw_colored_polygon(backPoints, Color(1, 1, 1, 1), uvPoints, checker);
 }
 
 Size2 GradientEdit::get_minimum_size() const {
