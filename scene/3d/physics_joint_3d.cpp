@@ -86,36 +86,19 @@ void Joint3D::_update_joint(bool p_only_free) {
 
 	if (node_a && !body_a && node_b && !body_b) {
 		warning = TTR("Node A and Node B must be PhysicsBody3Ds");
-		update_configuration_warning();
-		return;
-	}
-
-	if (node_a && !body_a) {
+	} else if (node_a && !body_a) {
 		warning = TTR("Node A must be a PhysicsBody3D");
-		update_configuration_warning();
-		return;
-	}
-
-	if (node_b && !body_b) {
+	} else if (node_b && !body_b) {
 		warning = TTR("Node B must be a PhysicsBody3D");
-		update_configuration_warning();
-		return;
-	}
-
-	if (!body_a && !body_b) {
+	} else if (!body_a && !body_b) {
 		warning = TTR("Joint is not connected to any PhysicsBody3Ds");
-		update_configuration_warning();
-		return;
-	}
-
-	if (body_a == body_b) {
+	} else if (body_a == body_b) {
 		warning = TTR("Node A and Node B must be different PhysicsBody3Ds");
-		update_configuration_warning();
-		return;
+	} else {
+		warning = String();
 	}
 
-	warning = String();
-	update_configuration_warning();
+	update_configuration_warnings();
 
 	if (body_a) {
 		joint = _configure_joint(body_a, body_b);
@@ -211,17 +194,14 @@ bool Joint3D::get_exclude_nodes_from_collision() const {
 	return exclude_from_collision;
 }
 
-String Joint3D::get_configuration_warning() const {
-	String node_warning = Node3D::get_configuration_warning();
+TypedArray<String> Joint3D::get_configuration_warnings() const {
+	TypedArray<String> warnings = Node3D::get_configuration_warnings();
 
 	if (!warning.is_empty()) {
-		if (!node_warning.is_empty()) {
-			node_warning += "\n\n";
-		}
-		node_warning += warning;
+		warnings.push_back(warning);
 	}
 
-	return node_warning;
+	return warnings;
 }
 
 void Joint3D::_bind_methods() {

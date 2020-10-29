@@ -70,7 +70,7 @@ public:
 
 	virtual AABB get_item_rect() const;
 
-	String get_configuration_warning() const override;
+	TypedArray<String> get_configuration_warnings() const override;
 
 	CollisionPolygon3D();
 };

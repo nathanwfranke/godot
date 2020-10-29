@@ -482,7 +482,7 @@ void NavigationRegion2D::set_navigation_polygon(const Ref<NavigationPolygon> &p_
 	_navpoly_changed();
 
 	_change_notify("navpoly");
-	update_configuration_warning();
+	update_configuration_warnings();
 }
 
 Ref<NavigationPolygon> NavigationRegion2D::get_navigation_polygon() const {
@@ -495,31 +495,27 @@ void NavigationRegion2D::_navpoly_changed() {
 	}
 }
 
-String NavigationRegion2D::get_configuration_warning() const {
-	if (!is_visible_in_tree() || !is_inside_tree()) {
-		return String();
-	}
+TypedArray<String> NavigationRegion2D::get_configuration_warnings() const {
+	TypedArray<String> warnings = Node2D::get_configuration_warnings();
 
-	String warning = Node2D::get_configuration_warning();
-
-	if (!navpoly.is_valid()) {
-		if (!warning.is_empty()) {
-			warning += "\n\n";
-		}
-		warning += TTR("A NavigationPolygon resource must be set or created for this node to work. Please set a property or draw a polygon.");
-	}
-	const Node2D *c = this;
-	while (c) {
-		if (Object::cast_to<Navigation2D>(c)) {
-			return warning;
+	if (is_visible_in_tree() && is_inside_tree()) {
+		if (!navpoly.is_valid()) {
+			warnings.push_back(TTR("A NavigationPolygon resource must be set or created for this node to work. Please set a property or draw a polygon."));
 		}
 
-		c = Object::cast_to<Node2D>(c->get_parent());
+		const Node2D *c = this;
+		while (c) {
+			if (Object::cast_to<Navigation2D>(c)) {
+				return warnings;
+			}
+
+			c = Object::cast_to<Node2D>(c->get_parent());
+		}
+
+		warnings.push_back(TTR("NavigationRegion2D must be a child or grandchild to a Navigation2D node. It only provides navigation data."));
 	}
-	if (!warning.is_empty()) {
-		warning += "\n\n";
-	}
-	return warning + TTR("NavigationRegion2D must be a child or grandchild to a Navigation2D node. It only provides navigation data.");
+
+	return warnings;
 }
 
 void NavigationRegion2D::_bind_methods() {

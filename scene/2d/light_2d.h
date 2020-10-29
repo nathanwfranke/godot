@@ -126,6 +126,8 @@ public:
 
 	void set_blend_mode(BlendMode p_mode);
 	BlendMode get_blend_mode() const;
+	
+	TypedArray<String> get_configuration_warnings() const override;
 
 	Light2D();
 	~Light2D();
@@ -168,7 +170,7 @@ public:
 	void set_texture_scale(float p_scale);
 	float get_texture_scale() const;
 
-	String get_configuration_warning() const override;
+	TypedArray<String> get_configuration_warnings() const override;
 
 	PointLight2D();
 };

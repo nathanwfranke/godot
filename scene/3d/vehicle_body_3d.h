@@ -145,7 +145,7 @@ public:
 	void set_steering(float p_steering);
 	float get_steering() const;
 
-	String get_configuration_warning() const override;
+	TypedArray<String> get_configuration_warnings() const override;
 
 	VehicleWheel3D();
 };

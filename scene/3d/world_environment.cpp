@@ -79,7 +79,7 @@ void WorldEnvironment::set_environment(const Ref<Environment> &p_environment) {
 		add_to_group("_world_environment_" + itos(get_viewport()->find_world_3d()->get_scenario().get_id()));
 	}
 
-	update_configuration_warning();
+	update_configuration_warnings();
 }
 
 Ref<Environment> WorldEnvironment::get_environment() const {
@@ -102,38 +102,32 @@ void WorldEnvironment::set_camera_effects(const Ref<CameraEffects> &p_camera_eff
 		add_to_group("_world_camera_effects_" + itos(get_viewport()->find_world_3d()->get_scenario().get_id()));
 	}
 
-	update_configuration_warning();
+	update_configuration_warnings();
 }
 
 Ref<CameraEffects> WorldEnvironment::get_camera_effects() const {
 	return camera_effects;
 }
 
-String WorldEnvironment::get_configuration_warning() const {
-	String warning = Node::get_configuration_warning();
+TypedArray<String> WorldEnvironment::get_configuration_warnings() const {
+	TypedArray<String> warnings = Node::get_configuration_warnings();
 
 	if (!environment.is_valid()) {
-		if (!warning.is_empty()) {
-			warning += "\n\n";
-		}
-		warning += TTR("WorldEnvironment requires its \"Environment\" property to contain an Environment to have a visible effect.");
+		warnings.push_back(TTR("WorldEnvironment requires its \"Environment\" property to contain an Environment to have a visible effect."));
 	}
 
 	if (!is_inside_tree()) {
-		return warning;
+		return warnings;
 	}
 
 	List<Node *> nodes;
 	get_tree()->get_nodes_in_group("_world_environment_" + itos(get_viewport()->find_world_3d()->get_scenario().get_id()), &nodes);
 
 	if (nodes.size() > 1) {
-		if (!warning.is_empty()) {
-			warning += "\n\n";
-		}
-		warning += TTR("Only one WorldEnvironment is allowed per scene (or set of instanced scenes).");
+		warnings.push_back(TTR("Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."));
 	}
 
-	return warning;
+	return warnings;
 }
 
 void WorldEnvironment::_bind_methods() {

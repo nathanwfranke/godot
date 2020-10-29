@@ -89,36 +89,19 @@ void Joint2D::_update_joint(bool p_only_free) {
 
 	if (node_a && !body_a && node_b && !body_b) {
 		warning = TTR("Node A and Node B must be PhysicsBody2Ds");
-		update_configuration_warning();
-		return;
-	}
-
-	if (node_a && !body_a) {
+	} else if (node_a && !body_a) {
 		warning = TTR("Node A must be a PhysicsBody2D");
-		update_configuration_warning();
-		return;
-	}
-
-	if (node_b && !body_b) {
+	} else if (node_b && !body_b) {
 		warning = TTR("Node B must be a PhysicsBody2D");
-		update_configuration_warning();
-		return;
-	}
-
-	if (!body_a || !body_b) {
+	} else if (!body_a || !body_b) {
 		warning = TTR("Joint is not connected to two PhysicsBody2Ds");
-		update_configuration_warning();
-		return;
-	}
-
-	if (body_a == body_b) {
+	} else if (body_a == body_b) {
 		warning = TTR("Node A and Node B must be different PhysicsBody2Ds");
-		update_configuration_warning();
-		return;
+	} else {
+		warning = String();
 	}
 
-	warning = String();
-	update_configuration_warning();
+	update_configuration_warnings();
 
 	if (body_a) {
 		body_a->force_update_transform();
@@ -216,17 +199,14 @@ bool Joint2D::get_exclude_nodes_from_collision() const {
 	return exclude_from_collision;
 }
 
-String Joint2D::get_configuration_warning() const {
-	String node_warning = Node2D::get_configuration_warning();
+TypedArray<String> Joint2D::get_configuration_warnings() const {
+	TypedArray<String> warnings = Node2D::get_configuration_warnings();
 
 	if (!warning.is_empty()) {
-		if (!node_warning.is_empty()) {
-			node_warning += "\n\n";
-		}
-		node_warning += warning;
+		warnings.push_back(warning);
 	}
 
-	return node_warning;
+	return warnings;
 }
 
 void Joint2D::_bind_methods() {

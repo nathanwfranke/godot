@@ -142,7 +142,7 @@ void NavigationRegion3D::set_navigation_mesh(const Ref<NavigationMesh> &p_navmes
 	emit_signal("navigation_mesh_changed");
 
 	update_gizmo();
-	update_configuration_warning();
+	update_configuration_warnings();
 }
 
 Ref<NavigationMesh> NavigationRegion3D::get_navigation_mesh() const {
@@ -185,33 +185,27 @@ void NavigationRegion3D::_bake_finished(Ref<NavigationMesh> p_nav_mesh) {
 	emit_signal("bake_finished");
 }
 
-String NavigationRegion3D::get_configuration_warning() const {
-	if (!is_visible_in_tree() || !is_inside_tree()) {
-		return String();
-	}
+TypedArray<String> NavigationRegion3D::get_configuration_warnings() const {
+	TypedArray<String> warnings = Node::get_configuration_warnings();
 
-	String warning = Node3D::get_configuration_warning();
-
-	if (!navmesh.is_valid()) {
-		if (!warning.is_empty()) {
-			warning += "\n\n";
-		}
-		warning += TTR("A NavigationMesh resource must be set or created for this node to work.");
-	}
-
-	const Node3D *c = this;
-	while (c) {
-		if (Object::cast_to<Navigation3D>(c)) {
-			return warning;
+	if (is_visible_in_tree() && is_inside_tree()) {
+		if (!navmesh.is_valid()) {
+			warnings.push_back(TTR("A NavigationMesh resource must be set or created for this node to work."));
 		}
 
-		c = Object::cast_to<Node3D>(c->get_parent());
+		const Node3D *c = this;
+		while (c) {
+			if (Object::cast_to<Navigation3D>(c)) {
+				return warnings;
+			}
+
+			c = Object::cast_to<Node3D>(c->get_parent());
+		}
+
+		warnings.push_back(TTR("NavigationRegion3D must be a child or grandchild to a Navigation3D node. It only provides navigation data."));
 	}
 
-	if (!warning.is_empty()) {
-		warning += "\n\n";
-	}
-	return warning + TTR("NavigationRegion3D must be a child or grandchild to a Navigation3D node. It only provides navigation data.");
+	return warnings;
 }
 
 void NavigationRegion3D::_bind_methods() {
@@ -233,7 +227,7 @@ void NavigationRegion3D::_bind_methods() {
 
 void NavigationRegion3D::_changed_callback(Object *p_changed, const char *p_prop) {
 	update_gizmo();
-	update_configuration_warning();
+	update_configuration_warnings();
 }
 
 NavigationRegion3D::NavigationRegion3D() {

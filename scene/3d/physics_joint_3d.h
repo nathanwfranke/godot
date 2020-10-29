@@ -60,8 +60,6 @@ protected:
 	static void _bind_methods();
 
 public:
-	virtual String get_configuration_warning() const override;
-
 	void set_node_a(const NodePath &p_node_a);
 	NodePath get_node_a() const;
 
@@ -76,6 +74,8 @@ public:
 
 	RID get_joint() const { return joint; }
 	Joint3D();
+	
+	virtual TypedArray<String> get_configuration_warnings() const override;
 };
 
 ///////////////////////////////////////////

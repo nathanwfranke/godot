@@ -212,6 +212,16 @@ void Light2D::_notification(int p_what) {
 	}
 }
 
+TypedArray<String> Light2D::get_configuration_warnings() const {
+	TypedArray<String> warnings = Node::get_configuration_warnings();
+
+	if (!texture.is_valid()) {
+		warnings.push_back(TTR("A texture with the shape of the light must be supplied to the \"Texture\" property."));
+	}
+
+	return warnings;
+}
+
 void Light2D::set_shadow_smooth(float p_amount) {
 	shadow_smooth = p_amount;
 	RS::get_singleton()->canvas_light_set_shadow_smooth(canvas_light, shadow_smooth);
@@ -382,7 +392,7 @@ void PointLight2D::set_texture(const Ref<Texture2D> &p_texture) {
 		RS::get_singleton()->canvas_light_set_texture(_get_light(), RID());
 	}
 
-	update_configuration_warning();
+	update_configuration_warnings();
 }
 
 Ref<Texture2D> PointLight2D::get_texture() const {
@@ -400,17 +410,14 @@ Vector2 PointLight2D::get_texture_offset() const {
 	return texture_offset;
 }
 
-String PointLight2D::get_configuration_warning() const {
-	String warning = Node2D::get_configuration_warning();
+TypedArray<String> PointLight2D::get_configuration_warnings() const {
+	TypedArray<String> warnings = Node2D::get_configuration_warnings();
 
 	if (!texture.is_valid()) {
-		if (!warning.is_empty()) {
-			warning += "\n\n";
-		}
-		warning += TTR("A texture with the shape of the light must be supplied to the \"Texture\" property.");
+		warnings.push_back(TTR("A texture with the shape of the light must be supplied to the \"Texture\" property."));
 	}
 
-	return warning;
+	return warnings;
 }
 
 void PointLight2D::set_texture_scale(float p_scale) {
