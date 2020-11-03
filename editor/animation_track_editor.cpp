@@ -598,7 +598,7 @@ public:
 						List<StringName> anims;
 						ap->get_animation_list(&anims);
 						for (List<StringName>::Element *E = anims.front(); E; E = E->next()) {
-							if (animations != String()) {
+							if (!animations.empty()) {
 								animations += ",";
 							}
 
@@ -607,7 +607,7 @@ public:
 					}
 				}
 
-				if (animations != String()) {
+				if (!animations.empty()) {
 					animations += ",";
 				}
 				animations += "[stop]";
@@ -1250,7 +1250,7 @@ public:
 							List<StringName> anims;
 							ap->get_animation_list(&anims);
 							for (List<StringName>::Element *G = anims.front(); G; G = G->next()) {
-								if (animations != String()) {
+								if (!animations.empty()) {
 									animations += ",";
 								}
 
@@ -1259,7 +1259,7 @@ public:
 						}
 					}
 
-					if (animations != String()) {
+					if (!animations.empty()) {
 						animations += ",";
 					}
 					animations += "[stop]";
@@ -2506,7 +2506,7 @@ String AnimationTrackEdit::get_tooltip(const Point2 &p_pos) const {
 					if (stream.is_valid()) {
 						if (stream->get_path().is_resource_file()) {
 							stream_name = stream->get_path().get_file();
-						} else if (stream->get_name() != "") {
+						} else if (!stream->get_name().empty()) {
 							stream_name = stream->get_name();
 						} else {
 							stream_name = stream->get_class();
@@ -3435,7 +3435,7 @@ void AnimationTrackEditor::insert_transform_key(Node3D *p_node, const String &p_
 	ERR_FAIL_COND(!root);
 	//let's build a node path
 	String path = root->get_path_to(p_node);
-	if (p_sub != "") {
+	if (!p_sub.empty()) {
 		path += ":" + p_sub;
 	}
 
@@ -3523,7 +3523,7 @@ void AnimationTrackEditor::insert_node_value_key(Node *p_node, const String &p_p
 	EditorHistory *history = EditorNode::get_singleton()->get_editor_history();
 	for (int i = 1; i < history->get_path_size(); i++) {
 		String prop = history->get_path_property(i);
-		ERR_FAIL_COND(prop == "");
+		ERR_FAIL_COND(prop.empty());
 		path += ":" + prop;
 	}
 
@@ -3622,7 +3622,7 @@ void AnimationTrackEditor::insert_value_key(const String &p_property, const Vari
 
 	for (int i = 1; i < history->get_path_size(); i++) {
 		String prop = history->get_path_property(i);
-		ERR_FAIL_COND(prop == "");
+		ERR_FAIL_COND(prop.empty());
 		path += ":" + prop;
 	}
 

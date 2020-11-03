@@ -396,7 +396,7 @@ void DocData::generate(bool p_basic_types) {
 		method_list.sort();
 
 		for (List<MethodInfo>::Element *E = method_list.front(); E; E = E->next()) {
-			if (E->get().name == "" || (E->get().name[0] == '_' && !(E->get().flags & METHOD_FLAG_VIRTUAL))) {
+			if (E->get().name.empty() || (E->get().name[0] == '_' && !(E->get().flags & METHOD_FLAG_VIRTUAL))) {
 				continue; //hidden, don't count
 			}
 
@@ -418,12 +418,12 @@ void DocData::generate(bool p_basic_types) {
 			}
 
 			if (E->get().flags & METHOD_FLAG_CONST) {
-				if (method.qualifiers != "") {
+				if (!method.qualifiers.empty()) {
 					method.qualifiers += " ";
 				}
 				method.qualifiers += "const";
 			} else if (E->get().flags & METHOD_FLAG_VARARG) {
-				if (method.qualifiers != "") {
+				if (!method.qualifiers.empty()) {
 					method.qualifiers += " ";
 				}
 				method.qualifiers += "vararg";
@@ -592,7 +592,7 @@ void DocData::generate(bool p_basic_types) {
 			return_doc_from_retinfo(method, mi.return_val);
 
 			if (mi.flags & METHOD_FLAG_VARARG) {
-				if (method.qualifiers != "") {
+				if (!method.qualifiers.empty()) {
 					method.qualifiers += " ";
 				}
 				method.qualifiers += "vararg";
@@ -690,7 +690,7 @@ void DocData::generate(bool p_basic_types) {
 				md.name = mi.name;
 
 				if (mi.flags & METHOD_FLAG_VARARG) {
-					if (md.qualifiers != "") {
+					if (!md.qualifiers.empty()) {
 						md.qualifiers += " ";
 					}
 					md.qualifiers += "vararg";
@@ -807,7 +807,7 @@ Error DocData::load_classes(const String &p_dir) {
 	da->list_dir_begin();
 	String path;
 	path = da->get_next();
-	while (path != String()) {
+	while (!path.empty()) {
 		if (!da->current_is_dir() && path.ends_with("xml")) {
 			Ref<XMLParser> parser = memnew(XMLParser);
 			Error err2 = parser->open(p_dir.plus_file(path));
@@ -837,7 +837,7 @@ Error DocData::erase_classes(const String &p_dir) {
 	da->list_dir_begin();
 	String path;
 	path = da->get_next();
-	while (path != String()) {
+	while (!path.empty()) {
 		if (!da->current_is_dir() && path.ends_with("xml")) {
 			to_erase.push_back(path);
 		}
@@ -1031,7 +1031,7 @@ Error DocData::_load(Ref<XMLParser> parser) {
 }
 
 static void _write_string(FileAccess *f, int p_tablevel, const String &p_string) {
-	if (p_string == "") {
+	if (p_string.empty()) {
 		return;
 	}
 	String tab;
@@ -1061,7 +1061,7 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 		_write_string(f, 0, "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 
 		String header = "<class name=\"" + c.name + "\"";
-		if (c.inherits != "") {
+		if (!c.inherits.empty()) {
 			header += " inherits=\"" + c.inherits + "\"";
 		}
 		header += String(" version=\"") + VERSION_BRANCH + "\"";
@@ -1092,15 +1092,15 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 			const MethodDoc &m = c.methods[i];
 
 			String qualifiers;
-			if (m.qualifiers != "") {
+			if (!m.qualifiers.empty()) {
 				qualifiers += " qualifiers=\"" + m.qualifiers.xml_escape() + "\"";
 			}
 
 			_write_string(f, 2, "<method name=\"" + m.name + "\"" + qualifiers + ">");
 
-			if (m.return_type != "") {
+			if (!m.return_type.empty()) {
 				String enum_text;
-				if (m.return_enum != String()) {
+				if (!m.return_enum.empty()) {
 					enum_text = " enum=\"" + m.return_enum + "\"";
 				}
 				_write_string(f, 3, "<return type=\"" + m.return_type + "\"" + enum_text + ">");
@@ -1111,11 +1111,11 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 				const ArgumentDoc &a = m.arguments[j];
 
 				String enum_text;
-				if (a.enumeration != String()) {
+				if (!a.enumeration.empty()) {
 					enum_text = " enum=\"" + a.enumeration + "\"";
 				}
 
-				if (a.default_value != "") {
+				if (!a.default_value.empty()) {
 					_write_string(f, 3, "<argument index=\"" + itos(j) + "\" name=\"" + a.name.xml_escape() + "\" type=\"" + a.type.xml_escape() + "\"" + enum_text + " default=\"" + a.default_value.xml_escape(true) + "\">");
 				} else {
 					_write_string(f, 3, "<argument index=\"" + itos(j) + "\" name=\"" + a.name.xml_escape() + "\" type=\"" + a.type.xml_escape() + "\"" + enum_text + ">");
@@ -1140,10 +1140,10 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 			for (int i = 0; i < c.properties.size(); i++) {
 				String additional_attributes;
-				if (c.properties[i].enumeration != String()) {
+				if (!c.properties[i].enumeration.empty()) {
 					additional_attributes += " enum=\"" + c.properties[i].enumeration + "\"";
 				}
-				if (c.properties[i].default_value != String()) {
+				if (!c.properties[i].default_value.empty()) {
 					additional_attributes += " default=\"" + c.properties[i].default_value.xml_escape(true) + "\"";
 				}
 
@@ -1188,13 +1188,13 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 		for (int i = 0; i < c.constants.size(); i++) {
 			const ConstantDoc &k = c.constants[i];
 			if (k.is_value_valid) {
-				if (k.enumeration != String()) {
+				if (!k.enumeration.empty()) {
 					_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"" + k.value + "\" enum=\"" + k.enumeration + "\">");
 				} else {
 					_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"" + k.value + "\">");
 				}
 			} else {
-				if (k.enumeration != String()) {
+				if (!k.enumeration.empty()) {
 					_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"platform-dependent\" enum=\"" + k.enumeration + "\">");
 				} else {
 					_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"platform-dependent\">");
@@ -1213,7 +1213,7 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 			for (int i = 0; i < c.theme_properties.size(); i++) {
 				const PropertyDoc &p = c.theme_properties[i];
 
-				if (p.default_value != "") {
+				if (!p.default_value.empty()) {
 					_write_string(f, 2, "<theme_item name=\"" + p.name + "\" type=\"" + p.type + "\" default=\"" + p.default_value.xml_escape(true) + "\">");
 				} else {
 					_write_string(f, 2, "<theme_item name=\"" + p.name + "\" type=\"" + p.type + "\">");

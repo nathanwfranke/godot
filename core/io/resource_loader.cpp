@@ -52,7 +52,7 @@ bool ResourceFormatLoader::recognize_path(const String &p_path, const String &p_
 	String extension = p_path.get_extension();
 
 	List<String> extensions;
-	if (p_for_type == String()) {
+	if (p_for_type.empty()) {
 		get_recognized_extensions(&extensions);
 	} else {
 		get_recognized_extensions_for_type(p_for_type, &extensions);
@@ -85,7 +85,7 @@ String ResourceFormatLoader::get_resource_type(const String &p_path) const {
 }
 
 void ResourceFormatLoader::get_recognized_extensions_for_type(const String &p_type, List<String> *p_extensions) const {
-	if (p_type == "" || handles_type(p_type)) {
+	if (p_type.empty() || handles_type(p_type)) {
 		get_recognized_extensions(p_extensions);
 	}
 }
@@ -187,7 +187,7 @@ RES ResourceLoader::_load(const String &p_path, const String &p_original_path, c
 			continue;
 		}
 		found = true;
-		RES res = loader[i]->load(p_path, p_original_path != String() ? p_original_path : p_path, r_error, p_use_sub_threads, r_progress, p_no_cache);
+		RES res = loader[i]->load(p_path, !p_original_path.empty() ? p_original_path : p_path, r_error, p_use_sub_threads, r_progress, p_no_cache);
 		if (res.is_null()) {
 			continue;
 		}
@@ -277,7 +277,7 @@ Error ResourceLoader::load_threaded_request(const String &p_path, const String &
 
 	thread_load_mutex->lock();
 
-	if (p_source_resource != String()) {
+	if (!p_source_resource.empty()) {
 		//must be loading from this resource
 		if (!thread_load_tasks.has(p_source_resource)) {
 			thread_load_mutex->unlock();
@@ -298,7 +298,7 @@ Error ResourceLoader::load_threaded_request(const String &p_path, const String &
 
 	if (thread_load_tasks.has(local_path)) {
 		thread_load_tasks[local_path].requests++;
-		if (p_source_resource != String()) {
+		if (!p_source_resource.empty()) {
 			thread_load_tasks[p_source_resource].sub_tasks.insert(local_path);
 		}
 		thread_load_mutex->unlock();
@@ -345,7 +345,7 @@ Error ResourceLoader::load_threaded_request(const String &p_path, const String &
 			}
 		}
 
-		if (p_source_resource != String()) {
+		if (!p_source_resource.empty()) {
 			thread_load_tasks[p_source_resource].sub_tasks.insert(local_path);
 		}
 
@@ -584,7 +584,7 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 		bool xl_remapped = false;
 		String path = _path_remap(local_path, &xl_remapped);
 
-		if (path == "") {
+		if (path.empty()) {
 			ERR_FAIL_V_MSG(RES(), "Remapping '" + local_path + "' failed.");
 		}
 
@@ -838,7 +838,7 @@ String ResourceLoader::get_resource_type(const String &p_path) {
 
 	for (int i = 0; i < loader_count; i++) {
 		String result = loader[i]->get_resource_type(local_path);
-		if (result != "") {
+		if (!result.empty()) {
 			return result;
 		}
 	}

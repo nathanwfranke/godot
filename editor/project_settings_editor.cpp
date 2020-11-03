@@ -80,7 +80,7 @@ void ProjectSettingsEditor::_advanced_pressed() {
 }
 
 void ProjectSettingsEditor::_setting_selected(const String &p_path) {
-	if (p_path == String()) {
+	if (p_path.empty()) {
 		return;
 	}
 
@@ -164,7 +164,7 @@ void ProjectSettingsEditor::_update_advanced_bar() {
 			disable_del = ps->is_builtin_setting(setting);
 			if (disable_del) {
 				String msg = TTR(" - Cannot delete built-in setting.");
-				error_msg += (error_msg == "") ? msg : "\n" + msg;
+				error_msg += (error_msg.empty()) ? msg : "\n" + msg;
 			}
 		} else {
 			bool bad_category = false; // Allow empty string.
@@ -182,7 +182,7 @@ void ProjectSettingsEditor::_update_advanced_bar() {
 			if (!property_text.is_valid_identifier()) {
 				disable_add = true;
 				String msg = TTR(" - Invalid property name.");
-				error_msg += (error_msg == "") ? msg : "\n" + msg;
+				error_msg += (error_msg.empty()) ? msg : "\n" + msg;
 			}
 		}
 	}
@@ -191,7 +191,7 @@ void ProjectSettingsEditor::_update_advanced_bar() {
 	del_button->set_disabled(disable_del);
 
 	error_label->set_text(error_msg);
-	error_label->set_visible(error_msg != "");
+	error_label->set_visible(!error_msg.empty());
 }
 
 String ProjectSettingsEditor::_get_setting_name() const {
@@ -199,7 +199,7 @@ String ProjectSettingsEditor::_get_setting_name() const {
 	const String name = (cat.empty() ? "global" : cat.strip_edges()).plus_file(property_box->get_text().strip_edges());
 	const String feature = feature_override->get_item_text(feature_override->get_selected());
 
-	return (feature == "") ? name : (name + "." + feature);
+	return (feature.empty()) ? name : (name + "." + feature);
 }
 
 void ProjectSettingsEditor::_add_feature_overrides() {
@@ -239,7 +239,7 @@ void ProjectSettingsEditor::_add_feature_overrides() {
 		Vector<String> custom_list = custom.split(",");
 		for (int j = 0; j < custom_list.size(); j++) {
 			String f = custom_list[j].strip_edges();
-			if (f != String()) {
+			if (!f.empty()) {
 				presets.insert(f);
 			}
 		}

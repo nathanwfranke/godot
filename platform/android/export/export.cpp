@@ -349,7 +349,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 							}
 						}
 
-						if (d.description == "") {
+						if (d.description.empty()) {
 							//in the oven, request!
 							args.clear();
 							args.push_back("-s");
@@ -398,7 +398,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 							}
 
 							d.name = vendor + " " + device;
-							if (device == String()) {
+							if (device.empty()) {
 								continue;
 							}
 						}
@@ -436,13 +436,13 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 	String get_project_name(const String &p_name) const {
 		String aname;
-		if (p_name != "") {
+		if (!p_name.empty()) {
 			aname = p_name;
 		} else {
 			aname = ProjectSettings::get_singleton()->get("application/config/name");
 		}
 
-		if (aname == "") {
+		if (aname.empty()) {
 			aname = VERSION_NAME;
 		}
 
@@ -466,7 +466,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 				first = false;
 			}
 		}
-		if (name == "") {
+		if (name.empty()) {
 			name = "noname";
 		}
 
@@ -619,7 +619,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 			da->list_dir_begin();
 			while (true) {
 				String file = da->get_next();
-				if (file == "") {
+				if (file.empty()) {
 					break;
 				}
 
@@ -1963,7 +1963,7 @@ public:
 
 		if (bool(p_preset->get("custom_template/use_custom_build"))) {
 			String sdk_path = EditorSettings::get_singleton()->get("export/android/custom_build_sdk_path");
-			if (sdk_path == "") {
+			if (sdk_path.empty()) {
 				err += TTR("Custom build requires a valid Android SDK path in Editor Settings.") + "\n";
 				valid = false;
 			} else {
@@ -1986,7 +1986,7 @@ public:
 		if (apk_expansion) {
 			String apk_expansion_pkey = p_preset->get("apk_expansion/public_key");
 
-			if (apk_expansion_pkey == "") {
+			if (apk_expansion_pkey.empty()) {
 				valid = false;
 
 				err += TTR("Invalid public key for APK expansion.") + "\n";
@@ -2002,7 +2002,7 @@ public:
 		}
 
 		String etc_error = test_etc2();
-		if (etc_error != String()) {
+		if (!etc_error.empty()) {
 			valid = false;
 			err += etc_error;
 		}
@@ -2209,7 +2209,7 @@ public:
 		args.push_back("-sigalg");
 		args.push_back("SHA256withRSA");
 		String tsa_url = EditorSettings::get_singleton()->get("export/android/timestamping_authority_url");
-		if (tsa_url != "") {
+		if (!tsa_url.empty()) {
 			args.push_back("-tsa");
 			args.push_back(tsa_url);
 		}
@@ -2311,7 +2311,7 @@ public:
 				}
 			}
 			String sdk_path = EDITOR_GET("export/android/custom_build_sdk_path");
-			ERR_FAIL_COND_V_MSG(sdk_path == "", ERR_UNCONFIGURED, "Android SDK path must be configured in Editor Settings at 'export/android/custom_build_sdk_path'.");
+			ERR_FAIL_COND_V_MSG(sdk_path.empty(), ERR_UNCONFIGURED, "Android SDK path must be configured in Editor Settings at 'export/android/custom_build_sdk_path'.");
 
 			// TODO: should we use "package/name" or "application/config/name"?
 			String project_name = get_project_name(p_preset->get("package/name"));
@@ -2443,13 +2443,13 @@ public:
 		else
 			src_apk = p_preset->get("custom_template/release");
 		src_apk = src_apk.strip_edges();
-		if (src_apk == "") {
+		if (src_apk.empty()) {
 			if (p_debug) {
 				src_apk = find_export_template("android_debug.apk");
 			} else {
 				src_apk = find_export_template("android_release.apk");
 			}
-			if (src_apk == "") {
+			if (src_apk.empty()) {
 				EditorNode::add_io_error("Package not found: " + src_apk);
 				return ERR_FILE_NOT_FOUND;
 			}

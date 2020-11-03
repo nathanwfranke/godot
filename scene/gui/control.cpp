@@ -2559,7 +2559,7 @@ void Control::get_argument_options(const StringName &p_function, int p_idx, List
 String Control::get_configuration_warning() const {
 	String warning = CanvasItem::get_configuration_warning();
 
-	if (data.mouse_filter == MOUSE_FILTER_IGNORE && data.tooltip != "") {
+	if (data.mouse_filter == MOUSE_FILTER_IGNORE && !data.tooltip.empty()) {
 		if (!warning.empty()) {
 			warning += "\n\n";
 		}

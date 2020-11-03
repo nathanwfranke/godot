@@ -174,7 +174,7 @@ void AnimationPlayerEditor::_play_pressed() {
 		current = animation->get_item_text(animation->get_selected());
 	}
 
-	if (current != "") {
+	if (!current.empty()) {
 		if (current == player->get_assigned_animation()) {
 			player->stop(); //so it won't blend with itself
 		}
@@ -191,7 +191,7 @@ void AnimationPlayerEditor::_play_from_pressed() {
 		current = animation->get_item_text(animation->get_selected());
 	}
 
-	if (current != "") {
+	if (!current.empty()) {
 		float time = player->get_current_animation_position();
 
 		if (current == player->get_assigned_animation() && player->is_playing()) {
@@ -212,7 +212,7 @@ void AnimationPlayerEditor::_play_bw_pressed() {
 		current = animation->get_item_text(animation->get_selected());
 	}
 
-	if (current != "") {
+	if (!current.empty()) {
 		if (current == player->get_assigned_animation()) {
 			player->stop(); //so it won't blend with itself
 		}
@@ -229,7 +229,7 @@ void AnimationPlayerEditor::_play_bw_from_pressed() {
 		current = animation->get_item_text(animation->get_selected());
 	}
 
-	if (current != "") {
+	if (!current.empty()) {
 		float time = player->get_current_animation_position();
 		if (current == player->get_assigned_animation()) {
 			player->stop(); //so it won't blend with itself
@@ -264,7 +264,7 @@ void AnimationPlayerEditor::_animation_selected(int p_which) {
 		current = animation->get_item_text(animation->get_selected());
 	}
 
-	if (current != "") {
+	if (!current.empty()) {
 		player->set_assigned_animation(current);
 
 		Ref<Animation> anim = player->get_animation(current);
@@ -382,7 +382,7 @@ void AnimationPlayerEditor::_animation_save_as(const Ref<Resource> &p_resource) 
 
 	String path;
 	//file->set_current_path(current_path);
-	if (p_resource->get_path() != "") {
+	if (!p_resource->get_path().empty()) {
 		path = p_resource->get_path();
 		if (extensions.size()) {
 			if (extensions.find(p_resource->get_path().get_extension().to_lower()) == nullptr) {
@@ -391,7 +391,7 @@ void AnimationPlayerEditor::_animation_save_as(const Ref<Resource> &p_resource) 
 		}
 	} else {
 		if (extensions.size()) {
-			if (p_resource->get_name() != "") {
+			if (!p_resource->get_name().empty()) {
 				path = p_resource->get_name() + "." + extensions.front()->get().to_lower();
 			} else {
 				path = "new_" + p_resource->get_class().to_lower() + "." + extensions.front()->get().to_lower();
@@ -471,7 +471,7 @@ void AnimationPlayerEditor::_animation_name_edited() {
 	player->stop();
 
 	String new_name = name->get_text();
-	if (new_name == "" || new_name.find(":") != -1 || new_name.find("/") != -1) {
+	if (new_name.empty() || new_name.find(":") != -1 || new_name.find("/") != -1) {
 		error_dialog->set_text(TTR("Invalid animation name!"));
 		error_dialog->popup_centered();
 		return;
@@ -730,7 +730,7 @@ void AnimationPlayerEditor::_dialog_action(String p_path) {
 		}
 		case RESOURCE_SAVE: {
 			String current = animation->get_item_text(animation->get_selected());
-			if (current != "") {
+			if (!current.empty()) {
 				Ref<Animation> anim = player->get_animation(current);
 
 				ERR_FAIL_COND(!Object::cast_to<Resource>(*anim));
@@ -981,7 +981,7 @@ void AnimationPlayerEditor::_seek_value_changed(float p_value, bool p_set) {
 
 	updating = true;
 	String current = player->get_assigned_animation();
-	if (current == "" || !player->has_animation(current)) {
+	if (current.empty() || !player->has_animation(current)) {
 		updating = false;
 		current = "";
 		return;
@@ -1062,7 +1062,7 @@ void AnimationPlayerEditor::_animation_tool_menu(int p_option) {
 	}
 
 	Ref<Animation> anim;
-	if (current != String()) {
+	if (!current.empty()) {
 		anim = player->get_animation(current);
 	}
 
@@ -1117,7 +1117,7 @@ void AnimationPlayerEditor::_animation_tool_menu(int p_option) {
 			}
 
 			String name = anim2->get_name();
-			if (name == "") {
+			if (name.empty()) {
 				name = TTR("Pasted Animation");
 			}
 

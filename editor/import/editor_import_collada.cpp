@@ -302,7 +302,7 @@ Error ColladaImport::_create_scene(Collada::Node *p_node, Node3D *p_parent) {
 		} break;
 	}
 
-	if (p_node->name != "") {
+	if (!p_node->name.empty()) {
 		node->set_name(p_node->name);
 	}
 	NodeMap nm;
@@ -316,7 +316,7 @@ Error ColladaImport::_create_scene(Collada::Node *p_node, Node3D *p_parent) {
 	p_parent->add_child(node);
 	node->set_owner(scene);
 
-	if (p_node->empty_draw_type != "") {
+	if (!p_node->empty_draw_type.empty()) {
 		node->set_meta("empty_draw_type", Variant(p_node->empty_draw_type));
 	}
 
@@ -338,17 +338,17 @@ Error ColladaImport::_create_material(const String &p_target) {
 
 	Ref<StandardMaterial3D> material = memnew(StandardMaterial3D);
 
-	if (src_mat.name != "") {
+	if (!src_mat.name.empty()) {
 		material->set_name(src_mat.name);
-	} else if (effect.name != "") {
+	} else if (!effect.name.empty()) {
 		material->set_name(effect.name);
 	}
 
 	// DIFFUSE
 
-	if (effect.diffuse.texture != "") {
+	if (!effect.diffuse.texture.empty()) {
 		String texfile = effect.get_texture_path(effect.diffuse.texture, collada);
-		if (texfile != "") {
+		if (!texfile.empty()) {
 			if (texfile.begins_with("/")) {
 				texfile = texfile.replace_first("/", "res://");
 			}
@@ -367,9 +367,9 @@ Error ColladaImport::_create_material(const String &p_target) {
 
 	// SPECULAR
 
-	if (effect.specular.texture != "") {
+	if (!effect.specular.texture.empty()) {
 		String texfile = effect.get_texture_path(effect.specular.texture, collada);
-		if (texfile != "") {
+		if (!texfile.empty()) {
 			if (texfile.begins_with("/")) {
 				texfile = texfile.replace_first("/", "res://");
 			}
@@ -392,9 +392,9 @@ Error ColladaImport::_create_material(const String &p_target) {
 
 	// EMISSION
 
-	if (effect.emission.texture != "") {
+	if (!effect.emission.texture.empty()) {
 		String texfile = effect.get_texture_path(effect.emission.texture, collada);
-		if (texfile != "") {
+		if (!texfile.empty()) {
 			if (texfile.begins_with("/")) {
 				texfile = texfile.replace_first("/", "res://");
 			}
@@ -419,9 +419,9 @@ Error ColladaImport::_create_material(const String &p_target) {
 
 	// NORMAL
 
-	if (effect.bump.texture != "") {
+	if (!effect.bump.texture.empty()) {
 		String texfile = effect.get_texture_path(effect.bump.texture, collada);
-		if (texfile != "") {
+		if (!texfile.empty()) {
 			if (texfile.begins_with("/")) {
 				texfile = texfile.replace_first("/", "res://");
 			}
@@ -833,7 +833,7 @@ Error ColladaImport::_create_mesh_surfaces(bool p_optimize, Ref<ArrayMesh> &p_me
 						material = material_cache[target];
 					}
 
-				} else if (p.material != "") {
+				} else if (!p.material.empty()) {
 					WARN_PRINT("Collada: Unreferenced material in geometry instance: " + p.material);
 				}
 			}
@@ -1116,7 +1116,7 @@ Error ColladaImport::_create_resources(Collada::Node *p_node, bool p_use_compres
 					}
 				}
 
-				ERR_FAIL_COND_V_MSG(ngsource != "", ERR_INVALID_DATA, "Controller instance source '" + ngsource + "' is neither skin or morph!");
+				ERR_FAIL_COND_V_MSG(!ngsource.empty(), ERR_INVALID_DATA, "Controller instance source '" + ngsource + "' is neither skin or morph!");
 
 			} else {
 				meshid = ng2->source;
@@ -1164,7 +1164,7 @@ Error ColladaImport::_create_resources(Collada::Node *p_node, bool p_use_compres
 							}
 
 							mi->set_surface_material(i, material);
-						} else if (matname != "") {
+						} else if (!matname.empty()) {
 							WARN_PRINT("Collada: Unreferenced material in geometry instance: " + matname);
 						}
 					}
@@ -1246,7 +1246,7 @@ void ColladaImport::_fix_param_animation_tracks() {
 				// test source(s)
 				String source = ng->source;
 
-				while (source != "") {
+				while (!source.empty()) {
 					if (collada.state.skin_controller_data_map.has(source)) {
 						const Collada::SkinControllerData &skin = collada.state.skin_controller_data_map[source];
 
@@ -1682,7 +1682,7 @@ Node *EditorSceneImporterCollada::import_scene(const String &p_path, uint32_t p_
 		AnimationPlayer *ap = memnew(AnimationPlayer);
 		for (int i = 0; i < state.animations.size(); i++) {
 			String name;
-			if (state.animations[i]->get_name() == "") {
+			if (state.animations[i]->get_name().empty()) {
 				name = "default";
 			} else {
 				name = state.animations[i]->get_name();

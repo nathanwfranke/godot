@@ -994,7 +994,7 @@ void LineEdit::paste_text() {
 	// Strip escape characters like \n and \t as they can't be displayed on LineEdit.
 	String paste_buffer = DisplayServer::get_singleton()->clipboard_get().strip_escapes();
 
-	if (paste_buffer != "") {
+	if (!paste_buffer.empty()) {
 		int prev_len = text.length();
 		if (selection.enabled) {
 			selection_delete();

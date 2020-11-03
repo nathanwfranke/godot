@@ -391,7 +391,7 @@ Node *ResourceImporterScene::_fix_node(Node *p_node, Node *p_root, Map<Ref<Mesh>
 					fixed_name = _fixstr(name, "convcolonly");
 				}
 
-				ERR_FAIL_COND_V(fixed_name == String(), nullptr);
+				ERR_FAIL_COND_V(fixed_name.empty(), nullptr);
 
 				if (shapes.size()) {
 					StaticBody3D *col = memnew(StaticBody3D);
@@ -510,7 +510,7 @@ Node *ResourceImporterScene::_fix_node(Node *p_node, Node *p_root, Map<Ref<Mesh>
 				fixed_name = _fixstr(name, "convcol");
 			}
 
-			if (fixed_name != String()) {
+			if (!fixed_name.empty()) {
 				if (mi->get_parent() && !mi->get_parent()->has_node(fixed_name)) {
 					mi->set_name(fixed_name);
 				}
@@ -800,7 +800,7 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 				Vector<String> filters = strings[i].substr(1, strings[i].length()).split(",");
 				for (int j = 0; j < filters.size(); j++) {
 					String fname = filters[j].strip_edges();
-					if (fname == "") {
+					if (fname.empty()) {
 						continue;
 					}
 					int fc = fname[0];
@@ -835,7 +835,7 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 					String path = a->track_get_path(j);
 
 					String tname = strings[i];
-					if (tname == "") {
+					if (tname.empty()) {
 						continue;
 					}
 					int fc = tname[0];
@@ -983,7 +983,7 @@ void ResourceImporterScene::_make_external_resources(Node *p_node, const String 
 		if (E->get().type == Variant::OBJECT) {
 			Ref<Material> mat = p_node->get(E->get().name);
 
-			if (p_make_materials && mat.is_valid() && mat->get_name() != "") {
+			if (p_make_materials && mat.is_valid() && !mat->get_name().empty()) {
 				if (!p_materials.has(mat)) {
 					String ext_name;
 
@@ -1037,7 +1037,7 @@ void ResourceImporterScene::_make_external_resources(Node *p_node, const String 
 								if (!mat.is_valid()) {
 									continue;
 								}
-								if (mat->get_name() == "") {
+								if (mat->get_name().empty()) {
 									continue;
 								}
 
@@ -1103,7 +1103,7 @@ void ResourceImporterScene::get_import_options(List<ImportOption> *r_options, in
 	String script_ext_hint;
 
 	for (List<String>::Element *E = script_extentions.front(); E; E = E->next()) {
-		if (script_ext_hint != "") {
+		if (!script_ext_hint.empty()) {
 			script_ext_hint += ",";
 		}
 		script_ext_hint += "*." + E->get();
@@ -1349,7 +1349,7 @@ Error ResourceImporterScene::import(const String &p_source_file, const String &p
 		_create_clips(scene, animation_clips, !bool(p_options["animation/optimizer/remove_unused_tracks"]));
 	}
 
-	if (animation_filter != "") {
+	if (!animation_filter.empty()) {
 		_filter_tracks(scene, animation_filter);
 	}
 
@@ -1409,7 +1409,7 @@ Error ResourceImporterScene::import(const String &p_source_file, const String &p
 		for (Map<Ref<ArrayMesh>, Transform>::Element *E = meshes.front(); E; E = E->next()) {
 			Ref<ArrayMesh> mesh = E->key();
 			String name = mesh->get_name();
-			if (name == "") { //should not happen but..
+			if (name.empty()) { //should not happen but..
 				name = "Mesh " + itos(step);
 			}
 
@@ -1500,7 +1500,7 @@ Error ResourceImporterScene::import(const String &p_source_file, const String &p
 	String post_import_script_path = p_options["nodes/custom_script"];
 	Ref<EditorScenePostImport> post_import_script;
 
-	if (post_import_script_path != "") {
+	if (!post_import_script_path.empty()) {
 		Ref<Script> scr = ResourceLoader::load(post_import_script_path);
 		if (!scr.is_valid()) {
 			EditorNode::add_io_error(TTR("Couldn't load post-import script:") + " " + post_import_script_path);
@@ -1538,7 +1538,7 @@ Error ResourceImporterScene::import(const String &p_source_file, const String &p
 			_replace_owner(child, scene, child);
 
 			String cn = String(child->get_name()).strip_edges().replace(".", "_").replace(":", "_");
-			if (cn == String()) {
+			if (cn.empty()) {
 				cn = "ChildNode" + itos(i);
 			}
 			String path = base_path.plus_file(cn + ".scn");

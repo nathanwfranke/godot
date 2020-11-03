@@ -33,7 +33,7 @@
 #include <string.h>
 
 StringBuilder &StringBuilder::append(const String &p_string) {
-	if (p_string == String()) {
+	if (p_string.empty()) {
 		return *this;
 	}
 

@@ -288,7 +288,7 @@ uint32_t InputEventKey::get_physical_keycode_with_modifiers() const {
 
 String InputEventKey::as_text() const {
 	String kc = keycode_get_string(keycode);
-	if (kc == String()) {
+	if (kc.empty()) {
 		return kc;
 	}
 

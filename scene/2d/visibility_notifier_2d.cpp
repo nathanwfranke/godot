@@ -213,7 +213,7 @@ void VisibilityEnabler2D::_find_nodes(Node *p_node) {
 
 	for (int i = 0; i < p_node->get_child_count(); i++) {
 		Node *c = p_node->get_child(i);
-		if (c->get_filename() != String()) {
+		if (!c->get_filename().empty()) {
 			continue; //skip, instance
 		}
 
@@ -229,7 +229,7 @@ void VisibilityEnabler2D::_notification(int p_what) {
 
 		Node *from = this;
 		//find where current scene starts
-		while (from->get_parent() && from->get_filename() == String()) {
+		while (from->get_parent() && from->get_filename().empty()) {
 			from = from->get_parent();
 		}
 
@@ -316,7 +316,7 @@ String VisibilityEnabler2D::get_configuration_warning() const {
 	String warning = VisibilityNotifier2D::get_configuration_warning();
 
 #ifdef TOOLS_ENABLED
-	if (is_inside_tree() && get_parent() && (get_parent()->get_filename() == String() && get_parent() != get_tree()->get_edited_scene_root())) {
+	if (is_inside_tree() && get_parent() && (get_parent()->get_filename().empty() && get_parent() != get_tree()->get_edited_scene_root())) {
 		if (!warning.empty()) {
 			warning += "\n\n";
 		}

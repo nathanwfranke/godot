@@ -452,7 +452,7 @@ Error DirAccessPack::change_dir(String p_dir) {
 
 	nd = nd.simplify_path();
 
-	if (nd == "") {
+	if (nd.empty()) {
 		nd = ".";
 	}
 

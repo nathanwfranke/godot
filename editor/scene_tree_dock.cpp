@@ -180,7 +180,7 @@ void SceneTreeDock::_perform_instance_scenes(const Vector<String> &p_files, Node
 			break;
 		}
 
-		if (edited_scene->get_filename() != "") {
+		if (!edited_scene->get_filename().empty()) {
 			if (_cyclical_dependency_exists(edited_scene->get_filename(), instanced_scene)) {
 				accept->set_text(vformat(TTR("Cannot instance the scene '%s' because the current scene exists within one of its nodes."), p_files[i]));
 				accept->popup_centered();
@@ -677,7 +677,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 				return;
 			}
 
-			if (node->get_filename() != String()) {
+			if (!node->get_filename().empty()) {
 				accept->set_text(TTR("Instantiated scenes can't become root"));
 				accept->popup_centered();
 				return;
@@ -756,7 +756,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 					Node *node = remove_list[0];
 					if (node == editor_data->get_edited_scene_root()) {
 						msg = vformat(TTR("Delete the root node \"%s\"?"), node->get_name());
-					} else if (node->get_filename() == "" && node->get_child_count() > 0) {
+					} else if (node->get_filename().empty() && node->get_child_count() > 0) {
 						// Display this message only for non-instanced scenes
 						msg = vformat(TTR("Delete node \"%s\" and its children?"), node->get_name());
 					} else {
@@ -810,7 +810,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 				break;
 			}
 
-			if (tocopy != editor_data->get_edited_scene_root() && tocopy->get_filename() != "") {
+			if (tocopy != editor_data->get_edited_scene_root() && !tocopy->get_filename().empty()) {
 				accept->set_text(TTR("This operation can't be done on instanced scenes."));
 				accept->popup_centered();
 				break;
@@ -923,7 +923,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 						break;
 					}
 
-					ERR_FAIL_COND(node->get_filename() == String());
+					ERR_FAIL_COND(node->get_filename().empty());
 					undo_redo->create_action(TTR("Make Local"));
 					undo_redo->add_do_method(node, "set_filename", "");
 					undo_redo->add_undo_method(node, "set_filename", node->get_filename());
@@ -2532,7 +2532,7 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 			menu->add_icon_shortcut(get_theme_icon("CopyNodePath", "EditorIcons"), ED_GET_SHORTCUT("scene_tree/copy_node_path"), TOOL_COPY_NODE_PATH);
 		}
 
-		bool is_external = (selection[0]->get_filename() != "");
+		bool is_external = (!selection[0]->get_filename().empty());
 		if (is_external) {
 			bool is_inherited = selection[0]->get_scene_inherited_state() != nullptr;
 			bool is_top_level = selection[0]->get_owner() == nullptr;
@@ -2626,9 +2626,9 @@ void SceneTreeDock::attach_script_to_selected(bool p_extend) {
 	Ref<Script> existing = selected->get_script();
 
 	String path = selected->get_filename();
-	if (path == "") {
+	if (path.empty()) {
 		String root_path = editor_data->get_edited_scene_root()->get_filename();
-		if (root_path == "") {
+		if (root_path.empty()) {
 			path = String("res://").plus_file(selected->get_name());
 		} else {
 			path = root_path.get_base_dir().plus_file(selected->get_name());
@@ -2744,7 +2744,7 @@ void SceneTreeDock::_update_create_root_dialog() {
 			while (!f->eof_reached()) {
 				String l = f->get_line().strip_edges();
 
-				if (l != String()) {
+				if (!l.empty()) {
 					Button *button = memnew(Button);
 					favorite_nodes->add_child(button);
 					button->set_text(l);

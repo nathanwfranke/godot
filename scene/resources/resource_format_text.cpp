@@ -287,12 +287,12 @@ Ref<PackedScene> ResourceLoaderText::_parse_node_tag(VariantParser::ResourcePars
 					}
 				}
 
-				if (assign != String()) {
+				if (!assign.empty()) {
 					int nameidx = packed_scene->get_state()->add_name(assign);
 					int valueidx = packed_scene->get_state()->add_value(value);
 					packed_scene->get_state()->add_node_property(node_id, nameidx, valueidx);
 					//it's assignment
-				} else if (next_tag.name != String()) {
+				} else if (!next_tag.name.empty()) {
 					break;
 				}
 			}
@@ -556,12 +556,12 @@ Error ResourceLoaderText::load() {
 				return error;
 			}
 
-			if (assign != String()) {
+			if (!assign.empty()) {
 				if (res.is_valid()) {
 					res->set(assign, value);
 				}
 				//it's assignment
-			} else if (next_tag.name != String()) {
+			} else if (!next_tag.name.empty()) {
 				error = OK;
 				break;
 			} else {
@@ -630,10 +630,10 @@ Error ResourceLoaderText::load() {
 				return error;
 			}
 
-			if (assign != String()) {
+			if (!assign.empty()) {
 				resource->set(assign, value);
 				//it's assignment
-			} else if (next_tag.name != String()) {
+			} else if (!next_tag.name.empty()) {
 				error = ERR_FILE_CORRUPT;
 				error_text = "Extra tag found when parsing main resource file";
 				_printerr();
@@ -1102,13 +1102,13 @@ Error ResourceLoaderText::save_as_binary(FileAccess *p_f, const String &p_path) 
 				return error;
 			}
 
-			if (assign != String()) {
+			if (!assign.empty()) {
 				Map<StringName, int> empty_string_map; //unused
 				bs_save_unicode_string(wf2, assign, true);
 				ResourceFormatSaverBinaryInstance::write_variant(wf2, value, dummy_read.resource_set, dummy_read.external_resources, empty_string_map);
 				prop_count++;
 
-			} else if (next_tag.name != String()) {
+			} else if (!next_tag.name.empty()) {
 				error = OK;
 				break;
 			} else {
@@ -1260,7 +1260,7 @@ RES ResourceFormatLoaderText::load(const String &p_path, const String &p_origina
 	ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot open file '" + p_path + "'.");
 
 	ResourceLoaderText loader;
-	String path = p_original_path != "" ? p_original_path : p_path;
+	String path = !p_original_path.empty() ? p_original_path : p_path;
 	loader.use_nocache = p_no_cache;
 	loader.use_sub_threads = p_use_sub_threads;
 	loader.local_path = ProjectSettings::get_singleton()->localize_path(path);
@@ -1280,7 +1280,7 @@ RES ResourceFormatLoaderText::load(const String &p_path, const String &p_origina
 }
 
 void ResourceFormatLoaderText::get_recognized_extensions_for_type(const String &p_type, List<String> *p_extensions) const {
-	if (p_type == "") {
+	if (p_type.empty()) {
 		get_recognized_extensions(p_extensions);
 		return;
 	}
@@ -1605,7 +1605,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 
 	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
 		RES res = E->get();
-		if (E->next() && (res->get_path() == "" || res->get_path().find("::") != -1)) {
+		if (E->next() && (res->get_path().empty() || res->get_path().find("::") != -1)) {
 			if (res->get_subindex() != 0) {
 				if (used_indices.has(res->get_subindex())) {
 					res->set_subindex(0); //repeated
@@ -1734,7 +1734,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 
 			f->store_string(header);
 
-			if (instance_placeholder != String()) {
+			if (!instance_placeholder.empty()) {
 				String vars;
 				f->store_string(" instance_placeholder=");
 				VariantWriter::write_to_string(instance_placeholder, vars, _write_resources, this);

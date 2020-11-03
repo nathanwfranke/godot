@@ -822,28 +822,28 @@ struct _VariantCall {
 		cd.func = p_func;
 		cd.arg_count = 0;
 
-		if (p_name1 == "") {
+		if (p_name1.empty()) {
 			goto end;
 		}
 		cd.arg_count++;
 		cd.arg_names.push_back(p_name1);
 		cd.arg_types.push_back(p_type1);
 
-		if (p_name2 == "") {
+		if (p_name2.empty()) {
 			goto end;
 		}
 		cd.arg_count++;
 		cd.arg_names.push_back(p_name2);
 		cd.arg_types.push_back(p_type2);
 
-		if (p_name3 == "") {
+		if (p_name3.empty()) {
 			goto end;
 		}
 		cd.arg_count++;
 		cd.arg_names.push_back(p_name3);
 		cd.arg_types.push_back(p_type3);
 
-		if (p_name4 == "") {
+		if (p_name4.empty()) {
 			goto end;
 		}
 		cd.arg_count++;

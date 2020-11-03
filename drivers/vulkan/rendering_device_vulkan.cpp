@@ -3723,7 +3723,7 @@ String RenderingDeviceVulkan::_shader_uniform_debug(RID p_shader, int p_set) {
 		}
 		for (int j = 0; j < shader->sets[i].uniform_info.size(); j++) {
 			const UniformInfo &ui = shader->sets[i].uniform_info[j];
-			if (ret != String()) {
+			if (!ret.empty()) {
 				ret += "\n";
 			}
 			ret += "Set: " + itos(i) + " Binding: " + itos(ui.binding) + " Type: " + shader_uniform_names[ui.type] + " Length: " + itos(ui.length);

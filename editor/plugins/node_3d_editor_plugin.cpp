@@ -743,7 +743,7 @@ void Node3DEditorViewport::_update_name() {
 		view_mode += " [auto]";
 	}
 
-	if (name != "") {
+	if (!name.empty()) {
 		view_menu->set_text(name + " " + view_mode);
 	} else {
 		view_menu->set_text(view_mode);
@@ -3680,7 +3680,7 @@ bool Node3DEditorViewport::_create_instance(Node *parent, String &path, const Po
 		return false;
 	}
 
-	if (editor->get_edited_scene()->get_filename() != "") { // cyclical instancing
+	if (!editor->get_edited_scene()->get_filename().empty()) { // cyclical instancing
 		if (_cyclical_dependency_exists(editor->get_edited_scene()->get_filename(), instanced_scene)) {
 			memdelete(instanced_scene);
 			return false;

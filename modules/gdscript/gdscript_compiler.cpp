@@ -62,7 +62,7 @@ bool GDScriptCompiler::_is_class_member_property(GDScript *owner, const StringNa
 }
 
 void GDScriptCompiler::_set_error(const String &p_error, const GDScriptParser::Node *p_node) {
-	if (error != "") {
+	if (!error.empty()) {
 		return;
 	}
 
@@ -551,7 +551,7 @@ GDScriptCodeGenerator::Address GDScriptCompiler::_parse_expression(CodeGen &code
 					}
 #endif
 
-					if (MI && MI->get().getter == "") {
+					if (MI && MI->get().getter == StringName()) {
 						// Remove result temp as we don't need it.
 						gen->pop_temporary();
 						// Faster than indexing self (as if no self. had been used).
@@ -1768,7 +1768,7 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 	if (EngineDebugger::is_active()) {
 		String signature;
 		// Path.
-		if (p_script->get_path() != String()) {
+		if (!p_script->get_path().empty()) {
 			signature += p_script->get_path();
 		}
 		// Location.
@@ -1860,7 +1860,7 @@ Error GDScriptCompiler::_parse_setter_getter(GDScript *p_script, const GDScriptP
 	if (EngineDebugger::is_active()) {
 		String signature;
 		//path
-		if (p_script->get_path() != String()) {
+		if (!p_script->get_path().empty()) {
 			signature += p_script->get_path();
 		}
 		//loc

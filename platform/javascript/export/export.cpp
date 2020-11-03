@@ -341,7 +341,7 @@ bool EditorExportPlatformJavaScript::can_export(const Ref<EditorExportPreset> &p
 
 	if (p_preset->get("vram_texture_compression/for_mobile")) {
 		String etc_error = test_etc2();
-		if (etc_error != String()) {
+		if (!etc_error.empty()) {
 			valid = false;
 			err += etc_error;
 		}
@@ -371,7 +371,7 @@ Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPrese
 
 	template_path = template_path.strip_edges();
 
-	if (template_path == String()) {
+	if (template_path.empty()) {
 		if (p_debug) {
 			template_path = find_export_template(EXPORT_TEMPLATE_WEBASSEMBLY_DEBUG);
 		} else {
@@ -383,7 +383,7 @@ Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPrese
 		return ERR_FILE_BAD_PATH;
 	}
 
-	if (template_path != String() && !FileAccess::exists(template_path)) {
+	if (!template_path.empty() && !FileAccess::exists(template_path)) {
 		EditorNode::get_singleton()->show_warning(TTR("Template file not found:") + "\n" + template_path);
 		return ERR_FILE_NOT_FOUND;
 	}

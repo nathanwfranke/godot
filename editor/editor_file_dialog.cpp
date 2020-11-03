@@ -255,7 +255,7 @@ void EditorFileDialog::_post_popup() {
 		file_box->set_visible(true);
 	}
 
-	if (is_visible() && get_current_file() != "") {
+	if (is_visible() && !get_current_file().empty()) {
 		_request_single_thumbnail(get_current_dir().plus_file(get_current_file()));
 	}
 

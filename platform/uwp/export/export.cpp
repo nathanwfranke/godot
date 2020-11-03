@@ -1193,7 +1193,7 @@ public:
 
 		Platform arch = (Platform)(int)p_preset->get("architecture/target");
 
-		if (src_appx == "") {
+		if (src_appx.empty()) {
 			String err, infix;
 			switch (arch) {
 				case ARM: {
@@ -1211,7 +1211,7 @@ public:
 			} else {
 				src_appx = find_export_template("uwp" + infix + "release.zip", &err);
 			}
-			if (src_appx == "") {
+			if (src_appx.empty()) {
 				EditorNode::add_io_error(err);
 				return ERR_FILE_NOT_FOUND;
 			}
@@ -1367,7 +1367,7 @@ public:
 #ifdef WINDOWS_ENABLED
 		// Sign with signtool
 		String signtool_path = EditorSettings::get_singleton()->get("export/uwp/signtool");
-		if (signtool_path == String()) {
+		if (signtool_path.empty()) {
 			return OK;
 		}
 
@@ -1388,7 +1388,7 @@ public:
 			cert_alg = p_preset->get("signing/algorithm");
 		}
 
-		if (cert_path == String()) {
+		if (cert_path.empty()) {
 			return OK; // Certificate missing, don't try to sign
 		}
 

@@ -168,7 +168,7 @@ TEST_CASE("[String] Invalid UTF8") {
 	String s;
 	bool err = s.parse_utf8((const char *)u8str);
 	CHECK(err);
-	CHECK(s == String());
+	CHECK(s.empty());
 
 	CharString cs = (const char *)u8str;
 	CHECK(String::utf8(cs) == String());
@@ -181,7 +181,7 @@ TEST_CASE("[String] Invalid UTF16") {
 	String s;
 	bool err = s.parse_utf16(u16str);
 	CHECK(err);
-	CHECK(s == String());
+	CHECK(s.empty());
 
 	Char16String cs = u16str;
 	CHECK(String::utf16(cs) == String());

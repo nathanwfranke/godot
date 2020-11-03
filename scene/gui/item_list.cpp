@@ -542,7 +542,7 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 
 	if (p_event->is_pressed() && items.size() > 0) {
 		if (p_event->is_action("ui_up")) {
-			if (search_string != "") {
+			if (!search_string.empty()) {
 				uint64_t now = OS::get_singleton()->get_ticks_msec();
 				uint64_t diff = now - search_time_msec;
 
@@ -572,7 +572,7 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 				accept_event();
 			}
 		} else if (p_event->is_action("ui_down")) {
-			if (search_string != "") {
+			if (!search_string.empty()) {
 				uint64_t now = OS::get_singleton()->get_ticks_msec();
 				uint64_t diff = now - search_time_msec;
 
@@ -807,7 +807,7 @@ void ItemList::_notification(int p_what) {
 						minsize = items[i].get_icon_size() * icon_scale;
 					}
 
-					if (items[i].text != "") {
+					if (!items[i].text.empty()) {
 						if (icon_mode == ICON_MODE_TOP) {
 							minsize.y += icon_margin;
 						} else {
@@ -816,7 +816,7 @@ void ItemList::_notification(int p_what) {
 					}
 				}
 
-				if (items[i].text != "") {
+				if (!items[i].text.empty()) {
 					Size2 s = font->get_string_size(items[i].text);
 					//s.width=MIN(s.width,fixed_column_width);
 
@@ -1056,7 +1056,7 @@ void ItemList::_notification(int p_what) {
 				draw_texture(items[i].tag_icon, items[i].rect_cache.position + base_ofs);
 			}
 
-			if (items[i].text != "") {
+			if (!items[i].text.empty()) {
 				int max_len = -1;
 
 				Vector2 size2 = font->get_string_size(items[i].text);
@@ -1226,10 +1226,10 @@ String ItemList::get_tooltip(const Point2 &p_pos) const {
 		if (!items[closest].tooltip_enabled) {
 			return "";
 		}
-		if (items[closest].tooltip != "") {
+		if (!items[closest].tooltip.empty()) {
 			return items[closest].tooltip;
 		}
-		if (items[closest].text != "") {
+		if (!items[closest].text.empty()) {
 			return items[closest].text;
 		}
 	}

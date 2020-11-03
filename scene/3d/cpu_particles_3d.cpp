@@ -208,7 +208,7 @@ String CPUParticles3D::get_configuration_warning() const {
 	anim_material_found = anim_material_found || (spat && spat->get_billboard_mode() == StandardMaterial3D::BILLBOARD_PARTICLES);
 
 	if (!mesh_found) {
-		if (warnings != String()) {
+		if (!warnings.empty()) {
 			warnings += "\n";
 		}
 		warnings += "- " + TTR("Nothing is visible because no mesh has been assigned.");
@@ -216,7 +216,7 @@ String CPUParticles3D::get_configuration_warning() const {
 
 	if (!anim_material_found && (get_param(PARAM_ANIM_SPEED) != 0.0 || get_param(PARAM_ANIM_OFFSET) != 0.0 ||
 										get_param_curve(PARAM_ANIM_SPEED).is_valid() || get_param_curve(PARAM_ANIM_OFFSET).is_valid())) {
-		if (warnings != String()) {
+		if (!warnings.empty()) {
 			warnings += "\n";
 		}
 		warnings += "- " + TTR("CPUParticles3D animation requires the usage of a StandardMaterial3D whose Billboard Mode is set to \"Particle Billboard\".");

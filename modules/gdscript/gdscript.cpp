@@ -352,7 +352,7 @@ bool GDScript::instance_has(const Object *p_this) const {
 }
 
 bool GDScript::has_source_code() const {
-	return source != "";
+	return !source.empty();
 }
 
 String GDScript::get_source_code() const {
@@ -402,11 +402,11 @@ bool GDScript::_update_exports(bool *r_err, bool p_recursive_call) {
 
 		String basedir = path;
 
-		if (basedir == "") {
+		if (basedir.empty()) {
 			basedir = get_path();
 		}
 
-		if (basedir != "") {
+		if (!basedir.empty()) {
 			basedir = basedir.get_base_dir();
 		}
 
@@ -428,7 +428,7 @@ bool GDScript::_update_exports(bool *r_err, bool p_recursive_call) {
 					path = c->extends_path;
 					if (path.is_rel_path()) {
 						String base = get_path();
-						if (base == "" || base.is_rel_path()) {
+						if (base.empty() || base.is_rel_path()) {
 							ERR_PRINT(("Could not resolve relative path for parent class: " + path).utf8().get_data());
 						} else {
 							path = base.get_base_dir().plus_file(path);
@@ -442,7 +442,7 @@ bool GDScript::_update_exports(bool *r_err, bool p_recursive_call) {
 					}
 				}
 
-				if (path != "") {
+				if (!path.empty()) {
 					if (path != get_path()) {
 						Ref<GDScript> bf = ResourceLoader::load(path);
 
@@ -583,11 +583,11 @@ Error GDScript::reload(bool p_keep_state) {
 
 	String basedir = path;
 
-	if (basedir == "") {
+	if (basedir.empty()) {
 		basedir = get_path();
 	}
 
-	if (basedir != "") {
+	if (!basedir.empty()) {
 		basedir = basedir.get_base_dir();
 	}
 
@@ -1243,7 +1243,7 @@ void GDScriptInstance::get_property_list(List<PropertyInfo> *p_properties) const
 					pinfo.type = Variant::Type(d["type"].operator int());
 					ERR_CONTINUE(pinfo.type < 0 || pinfo.type >= Variant::VARIANT_MAX);
 					pinfo.name = d["name"];
-					ERR_CONTINUE(pinfo.name == "");
+					ERR_CONTINUE(pinfo.name.empty());
 					if (d.has("hint")) {
 						pinfo.hint = PropertyHint(d["hint"].operator int());
 					}

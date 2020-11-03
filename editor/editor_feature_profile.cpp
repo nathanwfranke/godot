@@ -288,7 +288,7 @@ EditorFeatureProfile::EditorFeatureProfile() {
 void EditorFeatureProfileManager::_notification(int p_what) {
 	if (p_what == NOTIFICATION_READY) {
 		current_profile = EDITOR_GET("_default_feature_profile");
-		if (current_profile != String()) {
+		if (!current_profile.empty()) {
 			current.instance();
 			Error err = current->load_from_file(EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(current_profile + ".profile"));
 			if (err != OK) {
@@ -312,7 +312,7 @@ String EditorFeatureProfileManager::_get_selected_profile() {
 
 void EditorFeatureProfileManager::_update_profile_list(const String &p_select_profile) {
 	String selected_profile;
-	if (p_select_profile == String()) { //default, keep
+	if (p_select_profile.empty()) { //default, keep
 		if (profile_list->get_selected() >= 0) {
 			selected_profile = profile_list->get_item_metadata(profile_list->get_selected());
 			if (!FileAccess::exists(EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(selected_profile + ".profile"))) {
@@ -330,7 +330,7 @@ void EditorFeatureProfileManager::_update_profile_list(const String &p_select_pr
 	d->list_dir_begin();
 	while (true) {
 		String f = d->get_next();
-		if (f == String()) {
+		if (f.empty()) {
 			break;
 		}
 
@@ -349,7 +349,7 @@ void EditorFeatureProfileManager::_update_profile_list(const String &p_select_pr
 	for (int i = 0; i < profiles.size(); i++) {
 		String name = profiles[i];
 
-		if (i == 0 && selected_profile == String()) {
+		if (i == 0 && selected_profile.empty()) {
 			selected_profile = name;
 		}
 
@@ -364,15 +364,15 @@ void EditorFeatureProfileManager::_update_profile_list(const String &p_select_pr
 		}
 	}
 
-	class_list_vbc->set_visible(selected_profile != String());
-	property_list_vbc->set_visible(selected_profile != String());
-	no_profile_selected_help->set_visible(selected_profile == String());
-	profile_actions[PROFILE_CLEAR]->set_disabled(current_profile == String());
-	profile_actions[PROFILE_ERASE]->set_disabled(selected_profile == String());
-	profile_actions[PROFILE_EXPORT]->set_disabled(selected_profile == String());
-	profile_actions[PROFILE_SET]->set_disabled(selected_profile == String());
+	class_list_vbc->set_visible(!selected_profile.empty());
+	property_list_vbc->set_visible(!selected_profile.empty());
+	no_profile_selected_help->set_visible(selected_profile.empty());
+	profile_actions[PROFILE_CLEAR]->set_disabled(current_profile.empty());
+	profile_actions[PROFILE_ERASE]->set_disabled(selected_profile.empty());
+	profile_actions[PROFILE_EXPORT]->set_disabled(selected_profile.empty());
+	profile_actions[PROFILE_SET]->set_disabled(selected_profile.empty());
 
-	current_profile_name->set_text(current_profile != String() ? current_profile : TTR("(none)"));
+	current_profile_name->set_text(!current_profile.empty() ? current_profile : TTR("(none)"));
 
 	_update_selected_profile();
 }
@@ -390,7 +390,7 @@ void EditorFeatureProfileManager::_profile_action(int p_action) {
 		} break;
 		case PROFILE_SET: {
 			String selected = _get_selected_profile();
-			ERR_FAIL_COND(selected == String());
+			ERR_FAIL_COND(selected.empty());
 			if (selected == current_profile) {
 				return; // Nothing to do here.
 			}
@@ -416,7 +416,7 @@ void EditorFeatureProfileManager::_profile_action(int p_action) {
 		} break;
 		case PROFILE_ERASE: {
 			String selected = _get_selected_profile();
-			ERR_FAIL_COND(selected == String());
+			ERR_FAIL_COND(selected.empty());
 
 			erase_profile_dialog->set_text(vformat(TTR("Erase profile '%s'? (no undo)"), selected));
 			erase_profile_dialog->popup_centered();
@@ -426,7 +426,7 @@ void EditorFeatureProfileManager::_profile_action(int p_action) {
 
 void EditorFeatureProfileManager::_erase_selected_profile() {
 	String selected = _get_selected_profile();
-	ERR_FAIL_COND(selected == String());
+	ERR_FAIL_COND(selected.empty());
 	DirAccessRef da = DirAccess::open(EditorSettings::get_singleton()->get_feature_profiles_dir());
 	ERR_FAIL_COND_MSG(!da, "Cannot open directory '" + EditorSettings::get_singleton()->get_feature_profiles_dir() + "'.");
 
@@ -657,7 +657,7 @@ void EditorFeatureProfileManager::_update_selected_profile() {
 	class_list->clear();
 
 	String profile = _get_selected_profile();
-	if (profile == String()) { //nothing selected, nothing edited
+	if (profile.empty()) { //nothing selected, nothing edited
 		property_list->clear();
 		edited.unref();
 		return;
@@ -761,7 +761,7 @@ void EditorFeatureProfileManager::_export_profile(const String &p_path) {
 
 void EditorFeatureProfileManager::_save_and_update() {
 	String edited_path = _get_selected_profile();
-	ERR_FAIL_COND(edited_path == String());
+	ERR_FAIL_COND(edited_path.empty());
 	ERR_FAIL_COND(edited.is_null());
 
 	edited->save_to_file(EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(edited_path + ".profile"));

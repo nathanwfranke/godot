@@ -159,7 +159,7 @@ void EditorHelpSearch::popup_dialog(const String &p_term) {
 		popup_centered_ratio(0.5F);
 	}
 
-	if (p_term == "") {
+	if (p_term.empty()) {
 		search_box->clear();
 	} else {
 		if (old_term == p_term) {
@@ -324,7 +324,7 @@ bool EditorHelpSearch::Runner::_phase_match_classes() {
 
 		// Match class name.
 		if (search_flags & SEARCH_CLASSES) {
-			match.name = term == "" || _match_string(term, class_doc.name);
+			match.name = term.empty() || _match_string(term, class_doc.name);
 		}
 
 		// Match members if the term is long enough.
@@ -468,7 +468,7 @@ TreeItem *EditorHelpSearch::Runner::_create_class_hierarchy(const ClassMatch &p_
 
 	// Ensure parent nodes are created first.
 	TreeItem *parent = root_item;
-	if (p_match.doc->inherits != "") {
+	if (!p_match.doc->inherits.empty()) {
 		if (class_items.has(p_match.doc->inherits)) {
 			parent = class_items[p_match.doc->inherits];
 		} else {
@@ -513,7 +513,7 @@ TreeItem *EditorHelpSearch::Runner::_create_method_item(TreeItem *p_parent, cons
 	for (int i = 0; i < p_doc->arguments.size(); i++) {
 		const DocData::ArgumentDoc &arg = p_doc->arguments[i];
 		tooltip += arg.type + " " + arg.name;
-		if (arg.default_value != "") {
+		if (!arg.default_value.empty()) {
 			tooltip += " = " + arg.default_value;
 		}
 		if (i < p_doc->arguments.size() - 1) {
@@ -529,7 +529,7 @@ TreeItem *EditorHelpSearch::Runner::_create_signal_item(TreeItem *p_parent, cons
 	for (int i = 0; i < p_doc->arguments.size(); i++) {
 		const DocData::ArgumentDoc &arg = p_doc->arguments[i];
 		tooltip += arg.type + " " + arg.name;
-		if (arg.default_value != "") {
+		if (!arg.default_value.empty()) {
 			tooltip += " = " + arg.default_value;
 		}
 		if (i < p_doc->arguments.size() - 1) {

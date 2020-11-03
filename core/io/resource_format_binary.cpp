@@ -713,7 +713,7 @@ Error ResourceLoaderBinary::load() {
 
 		RES res = RES(r);
 
-		if (path != String()) {
+		if (!path.empty()) {
 			r->set_path(path);
 		}
 		r->set_subindex(subindex);
@@ -809,7 +809,7 @@ void ResourceLoaderBinary::get_dependencies(FileAccess *p_f, List<String> *p_dep
 	for (int i = 0; i < external_resources.size(); i++) {
 		String dep = external_resources[i].path;
 
-		if (p_add_types && external_resources[i].type != String()) {
+		if (p_add_types && !external_resources[i].type.empty()) {
 			dep += "::" + external_resources[i].type;
 		}
 
@@ -977,7 +977,7 @@ RES ResourceFormatLoaderBinary::load(const String &p_path, const String &p_origi
 	loader.use_nocache = p_no_cache;
 	loader.use_sub_threads = p_use_sub_threads;
 	loader.progress = r_progress;
-	String path = p_original_path != "" ? p_original_path : p_path;
+	String path = !p_original_path.empty() ? p_original_path : p_path;
 	loader.local_path = ProjectSettings::get_singleton()->localize_path(path);
 	loader.res_path = loader.local_path;
 	//loader.set_local_path( Globals::get_singleton()->localize_path(p_path) );
@@ -996,7 +996,7 @@ RES ResourceFormatLoaderBinary::load(const String &p_path, const String &p_origi
 }
 
 void ResourceFormatLoaderBinary::get_recognized_extensions_for_type(const String &p_type, List<String> *p_extensions) const {
-	if (p_type == "") {
+	if (p_type.empty()) {
 		get_recognized_extensions(p_extensions);
 		return;
 	}
@@ -1883,7 +1883,7 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 
 	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
 		RES r = E->get();
-		if (r->get_path() == "" || r->get_path().find("::") != -1) {
+		if (r->get_path().empty() || r->get_path().find("::") != -1) {
 			if (r->get_subindex() != 0) {
 				if (used_indices.has(r->get_subindex())) {
 					r->set_subindex(0); //repeated
@@ -1896,7 +1896,7 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 
 	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
 		RES r = E->get();
-		if (r->get_path() == "" || r->get_path().find("::") != -1) {
+		if (r->get_path().empty() || r->get_path().find("::") != -1) {
 			if (r->get_subindex() == 0) {
 				int new_subindex = 1;
 				if (used_indices.size()) {

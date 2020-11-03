@@ -47,7 +47,7 @@ void EditorSubScene::_path_changed(const String &p_path) {
 		scene = nullptr;
 	}
 
-	if (p_path == "") {
+	if (p_path.empty()) {
 		return;
 	}
 

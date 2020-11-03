@@ -862,7 +862,7 @@ Array ArrayMesh::_get_surfaces() const {
 			data["material"] = surfaces[i].material;
 		}
 
-		if (surfaces[i].name != String()) {
+		if (!surfaces[i].name.empty()) {
 			data["name"] = surfaces[i].name;
 		}
 

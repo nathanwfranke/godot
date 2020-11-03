@@ -1011,7 +1011,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	// Network file system needs to be configured before globals, since globals are based on the
 	// 'project.godot' file which will only be available through the network if this is enabled
 	FileAccessNetwork::configure();
-	if (remotefs != "") {
+	if (!remotefs.empty()) {
 		file_access_network_client = memnew(FileAccessNetworkClient);
 		int port;
 		if (remotefs.find(":") != -1) {
@@ -1164,7 +1164,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 			PropertyInfo(Variant::STRING,
 					"rendering/quality/driver/driver_name",
 					PROPERTY_HINT_ENUM, "Vulkan"));
-	if (display_driver == "") {
+	if (display_driver.empty()) {
 		display_driver = GLOBAL_GET("rendering/quality/driver/driver_name");
 	}
 
@@ -1245,7 +1245,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	OS::get_singleton()->_vsync_via_compositor = window_vsync_via_compositor;
 
-	if (tablet_driver == "") { // specified in project.godot
+	if (tablet_driver.empty()) { // specified in project.godot
 		tablet_driver = GLOBAL_DEF_RST_NOVAL("display/window/tablet_driver", OS::get_singleton()->get_tablet_driver_name(0));
 	}
 
@@ -1256,7 +1256,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		}
 	}
 
-	if (tablet_driver == "") {
+	if (tablet_driver.empty()) {
 		OS::get_singleton()->set_current_tablet_driver(OS::get_singleton()->get_tablet_driver_name(0));
 	}
 
@@ -1302,7 +1302,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		display_driver_idx = 0;
 	}
 
-	if (audio_driver == "") { // specified in project.godot
+	if (audio_driver.empty()) { // specified in project.godot
 		audio_driver = GLOBAL_DEF_RST_NOVAL("audio/driver", AudioDriverManager::get_driver(0)->get_name());
 	}
 
@@ -1565,7 +1565,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 
 		boot_logo_path = boot_logo_path.strip_edges();
 
-		if (boot_logo_path != String()) {
+		if (!boot_logo_path.empty()) {
 			boot_logo.instance();
 			Error load_err = ImageLoader::load_image(boot_logo_path, boot_logo);
 			if (load_err) {
@@ -1690,7 +1690,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	MAIN_PRINT("Main: Load Translations");
 
 	translation_server->setup(); //register translations, load them, etc.
-	if (locale != "") {
+	if (!locale.empty()) {
 		translation_server->set_locale(locale);
 	}
 	translation_server->load_translations();
@@ -1764,7 +1764,7 @@ bool Main::start() {
 		} else if (args[i] == "-p" || args[i] == "--project-manager") {
 			project_manager = true;
 #endif
-		} else if (args[i].length() && args[i][0] != '-' && positional_arg == "") {
+		} else if (args[i].length() && args[i][0] != '-' && positional_arg.empty()) {
 			positional_arg = args[i];
 
 			if (args[i].ends_with(".scn") ||
@@ -1815,7 +1815,7 @@ bool Main::start() {
 	}
 
 #ifdef TOOLS_ENABLED
-	if (doc_tool != "") {
+	if (!doc_tool.empty()) {
 		Engine::get_singleton()->set_editor_hint(
 				true); // Needed to instance editor-only classes for their default values
 
@@ -1890,8 +1890,8 @@ bool Main::start() {
 		return false;
 	}
 
-	if (_export_preset != "") {
-		if (positional_arg == "") {
+	if (!_export_preset.empty()) {
+		if (positional_arg.empty()) {
 			String err = "Command line includes export parameter option, but no destination path was given.\n";
 			err += "Please specify the binary's file path to export to. Aborting export.";
 			ERR_PRINT(err);
@@ -1900,7 +1900,7 @@ bool Main::start() {
 	}
 #endif
 
-	if (script == "" && game_path == "" && String(GLOBAL_DEF("application/run/main_scene", "")) != "") {
+	if (script.empty() && game_path.empty() && String(GLOBAL_DEF("application/run/main_scene", "")) != "") {
 		game_path = GLOBAL_DEF("application/run/main_scene", "");
 	}
 
@@ -1910,7 +1910,7 @@ bool Main::start() {
 	};
 	String main_loop_type = GLOBAL_DEF("application/run/main_loop_type", "SceneTree");
 
-	if (script != "") {
+	if (!script.empty()) {
 		Ref<Script> script_res = ResourceLoader::load(script);
 		ERR_FAIL_COND_V_MSG(script_res.is_null(), false, "Can't load script: " + script);
 
@@ -1958,7 +1958,7 @@ bool Main::start() {
 		}
 	}
 
-	if (!main_loop && main_loop_type == "") {
+	if (!main_loop && main_loop_type.empty()) {
 		main_loop_type = "SceneTree";
 	}
 
@@ -1999,7 +1999,7 @@ bool Main::start() {
 		ResourceSaver::add_custom_savers();
 
 		if (!project_manager && !editor) { // game
-			if (game_path != "" || script != "") {
+			if (!game_path.empty() || !script.empty()) {
 				//autoload
 				Map<StringName, ProjectSettings::AutoloadInfo> autoloads = ProjectSettings::get_singleton()->get_autoload_list();
 
@@ -2066,7 +2066,7 @@ bool Main::start() {
 			editor_node = memnew(EditorNode);
 			sml->get_root()->add_child(editor_node);
 
-			if (_export_preset != "") {
+			if (!_export_preset.empty()) {
 				editor_node->export_preset(_export_preset, positional_arg, export_debug, export_pack_only);
 				game_path = ""; // Do not load anything.
 			}
@@ -2198,7 +2198,7 @@ bool Main::start() {
 #endif
 
 		String local_game_path;
-		if (game_path != "" && !project_manager) {
+		if (!game_path.empty() && !project_manager) {
 			local_game_path = game_path.replace("\\", "/");
 
 			if (!local_game_path.begins_with("res://")) {
@@ -2251,7 +2251,7 @@ bool Main::start() {
 			// Load SSL Certificates from Project Settings (or builtin).
 			Crypto::load_default_certificates(GLOBAL_DEF("network/ssl/certificate_bundle_override", ""));
 
-			if (game_path != "") {
+			if (!game_path.empty()) {
 				Node *scene = nullptr;
 				Ref<PackedScene> scenedata = ResourceLoader::load(local_game_path);
 				if (scenedata.is_valid()) {
@@ -2263,7 +2263,7 @@ bool Main::start() {
 
 #ifdef OSX_ENABLED
 				String mac_iconpath = GLOBAL_DEF("application/config/macos_native_icon", "Variant()");
-				if (mac_iconpath != "") {
+				if (!mac_iconpath.empty()) {
 					DisplayServer::get_singleton()->set_native_icon(mac_iconpath);
 					hasicon = true;
 				}
@@ -2271,14 +2271,14 @@ bool Main::start() {
 
 #ifdef WINDOWS_ENABLED
 				String win_iconpath = GLOBAL_DEF("application/config/windows_native_icon", "Variant()");
-				if (win_iconpath != "") {
+				if (!win_iconpath.empty()) {
 					DisplayServer::get_singleton()->set_native_icon(win_iconpath);
 					hasicon = true;
 				}
 #endif
 
 				String iconpath = GLOBAL_DEF("application/config/icon", "Variant()");
-				if ((iconpath != "") && (!hasicon)) {
+				if ((!iconpath.empty()) && (!hasicon)) {
 					Ref<Image> icon;
 					icon.instance();
 					if (ImageLoader::load_image(iconpath, icon) == OK) {
@@ -2290,7 +2290,7 @@ bool Main::start() {
 		}
 
 #ifdef TOOLS_ENABLED
-		if (project_manager || (script == "" && game_path == "" && !editor)) {
+		if (project_manager || (script.empty() && game_path.empty() && !editor)) {
 			Engine::get_singleton()->set_editor_hint(true);
 			ProjectManager *pmanager = memnew(ProjectManager);
 			ProgressDialog *progress_dialog = memnew(ProgressDialog);

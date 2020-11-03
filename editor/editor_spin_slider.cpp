@@ -202,7 +202,7 @@ void EditorSpinSlider::_notification(int p_what) {
 		// EditorSpinSliders with a label have more space on the left, so add an
 		// higher margin to match the location where the text begins.
 		// The margin values below were determined by empirical testing.
-		stylebox->set_default_margin(MARGIN_LEFT, (get_label() != String() ? 23 : 16) * EDSCALE);
+		stylebox->set_default_margin(MARGIN_LEFT, (!get_label().empty() ? 23 : 16) * EDSCALE);
 		value_input->add_theme_style_override("normal", stylebox);
 	}
 
@@ -238,7 +238,7 @@ void EditorSpinSlider::_notification(int p_what) {
 			lc = fc;
 		}
 
-		if (flat && label != String()) {
+		if (flat && !label.empty()) {
 			Color label_bg_color = get_theme_color("dark_color_3", "Editor");
 			draw_rect(Rect2(Vector2(), Vector2(sb->get_offset().x * 2 + string_width, get_size().height)), label_bg_color);
 		}

@@ -482,7 +482,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				Vector<String> flags = hint_text.split(",");
 				for (int i = 0; i < flags.size(); i++) {
 					String flag = flags[i];
-					if (flag == "") {
+					if (flag.empty()) {
 						continue;
 					}
 					menu->add_check_item(flag, i);
@@ -552,7 +552,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 					add_child(create_dialog);
 				}
 
-				if (hint_text != String()) {
+				if (!hint_text.empty()) {
 					create_dialog->set_base_type(hint_text);
 				} else {
 					create_dialog->set_base_type("Object");
@@ -850,7 +850,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			if (p_name == "script" && hint_text == "Script" && Object::cast_to<Node>(owner)) {
 				menu->add_item(TTR("New Script"), OBJ_MENU_NEW_SCRIPT);
 				menu->add_separator();
-			} else if (hint_text != "") {
+			} else if (!hint_text.empty()) {
 				int idx = 0;
 
 				Vector<EditorData::CustomType> custom_resources;
@@ -930,7 +930,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			RES cb = EditorSettings::get_singleton()->get_resource_clipboard();
 			bool paste_valid = false;
 			if (cb.is_valid()) {
-				if (hint_text == "") {
+				if (hint_text.empty()) {
 					paste_valid = true;
 				} else {
 					for (int i = 0; i < hint_text.get_slice_count(","); i++) {
@@ -1107,7 +1107,7 @@ void CustomPropertyEditor::_node_path_selected(NodePath p_path) {
 		return;
 	}
 
-	if (hint == PROPERTY_HINT_NODE_PATH_TO_EDITED_NODE && hint_text != String()) {
+	if (hint == PROPERTY_HINT_NODE_PATH_TO_EDITED_NODE && !hint_text.empty()) {
 		Node *node = get_node(hint_text);
 		if (node) {
 			Node *tonode = node->get_node(p_path);
@@ -1185,7 +1185,7 @@ void CustomPropertyEditor::_action_pressed(int p_which) {
 
 					file->clear_filters();
 
-					if (hint_text != "") {
+					if (!hint_text.empty()) {
 						Vector<String> extensions = hint_text.split(",");
 						for (int i = 0; i < extensions.size(); i++) {
 							String filter = extensions[i];

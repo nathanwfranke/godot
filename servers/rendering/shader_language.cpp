@@ -2435,7 +2435,7 @@ bool ShaderLanguage::_validate_function_call(BlockNode *p_block, const FunctionI
 		}
 
 		FunctionNode *pfunc = shader->functions[i].function;
-		if (arg_list == "") {
+		if (arg_list.empty()) {
 			for (int j = 0; j < pfunc->arguments.size(); j++) {
 				if (j > 0) {
 					arg_list += ", ";
@@ -5824,7 +5824,7 @@ String ShaderLanguage::_get_shader_type_list(const Set<String> &p_shader_types) 
 	// Return a list of shader types as an human-readable string
 	String valid_types;
 	for (const Set<String>::Element *E = p_shader_types.front(); E; E = E->next()) {
-		if (valid_types != String()) {
+		if (!valid_types.empty()) {
 			valid_types += ", ";
 		}
 
@@ -7177,7 +7177,7 @@ String ShaderLanguage::get_shader_type(const String &p_code) {
 			break;
 
 		} else if (p_code[i] <= 32) {
-			if (cur_identifier != String()) {
+			if (!cur_identifier.empty()) {
 				if (!reading_type) {
 					if (cur_identifier != "shader_type") {
 						return String();

@@ -49,7 +49,7 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 	String remote_host = EditorSettings::get_singleton()->get("network/debug/remote_host");
 	int remote_port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
 
-	if (resource_path != "") {
+	if (!resource_path.empty()) {
 		args.push_back("--path");
 		args.push_back(resource_path.replace(" ", "%20"));
 	}
@@ -179,11 +179,11 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 		args.push_back("--skip-breakpoints");
 	}
 
-	if (p_scene != "") {
+	if (!p_scene.empty()) {
 		args.push_back(p_scene);
 	}
 
-	if (p_custom_args != "") {
+	if (!p_custom_args.empty()) {
 		Vector<String> cargs = p_custom_args.split(" ", false);
 		for (int i = 0; i < cargs.size(); i++) {
 			args.push_back(cargs[i].replace(" ", "%20"));
@@ -207,7 +207,7 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 	}
 
 	status = STATUS_PLAY;
-	if (p_scene != "") {
+	if (!p_scene.empty()) {
 		running_scene = p_scene;
 	}
 

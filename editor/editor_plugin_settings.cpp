@@ -67,7 +67,7 @@ void EditorPluginSettings::update_plugins() {
 
 	Vector<String> plugins;
 
-	while (d != String()) {
+	while (!d.empty()) {
 		bool dir = da->current_is_dir();
 		String path = "res://addons/" + d + "/plugin.cfg";
 

@@ -563,7 +563,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 #ifdef DEBUG_ENABLED
 				if (!valid) {
 					String v = index->operator String();
-					if (v != "") {
+					if (!v.empty()) {
 						v = "'" + v + "'";
 					} else {
 						v = "of type '" + _get_var_type(index) + "'";
@@ -594,7 +594,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 #ifdef DEBUG_ENABLED
 				if (!valid) {
 					String v = index->operator String();
-					if (v != "") {
+					if (!v.empty()) {
 						v = "'" + v + "'";
 					} else {
 						v = "of type '" + _get_var_type(index) + "'";
@@ -1528,20 +1528,20 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 		//error
 		// function, file, line, error, explanation
 		String err_file;
-		if (p_instance && ObjectDB::get_instance(p_instance->owner_id) != nullptr && p_instance->script->is_valid() && p_instance->script->path != "") {
+		if (p_instance && ObjectDB::get_instance(p_instance->owner_id) != nullptr && p_instance->script->is_valid() && !p_instance->script->path.empty()) {
 			err_file = p_instance->script->path;
 		} else if (script) {
 			err_file = script->path;
 		}
-		if (err_file == "") {
+		if (err_file.empty()) {
 			err_file = "<built-in>";
 		}
 		String err_func = name;
-		if (p_instance && ObjectDB::get_instance(p_instance->owner_id) != nullptr && p_instance->script->is_valid() && p_instance->script->name != "") {
+		if (p_instance && ObjectDB::get_instance(p_instance->owner_id) != nullptr && p_instance->script->is_valid() && !p_instance->script->name.empty()) {
 			err_func = p_instance->script->name + "." + err_func;
 		}
 		int err_line = line;
-		if (err_text == "") {
+		if (err_text.empty()) {
 			err_text = "Internal Script Error! - opcode #" + itos(last_opcode) + " (report please).";
 		}
 

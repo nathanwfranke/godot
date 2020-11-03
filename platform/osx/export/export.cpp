@@ -533,10 +533,10 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 		src_pkg_name = p_preset->get("custom_template/release");
 	}
 
-	if (src_pkg_name == "") {
+	if (src_pkg_name.empty()) {
 		String err;
 		src_pkg_name = find_export_template("osx.zip", &err);
-		if (src_pkg_name == "") {
+		if (src_pkg_name.empty()) {
 			EditorNode::add_io_error(err);
 			return ERR_FILE_NOT_FOUND;
 		}
@@ -652,7 +652,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 				iconpath = ProjectSettings::get_singleton()->get("application/config/icon");
 			}
 
-			if (iconpath != "") {
+			if (!iconpath.empty()) {
 				if (iconpath.get_extension() == "icns") {
 					FileAccess *icon = FileAccess::open(iconpath, FileAccess::READ);
 					if (icon) {

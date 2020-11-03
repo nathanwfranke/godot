@@ -63,7 +63,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 	// Create a tree item for the subdirectory.
 	TreeItem *subdirectory_item = tree->create_item(p_parent);
 	String dname = p_dir->get_name();
-	if (dname == "") {
+	if (dname.empty()) {
 		dname = "res://";
 	}
 
@@ -905,7 +905,7 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 			files->select(item_index, false);
 		}
 
-		if (!p_keep_selection && file != "" && fname == file) {
+		if (!p_keep_selection && !file.empty() && fname == file) {
 			files->select(item_index, true);
 			files->ensure_current_is_visible();
 		}
@@ -1589,7 +1589,7 @@ Vector<String> FileSystemDock::_remove_self_included_paths(Vector<String> select
 		selected_strings.sort_custom<NaturalNoCaseComparator>();
 		String last_path = "";
 		for (int i = 0; i < selected_strings.size(); i++) {
-			if (last_path != "" && selected_strings[i].begins_with(last_path)) {
+			if (!last_path.empty() && selected_strings[i].begins_with(last_path)) {
 				selected_strings.remove(i);
 				i--;
 			}
@@ -1921,7 +1921,7 @@ void FileSystemDock::_search_changed(const String &p_text, const Control *p_from
 		tree_search_box->set_text(searched_string);
 	}
 
-	bool unfold_path = (p_text == String() && path != String());
+	bool unfold_path = (p_text.empty() && !path.empty());
 	switch (display_mode) {
 		case DISPLAY_MODE_TREE_ONLY: {
 			_update_tree(searched_string.length() == 0 ? uncollapsed_paths_before_search : Vector<String>(), false, false, unfold_path);
@@ -2527,7 +2527,7 @@ void FileSystemDock::_get_imported_files(const String &p_path, Vector<String> &f
 	DirAccess *da = DirAccess::open(p_path);
 	da->list_dir_begin();
 	String n = da->get_next();
-	while (n != String()) {
+	while (!n.empty()) {
 		if (n != "." && n != ".." && !n.ends_with(".import")) {
 			String npath = p_path + n + (da->current_is_dir() ? "/" : "");
 			_get_imported_files(npath, files);
@@ -2577,7 +2577,7 @@ void FileSystemDock::_update_import_dock() {
 		}
 
 		String type = cf->get_value("remap", "type");
-		if (import_type == "") {
+		if (import_type.empty()) {
 			import_type = type;
 		} else if (import_type != type) {
 			// All should be the same type.

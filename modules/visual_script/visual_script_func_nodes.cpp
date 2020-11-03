@@ -364,7 +364,7 @@ void VisualScriptFunctionCall::_update_method_cache() {
 
 	} else if (call_mode == CALL_MODE_INSTANCE) {
 		type = base_type;
-		if (base_script != String()) {
+		if (!base_script.empty()) {
 			if (!ResourceCache::has(base_script) && ScriptServer::edit_request_func) {
 				ScriptServer::edit_request_func(base_script); //make sure it's loaded
 			}
@@ -533,7 +533,7 @@ void VisualScriptFunctionCall::_validate_property(PropertyInfo &property) const 
 			property.hint = PROPERTY_HINT_ENUM;
 			String sl;
 			for (List<Engine::Singleton>::Element *E = names.front(); E; E = E->next()) {
-				if (sl != String()) {
+				if (!sl.empty()) {
 					sl += ",";
 				}
 				sl += E->get().name;
@@ -574,7 +574,7 @@ void VisualScriptFunctionCall::_validate_property(PropertyInfo &property) const 
 			property.hint = PROPERTY_HINT_METHOD_OF_BASE_TYPE;
 			property.hint_string = base_type;
 
-			if (base_script != String()) {
+			if (!base_script.empty()) {
 				if (!ResourceCache::has(base_script) && ScriptServer::edit_request_func) {
 					ScriptServer::edit_request_func(base_script); //make sure it's loaded
 				}
@@ -678,7 +678,7 @@ void VisualScriptFunctionCall::_bind_methods() {
 
 	String script_ext_hint;
 	for (List<String>::Element *E = script_extensions.front(); E; E = E->next()) {
-		if (script_ext_hint != String()) {
+		if (!script_ext_hint.empty()) {
 			script_ext_hint += ",";
 		}
 		script_ext_hint += "*." + E->get();
@@ -1148,7 +1148,7 @@ void VisualScriptPropertySet::_update_cache() {
 			}
 		} else if (call_mode == CALL_MODE_INSTANCE) {
 			type = base_type;
-			if (base_script != String()) {
+			if (!base_script.empty()) {
 				if (!ResourceCache::has(base_script) && ScriptServer::edit_request_func) {
 					ScriptServer::edit_request_func(base_script); //make sure it's loaded
 				}
@@ -1308,7 +1308,7 @@ void VisualScriptPropertySet::_validate_property(PropertyInfo &property) const {
 			property.hint = PROPERTY_HINT_PROPERTY_OF_BASE_TYPE;
 			property.hint_string = base_type;
 
-			if (base_script != String()) {
+			if (!base_script.empty()) {
 				if (!ResourceCache::has(base_script) && ScriptServer::edit_request_func) {
 					ScriptServer::edit_request_func(base_script); //make sure it's loaded
 				}
@@ -1347,7 +1347,7 @@ void VisualScriptPropertySet::_validate_property(PropertyInfo &property) const {
 		property.hint = PROPERTY_HINT_ENUM;
 		property.hint_string = options;
 		property.type = Variant::STRING;
-		if (options == "") {
+		if (options.empty()) {
 			property.usage = 0; //hide if type has no usable index
 		}
 	}
@@ -1397,7 +1397,7 @@ void VisualScriptPropertySet::_bind_methods() {
 
 	String script_ext_hint;
 	for (List<String>::Element *E = script_extensions.front(); E; E = E->next()) {
-		if (script_ext_hint != String()) {
+		if (!script_ext_hint.empty()) {
 			script_ext_hint += ",";
 		}
 		script_ext_hint += "*." + E->get();
@@ -1818,7 +1818,7 @@ void VisualScriptPropertyGet::_update_cache() {
 			}
 		} else if (call_mode == CALL_MODE_INSTANCE) {
 			type = base_type;
-			if (base_script != String()) {
+			if (!base_script.empty()) {
 				if (!ResourceCache::has(base_script) && ScriptServer::edit_request_func) {
 					ScriptServer::edit_request_func(base_script); //make sure it's loaded
 				}
@@ -1985,7 +1985,7 @@ void VisualScriptPropertyGet::_validate_property(PropertyInfo &property) const {
 			property.hint = PROPERTY_HINT_PROPERTY_OF_BASE_TYPE;
 			property.hint_string = base_type;
 
-			if (base_script != String()) {
+			if (!base_script.empty()) {
 				if (!ResourceCache::has(base_script) && ScriptServer::edit_request_func) {
 					ScriptServer::edit_request_func(base_script); //make sure it's loaded
 				}
@@ -2023,7 +2023,7 @@ void VisualScriptPropertyGet::_validate_property(PropertyInfo &property) const {
 		property.hint = PROPERTY_HINT_ENUM;
 		property.hint_string = options;
 		property.type = Variant::STRING;
-		if (options == "") {
+		if (options.empty()) {
 			property.usage = 0; //hide if type has no usable index
 		}
 	}
@@ -2070,7 +2070,7 @@ void VisualScriptPropertyGet::_bind_methods() {
 
 	String script_ext_hint;
 	for (List<String>::Element *E = script_extensions.front(); E; E = E->next()) {
-		if (script_ext_hint != String()) {
+		if (!script_ext_hint.empty()) {
 			script_ext_hint += ",";
 		}
 		script_ext_hint += "." + E->get();
@@ -2279,7 +2279,7 @@ void VisualScriptEmitSignal::_validate_property(PropertyInfo &property) const {
 
 		String ml;
 		for (List<StringName>::Element *E = sigs.front(); E; E = E->next()) {
-			if (ml != String()) {
+			if (!ml.empty()) {
 				ml += ",";
 			}
 			ml += E->get();

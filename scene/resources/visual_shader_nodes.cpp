@@ -526,7 +526,7 @@ String VisualShaderNodeTexture::generate_code(Shader::Mode p_mode, VisualShader:
 
 		String code;
 		code += "\t{\n";
-		if (id == String()) {
+		if (id.empty()) {
 			code += "\t\tvec4 " + id + "_tex_read = vec4(0.0);\n";
 		} else {
 			if (p_input_vars[0] == String()) { // Use UV by default.
@@ -932,7 +932,7 @@ String VisualShaderNodeSample3D::generate_code(Shader::Mode p_mode, VisualShader
 		} else {
 			id = p_input_vars[2];
 		}
-		if (id != String()) {
+		if (!id.empty()) {
 			if (p_input_vars[0] == String()) { // Use UV by default.
 				if (p_input_vars[1] == String()) {
 					code += "\t\tvec4 " + id + "_tex_read = texture(" + id + ", " + default_uv + ");\n";
@@ -1202,7 +1202,7 @@ String VisualShaderNodeCubemap::generate_code(Shader::Mode p_mode, VisualShader:
 
 	code += "\t{\n";
 
-	if (id == String()) {
+	if (id.empty()) {
 		code += "\t\tvec4 " + id + "_read = vec4(0.0);\n";
 		code += "\t\t" + p_output_vars[0] + " = " + id + "_read.rgb;\n";
 		code += "\t\t" + p_output_vars[1] + " = " + id + "_read.a;\n";

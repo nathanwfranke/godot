@@ -885,7 +885,7 @@ void Tween::reset(Object *p_object, StringName p_key) {
 		}
 
 		// Do we have the correct object and key?
-		if (object == p_object && (data.concatenated_key == p_key || p_key == "")) {
+		if (object == p_object && (data.concatenated_key == p_key || p_key == StringName())) {
 			// Reset the tween to the initial state
 			data.elapsed = 0;
 			data.finish = false;
@@ -928,7 +928,7 @@ void Tween::stop(Object *p_object, StringName p_key) {
 		}
 
 		// Is this the correct object and does it have the given key?
-		if (object == p_object && (data.concatenated_key == p_key || p_key == "")) {
+		if (object == p_object && (data.concatenated_key == p_key || p_key == StringName())) {
 			// Disable the tween
 			data.active = false;
 		}
@@ -966,7 +966,7 @@ void Tween::resume(Object *p_object, StringName p_key) {
 		}
 
 		// If the object and string key match, activate it
-		if (object == p_object && (data.concatenated_key == p_key || p_key == "")) {
+		if (object == p_object && (data.concatenated_key == p_key || p_key == StringName())) {
 			data.active = true;
 		}
 	}
@@ -1006,7 +1006,7 @@ void Tween::remove(Object *p_object, StringName p_key) {
 		}
 
 		// If the target object and string key match, queue it for removal
-		if (object == p_object && (data.concatenated_key == p_key || p_key == "")) {
+		if (object == p_object && (data.concatenated_key == p_key || p_key == StringName())) {
 			for_removal.push_back(E);
 		}
 	}

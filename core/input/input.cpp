@@ -384,7 +384,7 @@ void Input::joy_connection_changed(int p_idx, bool p_connected, String p_name, S
 
 	if (p_connected) {
 		String uidname = p_guid;
-		if (p_guid == "") {
+		if (p_guid.empty()) {
 			int uidlen = MIN(p_name.length(), 16);
 			for (int i = 0; i < uidlen; i++) {
 				uidname = uidname + _hex_str(p_name[i]);
@@ -1412,7 +1412,7 @@ Input::Input() {
 
 	// If defined, parse SDL_GAMECONTROLLERCONFIG for possible new mappings/overrides.
 	String env_mapping = OS::get_singleton()->get_environment("SDL_GAMECONTROLLERCONFIG");
-	if (env_mapping != "") {
+	if (!env_mapping.empty()) {
 		Vector<String> entries = env_mapping.split("\n");
 		for (int i = 0; i < entries.size(); i++) {
 			if (entries[i] == "") {

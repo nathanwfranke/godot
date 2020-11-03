@@ -265,14 +265,14 @@ String GPUParticles3D::get_configuration_warning() const {
 	anim_material_found = anim_material_found || (spat && spat->get_billboard_mode() == StandardMaterial3D::BILLBOARD_PARTICLES);
 
 	if (!meshes_found) {
-		if (warnings != String()) {
+		if (!warnings.empty()) {
 			warnings += "\n";
 		}
 		warnings += "- " + TTR("Nothing is visible because meshes have not been assigned to draw passes.");
 	}
 
 	if (process_material.is_null()) {
-		if (warnings != String()) {
+		if (!warnings.empty()) {
 			warnings += "\n";
 		}
 		warnings += "- " + TTR("A material to process the particles is not assigned, so no behavior is imprinted.");
@@ -281,7 +281,7 @@ String GPUParticles3D::get_configuration_warning() const {
 		if (!anim_material_found && process &&
 				(process->get_param(ParticlesMaterial::PARAM_ANIM_SPEED) != 0.0 || process->get_param(ParticlesMaterial::PARAM_ANIM_OFFSET) != 0.0 ||
 						process->get_param_texture(ParticlesMaterial::PARAM_ANIM_SPEED).is_valid() || process->get_param_texture(ParticlesMaterial::PARAM_ANIM_OFFSET).is_valid())) {
-			if (warnings != String()) {
+			if (!warnings.empty()) {
 				warnings += "\n";
 			}
 			warnings += "- " + TTR("Particles animation requires the usage of a StandardMaterial3D whose Billboard Mode is set to \"Particle Billboard\".");

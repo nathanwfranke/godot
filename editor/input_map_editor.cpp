@@ -134,7 +134,7 @@ void InputMapEditor::_action_edited() {
 			return;
 		}
 
-		if (new_name == "" || !_validate_action_name(new_name)) {
+		if (new_name.empty() || !_validate_action_name(new_name)) {
 			ti->set_text(0, old_name);
 			add_at = "input/" + old_name;
 
@@ -778,7 +778,7 @@ void InputMapEditor::_update_actions() {
 }
 
 void InputMapEditor::_action_check(String p_action) {
-	if (p_action == "") {
+	if (p_action.empty()) {
 		action_add->set_disabled(true);
 	} else {
 		if (!_validate_action_name(p_action)) {

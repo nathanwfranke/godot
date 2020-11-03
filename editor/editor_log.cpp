@@ -81,11 +81,11 @@ void EditorLog::_clear_request() {
 void EditorLog::_copy_request() {
 	String text = log->get_selected_text();
 
-	if (text == "") {
+	if (text.empty()) {
 		text = log->get_text();
 	}
 
-	if (text != "") {
+	if (!text.empty()) {
 		DisplayServer::get_singleton()->clipboard_set(text);
 	}
 }

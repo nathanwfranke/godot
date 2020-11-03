@@ -758,7 +758,7 @@ void TextEdit::_notification(int p_what) {
 			String highlighted_text = get_selection_text();
 
 			// Check if highlighted words contains only whitespaces (tabs or spaces).
-			bool only_whitespaces_highlighted = highlighted_text.strip_edges() == String();
+			bool only_whitespaces_highlighted = highlighted_text.strip_edges().empty();
 
 			int cursor_wrap_index = get_cursor_wrap_index();
 
@@ -1027,7 +1027,7 @@ void TextEdit::_notification(int p_what) {
 							switch (gutter.type) {
 								case GUTTER_TYPE_STRING: {
 									const String &text = get_line_gutter_text(line, g);
-									if (text == "") {
+									if (text.empty()) {
 										break;
 									}
 
@@ -1467,7 +1467,7 @@ void TextEdit::_notification(int p_what) {
 
 			// Check to see if the hint should be drawn.
 			bool show_hint = false;
-			if (completion_hint != "") {
+			if (!completion_hint.empty()) {
 				if (completion_active) {
 					if (completion_below && !callhint_below) {
 						show_hint = true;
@@ -2257,7 +2257,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 			}
 		} else {
 			if (mb->get_button_index() == BUTTON_LEFT) {
-				if (mb->get_command() && highlighted_word != String()) {
+				if (mb->get_command() && !highlighted_word.empty()) {
 					int row, col;
 					_get_mouse_pos(Point2i(mb->get_position().x, mb->get_position().y), row, col);
 
@@ -2302,7 +2302,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 					emit_signal("symbol_validate", new_word);
 				}
 			} else {
-				if (highlighted_word != String()) {
+				if (!highlighted_word.empty()) {
 					set_highlighted_word(String());
 				}
 			}
@@ -2741,7 +2741,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 				end_complex_operation();
 			} break;
 			case KEY_ESCAPE: {
-				if (completion_hint != "") {
+				if (!completion_hint.empty()) {
 					completion_hint = "";
 					update();
 				} else {
@@ -3548,7 +3548,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 
 				const char32_t chr[2] = { (char32_t)k->get_unicode(), 0 };
 
-				if (completion_hint != "" && k->get_unicode() == ')') {
+				if (!completion_hint.empty() && k->get_unicode() == ')') {
 					completion_hint = "";
 				}
 				if (auto_brace_completion_enabled && _is_pair_symbol(chr[0])) {
@@ -4523,7 +4523,7 @@ void TextEdit::insert_text_at_cursor(const String &p_text) {
 }
 
 Control::CursorShape TextEdit::get_cursor_shape(const Point2 &p_pos) const {
-	if (highlighted_word != String()) {
+	if (!highlighted_word.empty()) {
 		return CURSOR_POINTING_HAND;
 	}
 
@@ -6215,7 +6215,7 @@ void TextEdit::_update_completion_candidates() {
 		prev_is_prefix = true;
 	}
 
-	if (cancel || (!pre_keyword && s == "" && (cofs == 0 || !prev_is_prefix))) {
+	if (cancel || (!pre_keyword && s.empty() && (cofs == 0 || !prev_is_prefix))) {
 		// None to complete, cancel.
 		_cancel_completion();
 		return;

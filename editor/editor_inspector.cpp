@@ -1444,7 +1444,7 @@ void EditorInspector::_parse_added_editors(VBoxContainer *current_vbox, Ref<Edit
 					ep->property_usage = 0;
 				}
 
-				if (F->get().label != String()) {
+				if (!F->get().label.empty()) {
 					ep->set_label(F->get().label);
 				}
 
@@ -1637,7 +1637,7 @@ void EditorInspector::update_tree() {
 				}
 			}
 			if (category->icon.is_null()) {
-				if (type != String()) { // Can happen for built-in scripts.
+				if (!type.empty()) { // Can happen for built-in scripts.
 					category->icon = EditorNode::get_singleton()->get_class_icon(type, "Object");
 				}
 			}
@@ -1681,8 +1681,8 @@ void EditorInspector::update_tree() {
 
 		String basename = p.name;
 
-		if (subgroup != "") {
-			if (subgroup_base != "") {
+		if (!subgroup.empty()) {
+			if (!subgroup_base.empty()) {
 				if (basename.begins_with(subgroup_base)) {
 					basename = basename.replace_first(subgroup_base, "");
 				} else if (subgroup_base.begins_with(basename)) {
@@ -1692,8 +1692,8 @@ void EditorInspector::update_tree() {
 				}
 			}
 		}
-		if (group != "") {
-			if (group_base != "" && subgroup == "") {
+		if (!group.empty()) {
+			if (!group_base.empty() && subgroup.empty()) {
 				if (basename.begins_with(group_base)) {
 					basename = basename.replace_first(group_base, "");
 				} else if (group_base.begins_with(basename)) {
@@ -1704,10 +1704,10 @@ void EditorInspector::update_tree() {
 				}
 			}
 		}
-		if (subgroup != "") {
+		if (!subgroup.empty()) {
 			basename = subgroup + "/" + basename;
 		}
-		if (group != "") {
+		if (!group.empty()) {
 			basename = group + "/" + basename;
 		}
 
@@ -1728,7 +1728,7 @@ void EditorInspector::update_tree() {
 
 		String path = basename.left(basename.rfind("/"));
 
-		if (use_filter && filter != "") {
+		if (use_filter && !filter.empty()) {
 			String cat = path;
 
 			if (capitalize_paths) {
@@ -1801,7 +1801,7 @@ void EditorInspector::update_tree() {
 
 		if (use_doc_hints) {
 			StringName classname = object->get_class_name();
-			if (object_class != String()) {
+			if (!object_class.empty()) {
 				classname = object_class;
 			}
 			StringName propname = property_prefix + p.name;
@@ -1820,7 +1820,7 @@ void EditorInspector::update_tree() {
 			if (!found) {
 				DocData *dd = EditorHelp::get_doc_data();
 				Map<String, DocData::ClassDoc>::Element *F = dd->class_list.find(classname);
-				while (F && descr == String()) {
+				while (F && descr.empty()) {
 					for (int i = 0; i < F->get().properties.size(); i++) {
 						if (F->get().properties[i].name == propname.operator String()) {
 							descr = DTR(F->get().properties[i].description);
@@ -1873,7 +1873,7 @@ void EditorInspector::update_tree() {
 							//and set label?
 						}
 
-						if (F->get().label != String()) {
+						if (!F->get().label.empty()) {
 							ep->set_label(F->get().label);
 						} else {
 							//use existin one
@@ -1913,7 +1913,7 @@ void EditorInspector::update_tree() {
 					ep->connect("multiple_properties_changed", callable_mp(this, &EditorInspector::_multiple_properties_changed));
 					ep->connect("resource_selected", callable_mp(this, &EditorInspector::_resource_selected), varray(), CONNECT_DEFERRED);
 					ep->connect("object_id_selected", callable_mp(this, &EditorInspector::_object_id_selected), varray(), CONNECT_DEFERRED);
-					if (doc_hint != String()) {
+					if (!doc_hint.empty()) {
 						ep->set_tooltip(property_prefix + p.name + "::" + doc_hint);
 					} else {
 						ep->set_tooltip(property_prefix + p.name);
@@ -2125,7 +2125,7 @@ void EditorInspector::_edit_request_change(Object *p_object, const String &p_pro
 		return;
 	}
 
-	if (p_property == String()) {
+	if (p_property.empty()) {
 		update_tree_pending = true;
 	} else {
 		pending.insert(p_property);
@@ -2452,7 +2452,7 @@ void EditorInspector::_update_script_class_properties(const Object &p_object, Li
 		String n = EditorNode::get_editor_data().script_class_get_name(script->get_path());
 		if (n.length()) {
 			classes.push_front(n);
-		} else if (script->get_path() != String() && script->get_path().find("::") == -1) {
+		} else if (!script->get_path().empty() && script->get_path().find("::") == -1) {
 			n = script->get_path().get_file();
 			classes.push_front(n);
 		} else {
@@ -2487,7 +2487,7 @@ void EditorInspector::_update_script_class_properties(const Object &p_object, Li
 		StringName name = E->get();
 		String path = paths[name];
 		Ref<Script> s;
-		if (path == String()) {
+		if (path.empty()) {
 			// Built-in script. It can't be inherited, so must be the script attached to the object.
 			s = p_object.get_script();
 		} else {

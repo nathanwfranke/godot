@@ -1019,7 +1019,7 @@ void Tree::draw_item_rect(const TreeItem::Cell &p_cell, const Rect2i &p_rect, co
 	Rect2i rect = p_rect;
 	Ref<Font> font = cache.font;
 	String text = p_cell.text;
-	if (p_cell.suffix != String()) {
+	if (!p_cell.suffix.empty()) {
 		text += " " + p_cell.suffix;
 	}
 
@@ -1114,7 +1114,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 			if (p_item->cells[i].expand_right) {
 				int plus = 1;
-				while (i + plus < columns.size() && !p_item->cells[i + plus].editable && p_item->cells[i + plus].mode == TreeItem::CELL_MODE_STRING && p_item->cells[i + plus].text == "" && p_item->cells[i + plus].icon.is_null()) {
+				while (i + plus < columns.size() && !p_item->cells[i + plus].editable && p_item->cells[i + plus].mode == TreeItem::CELL_MODE_STRING && p_item->cells[i + plus].text.empty() && p_item->cells[i + plus].icon.is_null()) {
 					w += get_column_width(i + plus);
 					plus++;
 					skip2++;
@@ -1260,7 +1260,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 				} break;
 				case TreeItem::CELL_MODE_RANGE: {
-					if (p_item->cells[i].text != "") {
+					if (!p_item->cells[i].text.empty()) {
 						if (!p_item->cells[i].editable) {
 							break;
 						}
@@ -1280,7 +1280,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 							}
 						}
 
-						if (p_item->cells[i].suffix != String()) {
+						if (!p_item->cells[i].suffix.empty()) {
 							s += " " + p_item->cells[i].suffix;
 						}
 
@@ -1298,7 +1298,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 						String valtext = String::num(p_item->cells[i].val, Math::range_step_decimals(p_item->cells[i].step));
 
-						if (p_item->cells[i].suffix != String()) {
+						if (!p_item->cells[i].suffix.empty()) {
 							valtext += " " + p_item->cells[i].suffix;
 						}
 
@@ -1651,7 +1651,7 @@ int Tree::propagate_mouse_event(const Point2i &p_pos, int x_ofs, int y_ofs, bool
 
 			if (p_item->cells[i].expand_right) {
 				int plus = 1;
-				while (i + plus < columns.size() && !p_item->cells[i + plus].editable && p_item->cells[i + plus].mode == TreeItem::CELL_MODE_STRING && p_item->cells[i + plus].text == "" && p_item->cells[i + plus].icon.is_null()) {
+				while (i + plus < columns.size() && !p_item->cells[i + plus].editable && p_item->cells[i + plus].mode == TreeItem::CELL_MODE_STRING && p_item->cells[i + plus].text.empty() && p_item->cells[i + plus].icon.is_null()) {
 					col_width += cache.hseparation;
 					col_width += get_column_width(i + plus);
 					plus++;
@@ -1811,7 +1811,7 @@ int Tree::propagate_mouse_event(const Point2i &p_pos, int x_ofs, int y_ofs, bool
 
 			} break;
 			case TreeItem::CELL_MODE_RANGE: {
-				if (c.text != "") {
+				if (!c.text.empty()) {
 					//if (x >= (get_column_width(col)-item_h/2)) {
 
 					popup_menu->clear();
@@ -2681,7 +2681,7 @@ bool Tree::edit_selected() {
 		item_edited(col, s);
 
 		return true;
-	} else if (c.mode == TreeItem::CELL_MODE_RANGE && c.text != "") {
+	} else if (c.mode == TreeItem::CELL_MODE_RANGE && !c.text.empty()) {
 		popup_menu->clear();
 		for (int i = 0; i < c.text.get_slice_count(","); i++) {
 			String s2 = c.text.get_slicec(',', i);
@@ -3713,7 +3713,7 @@ String Tree::get_tooltip(const Point2 &p_pos) const {
 				Size2 size = b->get_size() + cache.button_pressed->get_minimum_size();
 				if (pos.x > col_width - size.width) {
 					String tooltip = c.buttons[j].tooltip;
-					if (tooltip != "") {
+					if (!tooltip.empty()) {
 						return tooltip;
 					}
 				}

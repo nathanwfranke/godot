@@ -688,7 +688,7 @@ void EditorSceneImporterAssimp::_import_animation(ImportState &state, int p_anim
 
 	const aiAnimation *anim = state.assimp_scene->mAnimations[p_animation_index];
 	String name = AssimpUtils::get_anim_string_from_assimp(anim->mName);
-	if (name == String()) {
+	if (name.empty()) {
 		name = "Animation " + itos(p_animation_index + 1);
 	}
 	print_verbose("import animation: " + name);

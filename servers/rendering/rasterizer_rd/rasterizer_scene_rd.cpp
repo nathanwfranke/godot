@@ -2512,7 +2512,7 @@ void RasterizerSceneRD::SkyShaderData::set_code(const String &p_code) {
 	ubo_size = 0;
 	uniforms.clear();
 
-	if (code == String()) {
+	if (code.empty()) {
 		return; //just invalid, but no error
 	}
 

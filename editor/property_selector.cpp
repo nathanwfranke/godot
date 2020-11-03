@@ -170,7 +170,7 @@ void PropertySelector::_update_search() {
 				continue;
 			}
 
-			if (search_box->get_text() != String() && E->get().name.findn(search_text) == -1) {
+			if (!search_box->get_text().empty() && E->get().name.findn(search_text) == -1) {
 				continue;
 			}
 
@@ -183,7 +183,7 @@ void PropertySelector::_update_search() {
 			item->set_metadata(0, E->get().name);
 			item->set_icon(0, type_icons[E->get().type]);
 
-			if (!found && search_box->get_text() != String() && E->get().name.findn(search_text) != -1) {
+			if (!found && !search_box->get_text().empty() && E->get().name.findn(search_text) != -1) {
 				item->select(0);
 				found = true;
 			}
@@ -258,7 +258,7 @@ void PropertySelector::_update_search() {
 				continue;
 			}
 
-			if (search_box->get_text() != String() && name.findn(search_text) == -1) {
+			if (!search_box->get_text().empty() && name.findn(search_text) == -1) {
 				continue;
 			}
 
@@ -309,7 +309,7 @@ void PropertySelector::_update_search() {
 			item->set_metadata(0, name);
 			item->set_selectable(0, true);
 
-			if (!found && search_box->get_text() != String() && name.findn(search_text) != -1) {
+			if (!found && !search_box->get_text().empty() && name.findn(search_text) != -1) {
 				item->select(0);
 				found = true;
 			}
@@ -355,7 +355,7 @@ void PropertySelector::_item_selected() {
 	if (properties) {
 		String at_class = class_type;
 
-		while (at_class != String()) {
+		while (!at_class.empty()) {
 			Map<String, DocData::ClassDoc>::Element *E = dd->class_list.find(at_class);
 			if (E) {
 				for (int i = 0; i < E->get().properties.size(); i++) {
@@ -370,7 +370,7 @@ void PropertySelector::_item_selected() {
 	} else {
 		String at_class = class_type;
 
-		while (at_class != String()) {
+		while (!at_class.empty()) {
 			Map<String, DocData::ClassDoc>::Element *E = dd->class_list.find(at_class);
 			if (E) {
 				for (int i = 0; i < E->get().methods.size(); i++) {
@@ -384,7 +384,7 @@ void PropertySelector::_item_selected() {
 		}
 	}
 
-	if (text == String()) {
+	if (text.empty()) {
 		return;
 	}
 

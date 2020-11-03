@@ -681,7 +681,7 @@ void VisualShaderGraphPlugin::add_node(VisualShader::Type p_type, int p_id) {
 	node->add_child(offset);
 
 	String error = vsnode->get_warning(visual_shader->get_mode(), p_type);
-	if (error != String()) {
+	if (!error.empty()) {
 		Label *error_label = memnew(Label);
 		error_label->add_theme_color_override("font_color", VisualShaderEditor::get_singleton()->get_theme_color("error_color", "Editor"));
 		error_label->set_text(error);
@@ -957,7 +957,7 @@ void VisualShaderEditor::update_custom_nodes() {
 			category = category.rstrip("/");
 			category = category.lstrip("/");
 			category = "Addons/" + category;
-			if (subcategory != "") {
+			if (!subcategory.empty()) {
 				category += "/" + subcategory;
 			}
 
@@ -1630,7 +1630,7 @@ void VisualShaderEditor::_port_name_focus_out(Object *line_edit, int p_node_id, 
 	}
 
 	String validated_name = visual_shader->validate_port_name(text, input_names, output_names);
-	if (validated_name == "") {
+	if (validated_name.empty()) {
 		if (!p_output) {
 			Object::cast_to<LineEdit>(line_edit)->set_text(node->get_input_port_name(p_port_id));
 		} else {
@@ -1726,7 +1726,7 @@ VisualShaderNode *VisualShaderEditor::_add_node(int p_idx, int p_op_idx) {
 
 	bool is_custom = add_options[p_idx].is_custom;
 
-	if (!is_custom && add_options[p_idx].type != String()) {
+	if (!is_custom && !add_options[p_idx].type.empty()) {
 		VisualShaderNode *vsn = Object::cast_to<VisualShaderNode>(ClassDB::instance(add_options[p_idx].type));
 		ERR_FAIL_COND_V(!vsn, nullptr);
 

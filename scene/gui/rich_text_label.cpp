@@ -965,7 +965,7 @@ void RichTextLabel::_notification(int p_what) {
 
 		} break;
 		case NOTIFICATION_ENTER_TREE: {
-			if (bbcode != "") {
+			if (!bbcode.empty()) {
 				set_bbcode(bbcode);
 			}
 
@@ -2567,7 +2567,7 @@ String RichTextLabel::get_selected_text() {
 void RichTextLabel::selection_copy() {
 	String text = get_selected_text();
 
-	if (text != "") {
+	if (!text.empty()) {
 		DisplayServer::get_singleton()->clipboard_set(text);
 	}
 }

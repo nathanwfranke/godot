@@ -2594,7 +2594,7 @@ MeshInstance3D *EditorSceneImporterGLTF::_generate_mesh_instance(GLTFState &stat
 	GLTFMesh &mesh = state.meshes.write[gltf_node->mesh];
 	mi->set_mesh(mesh.mesh);
 
-	if (mesh.mesh->get_name() == "") {
+	if (mesh.mesh->get_name().empty()) {
 		mesh.mesh->set_name(gltf_node->name);
 	}
 

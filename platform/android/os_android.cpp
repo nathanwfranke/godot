@@ -186,7 +186,7 @@ String OS_Android::get_resource_dir() const {
 
 String OS_Android::get_locale() const {
 	String locale = godot_io_java->get_locale();
-	if (locale != "") {
+	if (!locale.empty()) {
 		return locale;
 	}
 
@@ -195,18 +195,18 @@ String OS_Android::get_locale() const {
 
 String OS_Android::get_model_name() const {
 	String model = godot_io_java->get_model();
-	if (model != "")
+	if (!model.empty())
 		return model;
 
 	return OS_Unix::get_model_name();
 }
 
 String OS_Android::get_user_data_dir() const {
-	if (data_dir_cache != String())
+	if (!data_dir_cache.empty())
 		return data_dir_cache;
 
 	String data_dir = godot_io_java->get_user_data_dir();
-	if (data_dir != "") {
+	if (!data_dir.empty()) {
 		//store current dir
 		char real_current_dir_name[2048];
 		getcwd(real_current_dir_name, 2048);
@@ -232,7 +232,7 @@ String OS_Android::get_user_data_dir() const {
 
 String OS_Android::get_unique_id() const {
 	String unique_id = godot_io_java->get_unique_id();
-	if (unique_id != "")
+	if (!unique_id.empty())
 		return unique_id;
 
 	return OS::get_unique_id();

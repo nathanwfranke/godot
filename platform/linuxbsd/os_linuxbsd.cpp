@@ -307,7 +307,7 @@ Error OS_LinuxBSD::move_to_trash(const String &p_path) {
 	String mnt = get_mountpoint(p_path);
 
 	// If there is a directory "[Mountpoint]/.Trash-[UID]/files", use it as the trash can.
-	if (mnt != "") {
+	if (!mnt.empty()) {
 		String path(mnt + "/.Trash-" + itos(getuid()) + "/files");
 		struct stat s;
 		if (!stat(path.utf8().get_data(), &s)) {
@@ -316,7 +316,7 @@ Error OS_LinuxBSD::move_to_trash(const String &p_path) {
 	}
 
 	// Otherwise, if ${XDG_DATA_HOME} is defined, use "${XDG_DATA_HOME}/Trash/files" as the trash can.
-	if (trash_can == "") {
+	if (trash_can.empty()) {
 		char *dhome = getenv("XDG_DATA_HOME");
 		if (dhome) {
 			trash_can = String(dhome) + "/Trash/files";
@@ -324,7 +324,7 @@ Error OS_LinuxBSD::move_to_trash(const String &p_path) {
 	}
 
 	// Otherwise, if ${HOME} is defined, use "${HOME}/.local/share/Trash/files" as the trash can.
-	if (trash_can == "") {
+	if (trash_can.empty()) {
 		char *home = getenv("HOME");
 		if (home) {
 			trash_can = String(home) + "/.local/share/Trash/files";
@@ -332,7 +332,7 @@ Error OS_LinuxBSD::move_to_trash(const String &p_path) {
 	}
 
 	// Issue an error if none of the previous locations is appropriate for the trash can.
-	if (trash_can == "") {
+	if (trash_can.empty()) {
 		ERR_PRINT("move_to_trash: Could not determine the trash can location");
 		return FAILED;
 	}
