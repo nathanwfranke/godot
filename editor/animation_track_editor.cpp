@@ -1754,7 +1754,6 @@ AnimationTimelineEdit::AnimationTimelineEdit() {
 
 	play_position_pos = 0;
 	play_position = memnew(Control);
-	play_position->set_mouse_filter(MOUSE_FILTER_PASS);
 	add_child(play_position);
 	play_position->set_anchors_and_margins_preset(PRESET_WIDE);
 	play_position->connect("draw", callable_mp(this, &AnimationTimelineEdit::_play_position_draw));
@@ -2981,12 +2980,10 @@ AnimationTrackEdit::AnimationTrackEdit() {
 
 	play_position_pos = 0;
 	play_position = memnew(Control);
-	play_position->set_mouse_filter(MOUSE_FILTER_PASS);
 	add_child(play_position);
 	play_position->set_anchors_and_margins_preset(PRESET_WIDE);
 	play_position->connect("draw", callable_mp(this, &AnimationTrackEdit::_play_position_draw));
 	set_focus_mode(FOCUS_CLICK);
-	set_mouse_filter(MOUSE_FILTER_PASS); //scroll has to work too for selection
 }
 
 //////////////////////////////////////
@@ -3104,7 +3101,6 @@ void AnimationTrackEditGroup::_bind_methods() {
 }
 
 AnimationTrackEditGroup::AnimationTrackEditGroup() {
-	set_mouse_filter(MOUSE_FILTER_PASS);
 }
 
 //////////////////////////////////////
@@ -5759,7 +5755,6 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	box_selection = memnew(Control);
 	add_child(box_selection);
 	box_selection->set_as_top_level(true);
-	box_selection->set_mouse_filter(MOUSE_FILTER_IGNORE);
 	box_selection->hide();
 	box_selection->connect("draw", callable_mp(this, &AnimationTrackEditor::_box_selection_draw));
 	box_selecting = false;

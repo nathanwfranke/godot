@@ -1493,7 +1493,6 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		reason->set_h_size_flags(SIZE_EXPAND_FILL);
 		reason->set_autowrap(true);
 		reason->set_max_lines_visible(3);
-		reason->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 
 		hbc->add_child(memnew(VSeparator));
 

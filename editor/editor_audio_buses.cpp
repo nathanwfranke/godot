@@ -821,7 +821,6 @@ EditorAudioBus::EditorAudioBus(EditorAudioBuses *p_buses, bool p_is_master) {
 	}
 
 	HSeparator *separator = memnew(HSeparator);
-	separator->set_mouse_filter(MOUSE_FILTER_PASS);
 	vb->add_child(separator);
 
 	HBoxContainer *hb = memnew(HBoxContainer);
@@ -841,7 +840,6 @@ EditorAudioBus::EditorAudioBus(EditorAudioBuses *p_buses, bool p_is_master) {
 	audio_value_preview_label = memnew(Label);
 	audio_value_preview_label->set_v_size_flags(SIZE_EXPAND_FILL);
 	audio_value_preview_label->set_h_size_flags(SIZE_EXPAND_FILL);
-	audio_value_preview_label->set_mouse_filter(MOUSE_FILTER_PASS);
 
 	audioprev_hbc->add_child(audio_value_preview_label);
 
@@ -850,7 +848,6 @@ EditorAudioBus::EditorAudioBus(EditorAudioBuses *p_buses, bool p_is_master) {
 	Ref<StyleBoxFlat> panel_style = memnew(StyleBoxFlat);
 	panel_style->set_bg_color(Color(0.0f, 0.0f, 0.0f, 0.8f));
 	audio_value_preview_box->add_theme_style_override("panel", panel_style);
-	audio_value_preview_box->set_mouse_filter(MOUSE_FILTER_PASS);
 	audio_value_preview_box->hide();
 
 	preview_timer = memnew(Timer);
@@ -889,7 +886,6 @@ EditorAudioBus::EditorAudioBus(EditorAudioBuses *p_buses, bool p_is_master) {
 		bool renderNotch = (db >= -6.0f || db == -24.0f || db == -72.0f);
 		scale->add_notch(_scaled_db_to_normalized_volume(db), db, renderNotch);
 	}
-	scale->set_mouse_filter(MOUSE_FILTER_PASS);
 	hb->add_child(scale);
 
 	effects = memnew(Tree);

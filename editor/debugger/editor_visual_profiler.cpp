@@ -783,7 +783,7 @@ EditorVisualProfiler::EditorVisualProfiler() {
 
 	graph = memnew(TextureRect);
 	graph->set_expand(true);
-	graph->set_mouse_filter(MOUSE_FILTER_STOP);
+	graph->set_event_propagation(EVENT_PROPAGATION_NONE);
 	//graph->set_ignore_mouse(false);
 	graph->connect("draw", callable_mp(this, &EditorVisualProfiler::_graph_tex_draw));
 	graph->connect("gui_input", callable_mp(this, &EditorVisualProfiler::_graph_tex_input));

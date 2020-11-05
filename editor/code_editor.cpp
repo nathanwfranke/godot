@@ -1722,7 +1722,7 @@ CodeTextEditor::CodeTextEditor() {
 	error = memnew(Label);
 	scroll->add_child(error);
 	error->set_v_size_flags(SIZE_EXPAND | SIZE_SHRINK_CENTER);
-	error->set_mouse_filter(MOUSE_FILTER_STOP);
+	error->set_event_propagation(EVENT_PROPAGATION_NONE);
 	error->connect("gui_input", callable_mp(this, &CodeTextEditor::_error_pressed));
 	find_replace_bar->connect("error", callable_mp(error, &Label::set_text));
 
@@ -1740,7 +1740,7 @@ CodeTextEditor::CodeTextEditor() {
 	warning_count_label->set_v_size_flags(SIZE_EXPAND | SIZE_SHRINK_CENTER);
 	warning_count_label->set_align(Label::ALIGN_RIGHT);
 	warning_count_label->set_default_cursor_shape(CURSOR_POINTING_HAND);
-	warning_count_label->set_mouse_filter(MOUSE_FILTER_STOP);
+	warning_count_label->set_event_propagation(EVENT_PROPAGATION_NONE);
 	warning_count_label->set_tooltip(TTR("Warnings"));
 	warning_count_label->add_theme_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_theme_color("warning_color", "Editor"));
 	warning_count_label->add_theme_font_override("font", EditorNode::get_singleton()->get_gui_base()->get_theme_font("status_source", "EditorFonts"));
@@ -1755,7 +1755,7 @@ CodeTextEditor::CodeTextEditor() {
 	line_and_col_txt->set_v_size_flags(SIZE_EXPAND | SIZE_SHRINK_CENTER);
 	line_and_col_txt->add_theme_font_override("font", EditorNode::get_singleton()->get_gui_base()->get_theme_font("status_source", "EditorFonts"));
 	line_and_col_txt->set_tooltip(TTR("Line and column numbers."));
-	line_and_col_txt->set_mouse_filter(MOUSE_FILTER_STOP);
+	line_and_col_txt->set_event_propagation(EVENT_PROPAGATION_NONE);
 
 	text_editor->connect("gui_input", callable_mp(this, &CodeTextEditor::_text_editor_gui_input));
 	text_editor->connect("cursor_changed", callable_mp(this, &CodeTextEditor::_line_col_changed));

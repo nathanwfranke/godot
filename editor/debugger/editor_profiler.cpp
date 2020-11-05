@@ -716,7 +716,7 @@ EditorProfiler::EditorProfiler() {
 
 	graph = memnew(TextureRect);
 	graph->set_expand(true);
-	graph->set_mouse_filter(MOUSE_FILTER_STOP);
+	graph->set_event_propagation(EVENT_PROPAGATION_NONE);
 	graph->connect("draw", callable_mp(this, &EditorProfiler::_graph_tex_draw));
 	graph->connect("gui_input", callable_mp(this, &EditorProfiler::_graph_tex_input));
 	graph->connect("mouse_exited", callable_mp(this, &EditorProfiler::_graph_tex_mouse_exit));

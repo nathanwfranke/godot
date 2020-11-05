@@ -220,7 +220,6 @@ TextureRect::TextureRect() {
 	expand = false;
 	hflip = false;
 	vflip = false;
-	set_mouse_filter(MOUSE_FILTER_PASS);
 	stretch_mode = STRETCH_SCALE_ON_EXPAND;
 }
 

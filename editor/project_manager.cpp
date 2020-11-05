@@ -870,8 +870,6 @@ public:
 		l->set_modulate(Color(1, 1, 1, 0.7));
 		// Also set the tooltip on the label so it appears when hovering either the checkbox or label.
 		l->set_tooltip(gles2_unsupported_tooltip);
-		// Required for the tooltip to show.
-		l->set_mouse_filter(Control::MOUSE_FILTER_STOP);
 		rvb->add_child(l);
 
 		l = memnew(Label);
@@ -1317,8 +1315,6 @@ void ProjectList::create_project_item_control(int p_index) {
 	TextureButton *favorite = memnew(TextureButton);
 	favorite->set_name("FavoriteButton");
 	favorite->set_normal_texture(favorite_icon);
-	// This makes the project's "hover" style display correctly when hovering the favorite icon
-	favorite->set_mouse_filter(MOUSE_FILTER_PASS);
 	favorite->connect("pressed", callable_mp(this, &ProjectList::_favorite_pressed), varray(hb));
 	favorite_box->add_child(favorite);
 	favorite_box->set_alignment(BoxContainer::ALIGN_CENTER);
@@ -1345,7 +1341,6 @@ void ProjectList::create_project_item_control(int p_index) {
 	hb->add_child(vb);
 	Control *ec = memnew(Control);
 	ec->set_custom_minimum_size(Size2(0, 1));
-	ec->set_mouse_filter(MOUSE_FILTER_PASS);
 	vb->add_child(ec);
 	Label *title = memnew(Label(!item.missing ? item.project_name : TTR("Missing Project")));
 	title->add_theme_font_override("font", get_theme_font("title", "EditorFonts"));

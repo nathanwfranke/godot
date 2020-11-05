@@ -1505,10 +1505,6 @@ String Viewport::_gui_get_tooltip(Control *p_control, const Vector2 &p_pos, Cont
 		}
 
 		// Otherwise, we check parent controls unless some conditions prevent it.
-
-		if (p_control->data.mouse_filter == Control::MOUSE_FILTER_STOP) {
-			break;
-		}
 		if (p_control->is_set_as_top_level()) {
 			break;
 		}
@@ -1618,9 +1614,8 @@ void Viewport::_gui_call_input(Control *p_control, const Ref<InputEvent> &p_inpu
 	while (ci) {
 		Control *control = Object::cast_to<Control>(ci);
 		if (control) {
-			if (control->data.mouse_filter != Control::MOUSE_FILTER_IGNORE) {
-				control->emit_signal(SceneStringNames::get_singleton()->gui_input, ev); //signal should be first, so it's possible to override an event (and then accept it)
-			}
+			// Signal should be first, so it's possible to override an event (and then accept it)
+			control->emit_signal(SceneStringNames::get_singleton()->gui_input, ev);
 			if (gui.key_event_accepted) {
 				break;
 			}
@@ -1628,18 +1623,16 @@ void Viewport::_gui_call_input(Control *p_control, const Ref<InputEvent> &p_inpu
 				break;
 			}
 
-			if (control->data.mouse_filter != Control::MOUSE_FILTER_IGNORE) {
-				// Call both script and native methods.
-				Callable::CallError error;
-				Variant event = ev;
-				const Variant *args[1] = { &event };
-				if (control->get_script_instance()) {
-					control->get_script_instance()->call(SceneStringNames::get_singleton()->_gui_input, args, 1, error);
-				}
-				MethodBind *method = ClassDB::get_method(control->get_class_name(), SceneStringNames::get_singleton()->_gui_input);
-				if (method) {
-					method->call(control, args, 1, error);
-				}
+			// Call both script and native methods.
+			Callable::CallError error;
+			Variant event = ev;
+			const Variant *args[1] = { &event };
+			if (control->get_script_instance()) {
+				control->get_script_instance()->call(SceneStringNames::get_singleton()->_gui_input, args, 1, error);
+			}
+			MethodBind *method = ClassDB::get_method(control->get_class_name(), SceneStringNames::get_singleton()->_gui_input);
+			if (method) {
+				method->call(control, args, 1, error);
 			}
 
 			if (!control->is_inside_tree() || control->is_set_as_top_level()) {
@@ -1648,7 +1641,7 @@ void Viewport::_gui_call_input(Control *p_control, const Ref<InputEvent> &p_inpu
 			if (gui.key_event_accepted) {
 				break;
 			}
-			if (!cant_stop_me_now && control->data.mouse_filter == Control::MOUSE_FILTER_STOP && ismouse) {
+			if (!cant_stop_me_now && control->data.event_propagation == Control::EVENT_PROPAGATION_NONE && ismouse) {
 				break;
 			}
 		}
@@ -1669,23 +1662,14 @@ void Viewport::_gui_call_notification(Control *p_control, int p_what) {
 	while (ci) {
 		Control *control = Object::cast_to<Control>(ci);
 		if (control) {
-			if (control->data.mouse_filter != Control::MOUSE_FILTER_IGNORE) {
-				control->notification(p_what);
-			}
+			control->notification(p_what);
 
-			if (!control->is_inside_tree()) {
-				break;
-			}
-
-			if (!control->is_inside_tree() || control->is_set_as_top_level()) {
-				break;
-			}
-			if (control->data.mouse_filter == Control::MOUSE_FILTER_STOP) {
+			if (control->data.event_propagation == Control::EVENT_PROPAGATION_NONE) {
 				break;
 			}
 		}
 
-		if (ci->is_set_as_top_level()) {
+		if (!control->is_inside_tree() || ci->is_set_as_top_level()) {
 			break;
 		}
 
@@ -1761,7 +1745,7 @@ Control *Viewport::_gui_find_control_at_pos(CanvasItem *p_node, const Point2 &p_
 	matrix.affine_invert();
 
 	//conditions for considering this as a valid control for return
-	if (c->data.mouse_filter != Control::MOUSE_FILTER_IGNORE && c->has_point(matrix.xform(p_global)) && (!gui.drag_preview || (c != gui.drag_preview && !gui.drag_preview->is_a_parent_of(c)))) {
+	if (c->has_point(matrix.xform(p_global)) && (!gui.drag_preview || (c != gui.drag_preview && !gui.drag_preview->is_a_parent_of(c)))) {
 		r_inv_xform = matrix;
 		return c;
 	} else {
@@ -1783,7 +1767,7 @@ bool Viewport::_gui_drop(Control *p_at_control, Point2 p_at_pos, bool p_just_che
 					return true;
 				}
 
-				if (control->data.mouse_filter == Control::MOUSE_FILTER_STOP) {
+				if (control->data.event_propagation == Control::EVENT_PROPAGATION_NONE) {
 					break;
 				}
 			}
@@ -1884,7 +1868,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 							break;
 						}
 
-						if (control->data.mouse_filter == Control::MOUSE_FILTER_STOP) {
+						if (control->data.event_propagation == Control::EVENT_PROPAGATION_NONE) {
 							break;
 						}
 					}
@@ -2035,7 +2019,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 								gui.dragging = false;
 							}
 
-							if (control->data.mouse_filter == Control::MOUSE_FILTER_STOP) {
+							if (control->data.event_propagation == Control::EVENT_PROPAGATION_NONE) {
 								break;
 							}
 						}
@@ -2148,7 +2132,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 					if (cursor_shape != Control::CURSOR_ARROW) {
 						break;
 					}
-					if (c->data.mouse_filter == Control::MOUSE_FILTER_STOP) {
+					if (c->data.event_propagation == Control::EVENT_PROPAGATION_NONE) {
 						break;
 					}
 					if (c->is_set_as_top_level()) {

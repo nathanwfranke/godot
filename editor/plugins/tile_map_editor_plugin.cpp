@@ -2163,7 +2163,6 @@ TileMapEditor::TileMapEditor(EditorNode *p_editor) {
 	// Tile position.
 	tile_info = memnew(Label);
 	tile_info->set_modulate(Color(1, 1, 1, 0.8));
-	tile_info->set_mouse_filter(MOUSE_FILTER_IGNORE);
 	tile_info->add_theme_font_override("font", EditorNode::get_singleton()->get_gui_base()->get_theme_font("main", "EditorFonts"));
 	// The tile info is only displayed after a tile has been hovered.
 	tile_info->hide();

@@ -179,7 +179,6 @@ NinePatchRect::NinePatchRect() {
 	margin[MARGIN_BOTTOM] = 0;
 	margin[MARGIN_TOP] = 0;
 
-	set_mouse_filter(MOUSE_FILTER_IGNORE);
 	draw_center = true;
 
 	axis_h = AXIS_STRETCH_MODE_STRETCH;

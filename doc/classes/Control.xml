@@ -11,7 +11,6 @@
 		[b]FIXME:[/b] No longer valid after DisplayServer split and Input refactoring.
 		Call [method accept_event] so no other node receives the event. Once you accepted an input, it becomes handled so [method Node._unhandled_input] will not process it.
 		Only one [Control] node can be in keyboard focus. Only the node in focus will receive keyboard events. To get the focus, call [method grab_focus]. [Control] nodes lose focus when another node grabs it, or if you hide the node in focus.
-		Sets [member mouse_filter] to [constant MOUSE_FILTER_IGNORE] to tell a [Control] node to ignore mouse or touch events. You'll need it if you place an icon on top of a button.
 		[Theme] resources change the Control's appearance. If you change the [Theme] on a [Control] node, it affects all of its children. To override some of the theme's parameters, call one of the [code]add_theme_*_override[/code] methods, like [method add_theme_font_override]. You can override the theme with the inspector.
 		[b]Note:[/b] Theme items are [i]not[/i] [Object] properties. This means you can't access their values using [method Object.get] and [method Object.set]. Instead, use the [code]get_theme_*[/code] and [code]add_theme_*_override[/code] methods provided by this class.
 	</description>
@@ -68,9 +67,8 @@
 				[/codeblocks]
 				The event won't trigger if:
 				* clicking outside the control (see [method has_point]);
-				* control has [member mouse_filter] set to [constant MOUSE_FILTER_IGNORE];
-				* control is obstructed by another [Control] on top of it, which doesn't have [member mouse_filter] set to [constant MOUSE_FILTER_IGNORE];
-				* control's parent has [member mouse_filter] set to [constant MOUSE_FILTER_STOP] or has accepted the event;
+				* control is obstructed by another [Control] on top of it, which has [member input_event_propagation] set to [constant EVENT_PROPAGATION_NONE];
+				* control's parent has [member input_event_propagation] set to [constant EVENT_PROPAGATION_NONE] or has accepted the event;
 				* it happens outside parent's rectangle and the parent has either [member rect_clip_content] or [method _clips_input] enabled.
 			</description>
 		</method>
@@ -994,7 +992,7 @@
 			Controls the direction on the vertical axis in which the control should grow if its vertical minimum size is changed to be greater than its current size, as the control always has to be at least the minimum size.
 		</member>
 		<member name="hint_tooltip" type="String" setter="set_tooltip" getter="_get_tooltip" default="&quot;&quot;">
-			Changes the tooltip text. The tooltip appears when the user's mouse cursor stays idle over this control for a few moments, provided that the [member mouse_filter] property is not [constant MOUSE_FILTER_IGNORE]. You can change the time required for the tooltip to appear with [code]gui/timers/tooltip_delay_sec[/code] option in Project Settings.
+			Changes the tooltip text. The tooltip appears when the user's mouse cursor stays idle over this control for a few moments. You can change the time required for the tooltip to appear with [code]gui/timers/tooltip_delay_sec[/code] option in Project Settings.
 			The tooltip popup will use either a default implementation, or a custom one that you can provide by overriding [method _make_custom_tooltip]. The default tooltip includes a [PopupPanel] and [Label] whose theme properties can be customized using [Theme] methods with the [code]"TooltipPanel"[/code] and [code]"TooltipLabel"[/code] respectively. For example:
 			[codeblocks]
 			[gdscript]
@@ -1035,8 +1033,8 @@
 			The default cursor shape for this control. Useful for Godot plugins and applications or games that use the system's mouse cursors.
 			[b]Note:[/b] On Linux, shapes may vary depending on the cursor theme of the system.
 		</member>
-		<member name="mouse_filter" type="int" setter="set_mouse_filter" getter="get_mouse_filter" enum="Control.MouseFilter" default="0">
-			Controls whether the control will be able to receive mouse button input events through [method _gui_input] and how these events should be handled. Also controls whether the control can receive the [signal mouse_entered], and [signal mouse_exited] signals. See the constants to learn what each does.
+		<member name="input_event_propagation" type="int" setter="set_input_event_propagation" getter="get_input_event_propagation" enum="Control.EventPropagation" default="0">
+			Controls how events are propagated after [method _gui_input] is called. See the constants to learn what each does.
 		</member>
 		<member name="rect_clip_content" type="bool" setter="set_clip_contents" getter="is_clipping_contents" default="false">
 			Enables whether rendering of [CanvasItem] based children should be clipped to this control's rectangle. If [code]true[/code], parts of a child which would be visibly outside of this control's rectangle will not be rendered.
@@ -1102,12 +1100,12 @@
 		</signal>
 		<signal name="mouse_entered">
 			<description>
-				Emitted when the mouse enters the control's [code]Rect[/code] area, provided its [member mouse_filter] lets the event reach it.
+				Emitted when the mouse enters the control's [code]Rect[/code] area, or propagated by a child using [member input_event_propagation].
 			</description>
 		</signal>
 		<signal name="mouse_exited">
 			<description>
-				Emitted when the mouse leaves the control's [code]Rect[/code] area, provided its [member mouse_filter] lets the event reach it.
+				Emitted when the mouse leaves the control's [code]Rect[/code] area, or propagated by a child using [member input_event_propagation].
 			</description>
 		</signal>
 		<signal name="resized">
@@ -1285,14 +1283,14 @@
 		<constant name="SIZE_SHRINK_END" value="8" enum="SizeFlags">
 			Tells the parent [Container] to align the node with its end, either the bottom or the right edge. It doesn't work with the fill or expand size flags. Use with [member size_flags_horizontal] and [member size_flags_vertical].
 		</constant>
-		<constant name="MOUSE_FILTER_STOP" value="0" enum="MouseFilter">
-			The control will receive mouse button input events through [method _gui_input] if clicked on. And the control will receive the [signal mouse_entered] and [signal mouse_exited] signals. These events are automatically marked as handled, and they will not propagate further to other controls. This also results in blocking signals in other controls.
+		<constant name="EVENT_PROPAGATION_NONE" value="0" enum="EventPropagation">
+			The control will receive the [signal mouse_entered] and [signal mouse_exited] signals, which are automatically marked as handled. The events will not propagate further to other controls, and their signals will not be called.
 		</constant>
-		<constant name="MOUSE_FILTER_PASS" value="1" enum="MouseFilter">
-			The control will receive mouse button input events through [method _gui_input] if clicked on. And the control will receive the [signal mouse_entered] and [signal mouse_exited] signals. If this control does not handle the event, the parent control (if any) will be considered, and so on until there is no more parent control to potentially handle it. This also allows signals to fire in other controls. Even if no control handled it at all, the event will still be handled automatically, so unhandled input will not be fired.
+		<constant name="EVENT_PROPAGATION_PARENT" value="1" enum="EventPropagation">
+			The control will receive the [signal mouse_entered] and [signal mouse_exited] signals. If they are not handled, the events will be recursively handled by the parent controls.
 		</constant>
-		<constant name="MOUSE_FILTER_IGNORE" value="2" enum="MouseFilter">
-			The control will not receive mouse button input events through [method _gui_input]. The control will also not receive the [signal mouse_entered] nor [signal mouse_exited] signals. This will not block other controls from receiving these events or firing the signals. Ignored events will not be handled automatically.
+		<constant name="EVENT_PROPAGATION_ALL" value="2" enum="EventPropagation">
+			The control will receive the [signal mouse_entered] and [signal mouse_exited] signals, and the events will continue propagating through the node tree.
 		</constant>
 		<constant name="GROW_DIRECTION_BEGIN" value="0" enum="GrowDirection">
 			The control will grow to the left or top to make up if its minimum size is changed to be greater than its current size on the respective axis.

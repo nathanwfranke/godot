@@ -544,7 +544,6 @@ TextureProgress::TextureProgress() {
 	rad_init_angle = 0;
 	rad_center_off = Point2();
 	rad_max_degrees = 360;
-	set_mouse_filter(MOUSE_FILTER_PASS);
 
 	nine_patch_stretch = false;
 	stretch_margin[MARGIN_LEFT] = 0;

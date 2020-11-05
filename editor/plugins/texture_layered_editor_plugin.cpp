@@ -218,7 +218,6 @@ TextureLayeredEditor::TextureLayeredEditor() {
 	set_custom_minimum_size(Size2(1, 150));
 	texture_rect = memnew(Control);
 	texture_rect->connect("draw", callable_mp(this, &TextureLayeredEditor::_texture_rect_draw));
-	texture_rect->set_mouse_filter(MOUSE_FILTER_IGNORE);
 	add_child(texture_rect);
 
 	layer = memnew(SpinBox);

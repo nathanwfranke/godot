@@ -2403,14 +2403,14 @@ int Control::get_v_size_flags() const {
 	return data.v_size_flags;
 }
 
-void Control::set_mouse_filter(MouseFilter p_filter) {
-	ERR_FAIL_INDEX(p_filter, 3);
-	data.mouse_filter = p_filter;
+void Control::set_event_propagation(EventPropagation p_mode) {
+	ERR_FAIL_INDEX(p_mode, 3);
+	data.event_propagation = p_mode;
 	update_configuration_warning();
 }
 
-Control::MouseFilter Control::get_mouse_filter() const {
-	return data.mouse_filter;
+Control::EventPropagation Control::get_event_propagation() const {
+	return data.event_propagation;
 }
 
 Control *Control::get_focus_owner() const {
@@ -2554,19 +2554,6 @@ void Control::get_argument_options(const StringName &p_function, int p_idx, List
 			r_options->push_back(quote_style + E->get() + quote_style);
 		}
 	}
-}
-
-String Control::get_configuration_warning() const {
-	String warning = CanvasItem::get_configuration_warning();
-
-	if (data.mouse_filter == MOUSE_FILTER_IGNORE && data.tooltip != "") {
-		if (!warning.empty()) {
-			warning += "\n\n";
-		}
-		warning += TTR("The Hint Tooltip won't be displayed as the control's Mouse Filter is set to \"Ignore\". To solve this, set the Mouse Filter to \"Stop\" or \"Pass\".");
-	}
-
-	return warning;
 }
 
 void Control::set_clip_contents(bool p_clip) {
@@ -2714,8 +2701,8 @@ void Control::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("force_drag", "data", "preview"), &Control::force_drag);
 
-	ClassDB::bind_method(D_METHOD("set_mouse_filter", "filter"), &Control::set_mouse_filter);
-	ClassDB::bind_method(D_METHOD("get_mouse_filter"), &Control::get_mouse_filter);
+	ClassDB::bind_method(D_METHOD("set_event_propagation", "filter"), &Control::set_event_propagation);
+	ClassDB::bind_method(D_METHOD("get_event_propagation"), &Control::get_event_propagation);
 
 	ClassDB::bind_method(D_METHOD("set_clip_contents", "enable"), &Control::set_clip_contents);
 	ClassDB::bind_method(D_METHOD("is_clipping_contents"), &Control::is_clipping_contents);
@@ -2781,9 +2768,9 @@ void Control::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "focus_previous", PROPERTY_HINT_NODE_PATH_VALID_TYPES, "Control"), "set_focus_previous", "get_focus_previous");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "focus_mode", PROPERTY_HINT_ENUM, "None,Click,All"), "set_focus_mode", "get_focus_mode");
 
-	ADD_GROUP("Mouse", "mouse_");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "mouse_filter", PROPERTY_HINT_ENUM, "Stop,Pass,Ignore"), "set_mouse_filter", "get_mouse_filter");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "mouse_default_cursor_shape", PROPERTY_HINT_ENUM, "Arrow,Ibeam,Pointing hand,Cross,Wait,Busy,Drag,Can drop,Forbidden,Vertical resize,Horizontal resize,Secondary diagonal resize,Main diagonal resize,Move,Vertical split,Horizontal split,Help"), "set_default_cursor_shape", "get_default_cursor_shape");
+	ADD_GROUP("Input", "input_");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "input_event_propagation", PROPERTY_HINT_ENUM, "None,Parent,All"), "set_event_propagation", "get_event_propagation");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "input_default_cursor_shape", PROPERTY_HINT_ENUM, "Arrow,Ibeam,Pointing hand,Cross,Wait,Busy,Drag,Can drop,Forbidden,Vertical resize,Horizontal resize,Secondary diagonal resize,Main diagonal resize,Move,Vertical split,Horizontal split,Help"), "set_default_cursor_shape", "get_default_cursor_shape");
 
 	ADD_GROUP("Size Flags", "size_flags_");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "size_flags_horizontal", PROPERTY_HINT_FLAGS, "Fill,Expand,Shrink Center,Shrink End"), "set_h_size_flags", "get_h_size_flags");
@@ -2852,9 +2839,9 @@ void Control::_bind_methods() {
 	BIND_ENUM_CONSTANT(SIZE_SHRINK_CENTER);
 	BIND_ENUM_CONSTANT(SIZE_SHRINK_END);
 
-	BIND_ENUM_CONSTANT(MOUSE_FILTER_STOP);
-	BIND_ENUM_CONSTANT(MOUSE_FILTER_PASS);
-	BIND_ENUM_CONSTANT(MOUSE_FILTER_IGNORE);
+	BIND_ENUM_CONSTANT(EVENT_PROPAGATION_NONE);
+	BIND_ENUM_CONSTANT(EVENT_PROPAGATION_PARENT);
+	BIND_ENUM_CONSTANT(EVENT_PROPAGATION_ALL);
 
 	BIND_ENUM_CONSTANT(GROW_DIRECTION_BEGIN);
 	BIND_ENUM_CONSTANT(GROW_DIRECTION_END);
@@ -2879,7 +2866,7 @@ void Control::_bind_methods() {
 Control::Control() {
 	data.parent = nullptr;
 
-	data.mouse_filter = MOUSE_FILTER_STOP;
+	data.event_propagation = EVENT_PROPAGATION_ALL;
 
 	data.RI = nullptr;
 	data.theme_owner = nullptr;

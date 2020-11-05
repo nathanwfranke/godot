@@ -1914,7 +1914,7 @@ LineEdit::LineEdit() {
 	deselect();
 	set_focus_mode(FOCUS_ALL);
 	set_default_cursor_shape(CURSOR_IBEAM);
-	set_mouse_filter(MOUSE_FILTER_STOP);
+	set_event_propagation(EVENT_PROPAGATION_NONE);
 
 	draw_caret = true;
 	caret_blink_enabled = false;

@@ -721,7 +721,7 @@ GraphNode::GraphNode() {
 	overlay = OVERLAY_DISABLED;
 	show_close = false;
 	connpos_dirty = true;
-	set_mouse_filter(MOUSE_FILTER_STOP);
+	set_event_propagation(EVENT_PROPAGATION_NONE);
 	comment = false;
 	resizable = false;
 	resizing = false;

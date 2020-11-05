@@ -76,10 +76,10 @@ public:
 
 	};
 
-	enum MouseFilter {
-		MOUSE_FILTER_STOP,
-		MOUSE_FILTER_PASS,
-		MOUSE_FILTER_IGNORE
+	enum EventPropagation {
+		EVENT_PROPAGATION_NONE,
+		EVENT_PROPAGATION_PARENT,
+		EVENT_PROPAGATION_ALL
 	};
 
 	enum CursorShape {
@@ -166,7 +166,7 @@ private:
 		float expand;
 		Point2 custom_minimum_size;
 
-		MouseFilter mouse_filter;
+		EventPropagation event_propagation;
 
 		bool clip_contents;
 
@@ -417,8 +417,8 @@ public:
 
 	Control *get_focus_owner() const;
 
-	void set_mouse_filter(MouseFilter p_filter);
-	MouseFilter get_mouse_filter() const;
+	void set_event_propagation(EventPropagation p_mode);
+	EventPropagation get_event_propagation() const;
 
 	/* SKINNING */
 
@@ -487,7 +487,6 @@ public:
 	bool is_visibility_clip_disabled() const;
 
 	virtual void get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const override;
-	virtual String get_configuration_warning() const override;
 
 	Control();
 	~Control();
@@ -498,7 +497,7 @@ VARIANT_ENUM_CAST(Control::SizeFlags);
 VARIANT_ENUM_CAST(Control::CursorShape);
 VARIANT_ENUM_CAST(Control::LayoutPreset);
 VARIANT_ENUM_CAST(Control::LayoutPresetMode);
-VARIANT_ENUM_CAST(Control::MouseFilter);
+VARIANT_ENUM_CAST(Control::EventPropagation);
 VARIANT_ENUM_CAST(Control::GrowDirection);
 VARIANT_ENUM_CAST(Control::Anchor);
 

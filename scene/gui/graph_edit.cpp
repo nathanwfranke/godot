@@ -249,7 +249,6 @@ void GraphEdit::add_child_notify(Node *p_child) {
 		gn->connect("raise_request", callable_mp(this, &GraphEdit::_graph_node_raised), varray(gn));
 		gn->connect("item_rect_changed", callable_mp((CanvasItem *)connections_layer, &CanvasItem::update));
 		_graph_node_moved(gn);
-		gn->set_mouse_filter(MOUSE_FILTER_PASS);
 	}
 }
 
@@ -551,7 +550,7 @@ bool GraphEdit::_check_clickable_control(Control *p_control, const Vector2 &pos)
 		return false;
 	}
 
-	if (!p_control->has_point(pos) || p_control->get_mouse_filter() == MOUSE_FILTER_IGNORE) {
+	if (!p_control->has_point(pos)) {
 		//test children
 		for (int i = 0; i < p_control->get_child_count(); i++) {
 			Control *subchild = Object::cast_to<Control>(p_control->get_child(i));
@@ -1299,7 +1298,6 @@ GraphEdit::GraphEdit() {
 	top_layer = nullptr;
 	top_layer = memnew(GraphEditFilter(this));
 	add_child(top_layer);
-	top_layer->set_mouse_filter(MOUSE_FILTER_PASS);
 	top_layer->set_anchors_and_margins_preset(Control::PRESET_WIDE);
 	top_layer->connect("draw", callable_mp(this, &GraphEdit::_top_layer_draw));
 	top_layer->connect("gui_input", callable_mp(this, &GraphEdit::_top_layer_input));
@@ -1309,7 +1307,6 @@ GraphEdit::GraphEdit() {
 	connections_layer->connect("draw", callable_mp(this, &GraphEdit::_connections_layer_draw));
 	connections_layer->set_name("CLAYER");
 	connections_layer->set_disable_visibility_clip(true); // so it can draw freely and be offset
-	connections_layer->set_mouse_filter(MOUSE_FILTER_IGNORE);
 
 	h_scroll = memnew(HScrollBar);
 	h_scroll->set_name("_h_scroll");

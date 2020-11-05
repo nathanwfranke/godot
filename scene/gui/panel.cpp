@@ -60,8 +60,8 @@ void Panel::_bind_methods() {
 }
 
 Panel::Panel() {
-	// Has visible stylebox, so stop by default.
-	set_mouse_filter(MOUSE_FILTER_STOP);
+	// Has visible stylebox, so do not propagate by default.
+	set_event_propagation(EVENT_PROPAGATION_NONE);
 }
 
 Panel::~Panel() {

@@ -736,7 +736,6 @@ ColorPicker::ColorPicker() :
 	uv_edit = memnew(Control);
 	hb_edit->add_child(uv_edit);
 	uv_edit->connect("gui_input", callable_mp(this, &ColorPicker::_uv_input));
-	uv_edit->set_mouse_filter(MOUSE_FILTER_PASS);
 	uv_edit->set_h_size_flags(SIZE_EXPAND_FILL);
 	uv_edit->set_v_size_flags(SIZE_EXPAND_FILL);
 	uv_edit->set_custom_minimum_size(Size2(get_theme_constant("sv_width"), get_theme_constant("sv_height")));
@@ -827,7 +826,6 @@ ColorPicker::ColorPicker() :
 		text_type->connect("pressed", callable_mp(this, &ColorPicker::_text_type_toggled));
 	} else {
 		text_type->set_flat(true);
-		text_type->set_mouse_filter(MOUSE_FILTER_IGNORE);
 	}
 
 	c_text = memnew(LineEdit);
