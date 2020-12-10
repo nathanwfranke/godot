@@ -6433,7 +6433,7 @@ EditorNode::EditorNode() {
 
 	// FileSystem: Bottom left
 	dock_slot[DOCK_SLOT_LEFT_BR]->add_child(filesystem_dock);
-	dock_slot[DOCK_SLOT_LEFT_BR]->set_tab_title(filesystem_dock->get_index(), TTR("FileSystem"));
+	dock_slot[DOCK_SLOT_LEFT_BR]->set_tab_title(filesystem_dock->get_index(), TTR("File System"));
 
 	// Inspector: Full height right
 	dock_slot[DOCK_SLOT_RIGHT_UL]->add_child(inspector_dock);
